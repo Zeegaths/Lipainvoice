@@ -1,0 +1,28 @@
+{
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "name": "lipa",
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "prebuild": "npm run prebuild --workspaces --if-present",
+    "pretest": "npm run prebuild --workspaces --if-present",
+    "start": "npm start --workspaces --if-present",
+    "test": "npm test --workspaces --if-present"
+  },
+  "type": "module",
+  "workspaces": [
+    "src/lipa_frontend"
+  ],
+  "dependencies": {
+    "@tanstack/react-query": "^5.83.0",
+    "ic-use-internet-identity": "^0.3.2",
+    "lucide-react": "^0.525.0",
+    "pnpm": "^10.13.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "tailwindcss": "^4.1.11",
+    "vite": "^7.0.5"
+  }
+}

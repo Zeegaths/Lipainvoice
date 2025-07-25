@@ -1,0 +1,26 @@
+{
+  "canisters": {
+    "lipa_backend": {
+      "main": "src/lipa_backend/main.mo",
+      "type": "motoko"
+    },
+    "lipa_frontend": {
+      "dependencies": [
+        "lipa_backend"
+      ],
+      "source": [
+        "src/lipa_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "lipa_frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

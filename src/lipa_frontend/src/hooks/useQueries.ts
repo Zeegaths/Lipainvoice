@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
-import { createActor } from '../backend';
+import { createActor } from '../declarations/lipa_backend';
 
 // Invoices
 export function useInvoices() {

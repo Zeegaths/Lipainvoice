@@ -445,13 +445,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </p>
               <div className="flex space-x-4">
                 <a
-                  href="#"
+                  href="https://x.com/lipainvoice"
+                  target="_blank"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <Twitter className="h-6 w-6" />
                 </a>
                 <a
-                  href="#"
+                  href="https://github.com/Zeegaths/Lipainvoice"
+                  target="_blank"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   <Github className="h-6 w-6" />

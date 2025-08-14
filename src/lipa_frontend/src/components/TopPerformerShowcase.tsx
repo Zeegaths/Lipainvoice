@@ -147,15 +147,13 @@ const TopPerformerShowcase = () => {
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center shadow-sm">
-              <Trophy className="h-5 w-5 text-white" />
-            </div>
-            <div className="ml-3">
-              <h2 className="text-lg font-bold text-gray-900">Top Performers</h2>
-              <p className="text-sm text-gray-600">Celebrating our platform leaders</p>
-            </div>
+        <div className="flex items-center">
+          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center shadow-sm">
+            <Trophy className="h-5 w-5 text-white" />
+          </div>
+          <div className="ml-3">
+            <h2 className="text-lg font-bold text-gray-900">Top Performers</h2>
+            <p className="text-sm text-gray-600">Celebrating our platform leaders</p>
           </div>
         </div>
       </div>
@@ -169,14 +167,14 @@ const TopPerformerShowcase = () => {
               <button
                 key={leaderboard.id}
                 onClick={() => setActiveLeaderboard(leaderboard.id)}
-                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   activeLeaderboard === leaderboard.id
                     ? `${leaderboard.bgColor} ${leaderboard.color} border border-gray-200 shadow-sm`
                     : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
-                <IconComponent className="h-4 w-4 mr-2" />
-                {leaderboard.title}
+                <IconComponent className="h-4 w-4 mr-2 flex-shrink-0" />
+                <span className="truncate">{leaderboard.title}</span>
               </button>
             );
           })}
@@ -184,18 +182,18 @@ const TopPerformerShowcase = () => {
 
         {/* Current Leaderboard */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="font-bold text-gray-900">{currentLeaderboard.title}</h4>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+            <h4 className="font-bold text-gray-900 mb-2 sm:mb-0">{currentLeaderboard.title}</h4>
             <p className="text-sm text-gray-500">{currentLeaderboard.description}</p>
           </div>
 
           {isLoading ? (
-            <div className="text-center py-10">
+            <div className="text-center py-8">
               <div className="w-8 h-8 border-2 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
               <p className="text-gray-600 text-sm">Loading performers...</p>
             </div>
           ) : currentLeaderboard.performers.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-10">
               <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Trophy className="h-8 w-8 text-purple-600" />
               </div>
@@ -209,39 +207,40 @@ const TopPerformerShowcase = () => {
                   key={performer.userId}
                   className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-all duration-200"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col space-y-3">
+                    {/* Position and Profile Row */}
                     <div className="flex items-center">
                       {/* Position Badge */}
-                      <div className="mr-4">
+                      <div className="mr-4 flex-shrink-0">
                         {getPositionBadge(performer.position)}
                       </div>
                       
                       {/* Profile Section */}
-                      <div className="flex items-center">
+                      <div className="flex items-center min-w-0 flex-1">
                         {performer.profilePhoto ? (
                           <img
                             src={performer.profilePhoto}
                             alt={performer.displayName}
-                            className="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm"
+                            className="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm flex-shrink-0"
                           />
                         ) : (
-                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3 shadow-sm">
+                          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mr-3 shadow-sm flex-shrink-0">
                             <span className="text-white font-bold text-sm">
                               {performer.displayName.charAt(0)}
                             </span>
                           </div>
                         )}
                         
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h5 className="font-bold text-gray-900">{performer.displayName}</h5>
-                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getTierColor(performer.currentTier)}`}>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-1">
+                            <h5 className="font-bold text-gray-900 truncate">{performer.displayName}</h5>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full flex-shrink-0 ${getTierColor(performer.currentTier)}`}>
                               {performer.currentTier.toUpperCase()}
                             </span>
                           </div>
-                          <div className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-3 text-sm text-gray-600">
                             <div className="flex items-center">
-                              <Star className="h-3 w-3 text-yellow-500 fill-current mr-1" />
+                              <Star className="h-3 w-3 text-yellow-500 fill-current mr-1 flex-shrink-0" />
                               <span className="font-semibold">{performer.averageRating}</span>
                             </div>
                             <span className="font-medium">{performer.completedProjects} projects</span>
@@ -251,17 +250,19 @@ const TopPerformerShowcase = () => {
                       </div>
                     </div>
                     
-                    {/* Earnings & Achievements */}
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-900">
-                        {performer.totalEarnings.toFixed(2)} BTC
-                      </p>
+                    {/* Earnings & Achievements Row */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                      <div className="text-left">
+                        <p className="text-lg font-bold text-gray-900">
+                          {performer.totalEarnings.toFixed(2)} BTC
+                        </p>
+                      </div>
                       {performer.specialAchievements.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2 justify-end">
+                        <div className="flex flex-wrap gap-1 justify-start sm:justify-end">
                           {performer.specialAchievements.slice(0, 2).map((achievement, achIndex) => (
                             <span
                               key={achIndex}
-                              className="px-2 py-1 text-xs bg-green-500 text-white rounded-full font-medium"
+                              className="px-2 py-1 text-xs bg-green-500 text-white rounded-full font-medium flex-shrink-0"
                             >
                               {achievement}
                             </span>
@@ -282,7 +283,7 @@ const TopPerformerShowcase = () => {
         </div>
 
         {/* Special Highlights */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="mt-6 pt-6 border-t border-gray-200">
           <h4 className="font-bold text-gray-900 mb-4">Special Highlights</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200 p-4">

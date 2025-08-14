@@ -246,12 +246,12 @@ const BadgesSection = () => {
 
   if (!identity) {
     return (
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Award className="h-8 w-8 text-white" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">Reputation & Achievements</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Reputation & Achievements</h3>
           <p className="text-gray-500">Please log in to view your reputation and earned badges</p>
         </div>
       </div>
@@ -259,16 +259,16 @@ const BadgesSection = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       {/* Header Section */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-8 py-6 border-b border-gray-100">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center mb-4 sm:mb-0">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${currentTier.bgColor}`}>
               <currentTier.icon className={`h-6 w-6 ${currentTier.color}`} />
             </div>
             <div className="ml-4">
-              <h2 className="text-2xl font-bold text-gray-900">Reputation & Achievements</h2>
+              <h2 className="text-xl font-bold text-gray-900">Reputation & Achievements</h2>
               <div className="flex items-center space-x-2">
                 <span className={`font-semibold ${currentTier.color}`}>{currentTier.name} Tier</span>
                 {nextTier && (
@@ -283,7 +283,7 @@ const BadgesSection = () => {
           <div className="flex items-center space-x-2">           
             <button
               onClick={() => setShowTierInfo(!showTierInfo)}
-              className="flex items-center space-x-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-xl font-medium transition-all duration-200"
+              className="flex items-center space-x-2 bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-2 rounded-lg font-medium transition-all duration-200"
             >
               <Info className="h-4 w-4" />
               <span className="hidden sm:inline">Tiers</span>
@@ -292,12 +292,12 @@ const BadgesSection = () => {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="p-6">
         {/* Current Status - More Compact */}
         <div className="mb-6">
           <div className={`${currentTier.bgColor} rounded-xl p-4 border border-gray-200`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+              <div className="flex items-center mb-4 sm:mb-0">
                 <currentTier.icon className={`h-8 w-8 ${currentTier.color} mr-3`} />
                 <div>
                   <h3 className="text-lg font-bold text-gray-900">{currentTier.name} Freelancer</h3>
@@ -343,7 +343,7 @@ const BadgesSection = () => {
                   />
                 </div>
                 
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                   {detailedProgress.map((metric, index) => (
                     <div key={index} className="text-center">
                       <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
@@ -370,7 +370,7 @@ const BadgesSection = () => {
         <div className="mb-6">
           <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-4">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Performance Metrics</h3>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="text-center">
                 <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mx-auto mb-1">
                   <Target className="h-4 w-4 text-white" />
@@ -405,7 +405,7 @@ const BadgesSection = () => {
 
         {/* Milestones Modal */}
         {showMilestones && (
-          <div className="mb-8 bg-green-50 border-2 border-green-200 rounded-2xl p-6">
+          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-2xl p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-green-900">Achievement Milestones</h3>
               <button
@@ -464,9 +464,9 @@ const BadgesSection = () => {
 
         {/* Tier Information Modal */}
         {showTierInfo && (
-          <div className="mb-8 bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-blue-900">Badge Tier System</h3>
+          <div className="mb-6 bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-blue-900">Badge Tier System</h3>
               <button
                 onClick={() => setShowTierInfo(false)}
                 className="p-2 text-blue-600 hover:bg-blue-200 rounded-lg transition-colors"
@@ -474,7 +474,7 @@ const BadgesSection = () => {
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto">
               {BADGE_TIERS.map((tier) => {
                 const IconComponent = tier.icon;
                 const isCurrentTier = tier.level === currentTier.level;
@@ -529,7 +529,7 @@ const BadgesSection = () => {
 
         {/* Add Badge Form */}
         {showAddForm && (
-          <div className="mb-8 bg-gradient-to-r from-gray-50 to-blue-50 rounded-2xl border border-gray-200 p-6">
+          <div className="mb-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200 p-4">
             <h3 className="text-lg font-bold text-gray-900 mb-4">Add Custom Achievement Badge</h3>
             <form onSubmit={handleAddBadge} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -540,7 +540,7 @@ const BadgesSection = () => {
                     placeholder="Enter badge name"
                     value={newBadge.name}
                     onChange={(e) => setNewBadge({ ...newBadge, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
                     required
                   />
                 </div>
@@ -549,7 +549,7 @@ const BadgesSection = () => {
                   <select
                     value={newBadge.category}
                     onChange={(e) => setNewBadge({ ...newBadge, category: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
                     {CUSTOM_BADGE_CATEGORIES.map((category) => (
                       <option key={category.name} value={category.name}>
@@ -565,23 +565,23 @@ const BadgesSection = () => {
                   placeholder="Describe the achievement"
                   value={newBadge.description}
                   onChange={(e) => setNewBadge({ ...newBadge, description: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
                   rows={3}
                   required
                 />
               </div>
-              <div className="flex space-x-3 pt-2">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-2">
                 <button
                   type="submit"
                   disabled={addBadgeMutation.isPending}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                  className="flex-1 sm:flex-none px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
                 >
                   {addBadgeMutation.isPending ? 'Creating...' : 'Create Badge'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddForm(false)}
-                  className="px-6 py-3 text-gray-600 border border-gray-200 rounded-xl hover:bg-gray-50 font-medium transition-all duration-200"
+                  className="flex-1 sm:flex-none px-6 py-3 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 font-medium transition-all duration-200"
                 >
                   Cancel
                 </button>
@@ -594,8 +594,8 @@ const BadgesSection = () => {
         <div>
           {/* Compact Badge Categories Chart */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-bold text-gray-900">Custom Achievement Badges</h3>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
+              <h3 className="text-lg font-bold text-gray-900 mb-3 sm:mb-0">Custom Achievement Badges</h3>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -649,19 +649,19 @@ const BadgesSection = () => {
 
           {/* Badges Display */}
           {isLoading ? (
-            <div className="text-center py-12">
+            <div className="text-center py-8">
               <div className="w-12 h-12 border-4 border-purple-100 border-t-purple-600 rounded-full animate-spin mx-auto mb-4"></div>
               <p className="text-gray-600 font-medium">Loading your badges...</p>
             </div>
           ) : filteredBadges.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-gradient-to-r from-purple-100 to-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Star className="h-10 w-10 text-purple-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 {selectedCategory === 'all' ? 'No Custom Badges Yet' : `No ${selectedCategory} Badges Yet`}
               </h3>
-              <p className="text-gray-500 mb-6">
+              <p className="text-gray-500 mb-4">
                 {selectedCategory === 'all' 
                   ? 'Create your first custom badge to showcase your achievements'
                   : `Add your first ${selectedCategory} badge to highlight your expertise`
@@ -674,7 +674,7 @@ const BadgesSection = () => {
                   }
                   setShowAddForm(true);
                 }}
-                className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <Plus className="h-5 w-5" />
                 <span>Create Your First Badge</span>

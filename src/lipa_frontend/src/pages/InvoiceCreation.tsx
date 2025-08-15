@@ -30,7 +30,7 @@ interface Task {
 const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const addInvoiceMutation = useAddInvoice();
   const { data: tasks = [] } = useTasks();
-  
+
   const [formData, setFormData] = useState({
     clientName: '',
     clientWallet: '',
@@ -104,7 +104,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   };
 
   const updateTeamMember = (id: string, field: keyof TeamMember, value: string | number) => {
-    setTeamMembers(teamMembers.map(member => 
+    setTeamMembers(teamMembers.map(member =>
       member.id === id ? { ...member, [field]: value } : member
     ));
   };
@@ -112,8 +112,8 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const totalPercentage = teamMembers.reduce((sum, member) => sum + member.percentage, 0);
 
   const handleTaskSelection = (taskId: bigint) => {
-    setSelectedTasks(prev => 
-      prev.includes(taskId) 
+    setSelectedTasks(prev =>
+      prev.includes(taskId)
         ? prev.filter(id => id !== taskId)
         : [...prev, taskId]
     );
@@ -125,7 +125,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.useTeamSplit && totalPercentage !== 100) {
       alert('Team member percentages must total 100%');
       return;
@@ -155,7 +155,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         id: invoiceId,
         details: JSON.stringify(invoiceData)
       });
-      
+
       setCreatedInvoiceId(invoiceId);
       alert('Invoice created successfully!');
       onNavigate('dashboard');
@@ -304,9 +304,9 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 mb-3">QR Code:</h3>
-                <img 
-                  src={generateQRCode()} 
-                  alt="Bitcoin Payment QR Code" 
+                <img
+                  src={generateQRCode()}
+                  alt="Bitcoin Payment QR Code"
                   className="mx-auto border rounded"
                 />
               </div>
@@ -357,7 +357,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
             <h2 className="text-lg font-semibold text-gray-900 ml-3">Client Information</h2>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -395,7 +395,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
             <h2 className="text-lg font-semibold text-gray-900 ml-3">Project Details</h2>
           </div>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -484,7 +484,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                   </div>
                 )}
               </div>
-              
+
               {selectedTasksData.length > 0 && (
                 <div className="bg-purple-50 rounded-lg p-4">
                   <p className="text-sm font-medium text-purple-900 mb-2">Selected Tasks Summary:</p>
@@ -601,7 +601,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                   )}
                 </div>
               ))}
-              
+
               <div className="flex justify-between items-center">
                 <button
                   type="button"
@@ -627,13 +627,13 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
             <h2 className="text-lg font-semibold text-gray-900 ml-3">Supporting Documents</h2>
           </div>
-          
+
           <p className="text-sm text-gray-600 mb-4">
             Upload supporting documents for this invoice. Files will be attached after the invoice is created.
           </p>
-          
+
           {createdInvoiceId ? (
-            <FileUpload 
+            <FileUpload
               invoiceId={createdInvoiceId}
               onUploadComplete={handleFileUploadComplete}
             />

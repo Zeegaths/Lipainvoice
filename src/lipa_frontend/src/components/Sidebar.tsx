@@ -1,9 +1,9 @@
 import { useInternetIdentity } from 'ic-use-internet-identity';
-import { X, Home, FileText, CheckSquare, Award, Settings, LogOut, Shield, Plus, Clock, Users } from 'lucide-react';
+import { X, Home, Settings, LogOut, Shield, Plus, Wallet } from 'lucide-react';
 import { useIsCurrentUserAdmin } from '../hooks/useQueries';
 import LoadingSpinner from './LoadingSpinner';
 
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings';
+type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -36,12 +36,8 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
 
   const navigationItems: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, page: 'dashboard', current: currentPage === 'dashboard', hasPage: true },
-    { name: 'Task Logger', icon: Clock, page: 'task-logger', current: currentPage === 'task-logger', hasPage: true },
     { name: 'Create Invoice', icon: Plus, page: 'create-invoice', current: currentPage === 'create-invoice', hasPage: true },
-    { name: 'Team Payments', icon: Users, page: 'team-payments', current: currentPage === 'team-payments', hasPage: true },
-    { name: 'Invoices', icon: FileText, href: '#', current: false, hasPage: false },
-    { name: 'Tasks', icon: CheckSquare, href: '#', current: false, hasPage: false },
-    { name: 'Badges', icon: Award, href: '#', current: false, hasPage: false },
+    { name: "My Wallet", icon: Wallet, page: 'my-wallet', current: currentPage === 'my-wallet', hasPage: true },
     { name: 'Settings', icon: Settings, page: 'settings', current: currentPage === 'settings', hasPage: true },
   ];
 
@@ -54,9 +50,9 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
       {/* Mobile overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
-          <div 
-            className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300" 
-            onClick={onClose} 
+          <div
+            className="fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity duration-300"
+            onClick={onClose}
           />
         </div>
       )}
@@ -111,7 +107,7 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
                 )}
               </li>
             ))}
-            
+
             {/* Admin section */}
             {adminLoading ? (
               <li className="pt-4">
@@ -150,7 +146,7 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200 bg-white">
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 transform hover:scale-105 hover:shadow-sm"
           >

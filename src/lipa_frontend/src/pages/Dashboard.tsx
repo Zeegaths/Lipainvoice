@@ -1,11 +1,5 @@
-// Dashboard.js
 import { useState } from 'react';
-import InvoiceSection from '../components/InvoiceSection';
-import TasksSection from '../components/TasksSection';
-import BadgesSection from '../components/BadgesSection';
-import TeamPaymentsSection from '../components/TeamPaymentsSection';
-import TopPerformerShowcase from '../components/TopPerformerShowcase';
-import { Search, MessageCircle, Bell, ChevronDown, Calendar, Download, Filter } from 'lucide-react';
+import { Search, ChevronDown, Calendar, Download, Filter } from 'lucide-react';
 
 interface Task {
   id: number;
@@ -26,7 +20,6 @@ interface Invoice {
 }
 
 const Dashboard = () => {
-  // Sample data for tasks and invoices with more examples
   const [tasks, setTasks] = useState<Task[]>([
     { id: 1, title: 'Website Redesign', client: 'Acme Inc', dueDate: '2025-08-15', status: 'in-progress', amount: 0.012 },
     { id: 2, title: 'Logo Creation', client: 'TechStart', dueDate: '2025-07-30', status: 'completed', amount: 0.005 },
@@ -50,7 +43,6 @@ const Dashboard = () => {
     { id: 107, taskId: null, client: 'Tech Conference', amount: 0.0135, status: 'pending', date: '2025-07-18' }
   ]);
 
-  // Add a new task (with ID validation)
   const addTask = (newTask: Task) => {
     if (newTask.id <= 0) {
       alert("Task ID must be greater than 0");
@@ -60,18 +52,16 @@ const Dashboard = () => {
     return true;
   };
 
-  // Mark a task as completed
   const completeTask = (taskId: number) => {
-    setTasks(tasks.map(task => 
+    setTasks(tasks.map(task =>
       task.id === taskId ? { ...task, status: 'completed' } : task
     ));
   };
 
-  // Generate an invoice for a task
   const generateInvoice = (taskId: number) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
-    
+
     const newInvoice: Invoice = {
       id: Date.now(),
       taskId: task.id,
@@ -80,11 +70,10 @@ const Dashboard = () => {
       status: 'pending',
       date: new Date().toISOString().split('T')[0]
     };
-    
+
     setInvoices([...invoices, newInvoice]);
   };
 
-  // Create a direct invoice
   const createDirectInvoice = (invoiceData: { client: string; amount: number }) => {
     const newInvoice: Invoice = {
       id: Date.now(),
@@ -93,17 +82,15 @@ const Dashboard = () => {
       status: 'pending',
       date: new Date().toISOString().split('T')[0]
     };
-    
+
     setInvoices([...invoices, newInvoice]);
   };
 
-  // Calculate overview metrics
   const totalInvoices = invoices.length;
   const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
   const totalUnpaid = invoices.filter(inv => inv.status === 'unpaid').reduce((sum, inv) => sum + inv.amount, 0);
   const totalOverdue = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0);
 
-  // Count invoices by status
   const draftCount = invoices.filter(inv => inv.status === 'pending').length;
   const unpaidCount = invoices.filter(inv => inv.status === 'unpaid').length;
   const paidCount = invoices.filter(inv => inv.status === 'paid').length;
@@ -113,7 +100,6 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
 
       <div className="px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
-        {/* Overview Section */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Overview</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
@@ -191,7 +177,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Invoices Section */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Invoices</h2>
@@ -206,7 +191,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Status Tabs */}
           <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6">
             <button className="text-sm font-medium text-green-600 border-b-2 border-green-600 pb-2 whitespace-nowrap">
               All Invoices
@@ -229,7 +213,6 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div className="flex-1 max-w-md mb-4 sm:mb-0">
               <div className="relative">
@@ -247,7 +230,6 @@ const Dashboard = () => {
             </button>
           </div>
 
-          {/* Invoices Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -279,12 +261,11 @@ const Dashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.date}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${(invoice.amount * 100000).toFixed(0)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
                           invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          invoice.status === 'unpaid' ? 'bg-purple-100 text-purple-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
+                            invoice.status === 'unpaid' ? 'bg-purple-100 text-purple-800' :
+                              'bg-red-100 text-red-800'
+                          }`}>
                           {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                         </span>
                       </td>
@@ -296,31 +277,6 @@ const Dashboard = () => {
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-
-        {/* Additional Dashboard Sections */}
-        <div className="">
-            <TasksSection 
-              tasks={tasks} 
-              addTask={addTask} 
-              completeTask={completeTask} 
-              generateInvoice={generateInvoice} 
-              invoices={invoices} 
-            />
-          
-          
-          <div className="flex flex-col md:flex-row mt-4 gap-4">
-            <BadgesSection />
-            <TeamPaymentsSection />
-          </div>
-          
-          <div className="xl:col-span-3">
-           
-          </div>
-          
-          <div className="xl:col-span-3">
-            <TopPerformerShowcase />
           </div>
         </div>
       </div>

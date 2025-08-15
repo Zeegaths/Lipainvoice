@@ -151,28 +151,11 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-900">19 Nov 2023</span>
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
         </div>
 
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 mt-12">
             <h2 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Invoices</h2>
-            <div className="flex space-x-3">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                <Download className="h-4 w-4" />
-                <span>Import</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-                <span>+ New Invoice</span>
-              </button>
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6">
@@ -210,8 +193,7 @@ const Dashboard = () => {
               </div>
             </div>
             <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              <Filter className="h-4 w-4" />
-              <span>Filter</span>
+              <span>+ New Invoice</span>
             </button>
           </div>
 

@@ -1,101 +1,85 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Search, ChevronDown, Calendar, Download, Filter } from 'lucide-react';
+import useInvoices from '../hooks/useInvoices';
+import LoadingSpinner from '../components/LoadingSpinner';
 
-interface Task {
-  id: number;
-  title: string;
-  client: string;
-  dueDate: string;
-  status: 'in-progress' | 'completed';
-  amount: number;
-}
 
 interface Invoice {
   id: number;
   taskId: number | null;
   client: string;
   amount: number;
-  status: 'paid' | 'pending' | 'unpaid' | 'overdue';
+  status: string;
   date: string;
 }
 
+type Tab = "all" | "pending" | "paid"
+
 const Dashboard = () => {
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 1, title: 'Website Redesign', client: 'Acme Inc', dueDate: '2025-08-15', status: 'in-progress', amount: 0.012 },
-    { id: 2, title: 'Logo Creation', client: 'TechStart', dueDate: '2025-07-30', status: 'completed', amount: 0.005 },
-    { id: 3, title: 'Mobile App UI', client: 'FitLife', dueDate: '2025-08-20', status: 'completed', amount: 0.008 },
-    { id: 4, title: 'Marketing Materials', client: 'Brew Co', dueDate: '2025-09-01', status: 'in-progress', amount: 0.0065 },
-    { id: 5, title: 'E-commerce Integration', client: 'FashionStore', dueDate: '2025-08-10', status: 'in-progress', amount: 0.0175 },
-    { id: 6, title: 'SEO Optimization', client: 'Travel Agency', dueDate: '2025-07-28', status: 'completed', amount: 0.003 },
-    { id: 7, title: 'Social Media Campaign', client: 'Organic Foods', dueDate: '2025-08-25', status: 'in-progress', amount: 0.0095 },
-    { id: 8, title: 'Product Photography', client: 'Handmade Crafts', dueDate: '2025-08-05', status: 'completed', amount: 0.0042 },
-    { id: 9, title: 'Blog Content Creation', client: 'Health Clinic', dueDate: '2025-08-30', status: 'in-progress', amount: 0.0085 },
-    { id: 10, title: 'Email Template Design', client: 'Online Store', dueDate: '2025-07-29', status: 'completed', amount: 0.0035 }
-  ]);
+  const { invoices, isLoading, error } = useInvoices();
+  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>(invoices || [])
+  const [loading, setIsLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>("all")
 
-  const [invoices, setInvoices] = useState<Invoice[]>([
-    { id: 101, taskId: 2, client: 'TechStart', amount: 0.005, status: 'paid', date: '2025-07-25' },
-    { id: 102, taskId: 3, client: 'FitLife', amount: 0.008, status: 'pending', date: '2025-07-22' },
-    { id: 103, taskId: 6, client: 'Travel Agency', amount: 0.003, status: 'paid', date: '2025-07-29' },
-    { id: 104, taskId: null, client: 'Creative Studio', amount: 0.0115, status: 'pending', date: '2025-07-20' },
-    { id: 105, taskId: null, client: 'Local Restaurant', amount: 0.0028, status: 'paid', date: '2025-07-15' },
-    { id: 106, taskId: 8, client: 'Handmade Crafts', amount: 0.0042, status: 'pending', date: '2025-08-01' },
-    { id: 107, taskId: null, client: 'Tech Conference', amount: 0.0135, status: 'pending', date: '2025-07-18' }
-  ]);
-
-  const addTask = (newTask: Task) => {
-    if (newTask.id <= 0) {
-      alert("Task ID must be greater than 0");
-      return false;
+  useEffect(() => {
+    const checkInvoices = async () => {
+      setIsLoading(true)
+      if (invoices) {
+        setIsLoading(false)
+      }
     }
-    setTasks([...tasks, newTask]);
-    return true;
-  };
+    checkInvoices()
+  }, [invoices])
 
-  const completeTask = (taskId: number) => {
-    setTasks(tasks.map(task =>
-      task.id === taskId ? { ...task, status: 'completed' } : task
-    ));
-  };
 
-  const generateInvoice = (taskId: number) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
 
-    const newInvoice: Invoice = {
-      id: Date.now(),
-      taskId: task.id,
-      client: task.client,
-      amount: task.amount,
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0]
-    };
+  if (!invoices || isLoading || loading) {
+    return (
+      <div className='flex items-center justify-center h-screen w-screen'>
+        <LoadingSpinner />
+      </div>
+    )
+  }
 
-    setInvoices([...invoices, newInvoice]);
-  };
+  if (error) {
+    <div>
+      <p className='text-red-500'>
+        {error.message}
+      </p>
+    </div>
+  }
 
-  const createDirectInvoice = (invoiceData: { client: string; amount: number }) => {
-    const newInvoice: Invoice = {
-      id: Date.now(),
-      taskId: null,
-      ...invoiceData,
-      status: 'pending',
-      date: new Date().toISOString().split('T')[0]
-    };
+  const filterByStatus = (status: string) => {
+    if (!status) {
+      throw new Error("Invalid status to filter")
+    }
+    switch (status) {
+      case "all":
+        setActiveTab("all")
+        break;
+      case "pending":
+        setActiveTab("pending")
+        break;
+      case "paid":
+        setActiveTab("paid")
+        break;
+      default:
+        setActiveTab("all")
+    }
 
-    setInvoices([...invoices, newInvoice]);
-  };
+    if (status === "all") {
+      setFilteredInvoices(invoices)
+      return;
+    }
+    const filtered = invoices.filter((invoice) => invoice.status.toLowerCase() === status)
+    setFilteredInvoices(filtered || [])
+
+  }
 
   const totalInvoices = invoices.length;
   const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
   const totalUnpaid = invoices.filter(inv => inv.status === 'unpaid').reduce((sum, inv) => sum + inv.amount, 0);
   const totalOverdue = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0);
-
-  const draftCount = invoices.filter(inv => inv.status === 'pending').length;
-  const unpaidCount = invoices.filter(inv => inv.status === 'unpaid').length;
-  const paidCount = invoices.filter(inv => inv.status === 'paid').length;
-  const pendingCount = invoices.filter(inv => inv.status === 'pending').length;
-
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -167,49 +151,33 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
-              <Calendar className="h-4 w-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-900">19 Nov 2023</span>
-              <ChevronDown className="h-4 w-4 text-gray-400" />
-            </div>
-          </div>
         </div>
 
         <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 mt-12">
             <h2 className="text-xl font-bold text-gray-900 mb-4 sm:mb-0">Invoices</h2>
-            <div className="flex space-x-3">
-              <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                <Download className="h-4 w-4" />
-                <span>Import</span>
-              </button>
-              <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
-                <span>+ New Invoice</span>
-              </button>
-            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 lg:gap-6 mb-6">
-            <button className="text-sm font-medium text-green-600 border-b-2 border-green-600 pb-2 whitespace-nowrap">
+            <button
+              onClick={() => filterByStatus("all")}
+              className={`${activeTab === "all" ? 'text-green-600 border-b-2 border-green-600' : null} text-sm font-medium pb-2 whitespace-nowrap`}
+            >
               All Invoices
             </button>
-            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 pb-2 whitespace-nowrap">
-              Drafts
-              <span className="ml-2 bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">3</span>
-            </button>
-            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 pb-2 whitespace-nowrap">
+            <button
+              onClick={() => filterByStatus("pending")}
+              className={`${activeTab === "pending" ? 'text-green-600 border-b-2 border-green-600' : null} text-sm font-medium pb-2 whitespace-nowrap`}
+            >
               Unpaid
               <span className="ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">4</span>
             </button>
-            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 pb-2 whitespace-nowrap">
+            <button
+              onClick={() => filterByStatus("paid")}
+              className={`${activeTab === "paid" ? 'text-green-600 border-b-2 border-green-600' : null} text-sm font-medium pb-2 whitespace-nowrap`}
+            >
               Paid
               <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">7</span>
-            </button>
-            <button className="text-sm font-medium text-gray-600 hover:text-gray-900 pb-2 whitespace-nowrap">
-              Pending
-              <span className="ml-2 bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded-full">8</span>
             </button>
           </div>
 
@@ -225,8 +193,7 @@ const Dashboard = () => {
               </div>
             </div>
             <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              <Filter className="h-4 w-4" />
-              <span>Filter</span>
+              <span>+ New Invoice</span>
             </button>
           </div>
 
@@ -248,7 +215,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {invoices.slice(0, 7).map((invoice, index) => (
+                  {filteredInvoices && filteredInvoices.slice(0, 7).map((invoice, index) => (
                     <tr key={invoice.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />

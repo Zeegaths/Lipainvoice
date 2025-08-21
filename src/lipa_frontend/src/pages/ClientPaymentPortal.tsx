@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bitcoin, Download, Star, Send, CheckCircle, Clock, AlertCircle, FileText, Paperclip, ArrowLeft, Award, Trophy, Shield } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { createActor } from '../../../declarations/lipa_backend';
+import { createActor, canisterId } from '../../../declarations/lipa_backend';
 import FileList from '../components/FileList';
 
 interface ClientPaymentPortalProps {
@@ -65,19 +65,24 @@ const ClientPaymentPortal = ({ invoiceId, onBack }: ClientPaymentPortalProps) =>
     queryFn: async () => {
       if (!invoiceId) throw new Error('Invoice ID is required');
       
-      const actor = await createActor();
+      const actor = await createActor(canisterId);
       const invoiceData = await actor.getInvoice(BigInt(invoiceId));
       
-      if (!invoiceData) {
+      if (!invoiceData || invoiceData.length === 0) {
         throw new Error('Invoice not found');
       }
 
+      const invoiceItem = invoiceData[0];
+      if (!invoiceItem) {
+        throw new Error('Invoice data is empty');
+      }
+
       try {
-        const parsedDetails = JSON.parse(invoiceData.details);
+        const parsedDetails = JSON.parse(invoiceItem.details);
         return {
-          id: invoiceData.id,
+          id: invoiceItem.id,
           ...parsedDetails,
-          files: invoiceData.files
+          files: invoiceItem.files
         } as InvoiceData;
       } catch {
         throw new Error('Invalid invoice data');

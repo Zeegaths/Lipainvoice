@@ -17,7 +17,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
 
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings';
+type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -109,7 +109,7 @@ function App() {
             isOpen={sidebarOpen} 
             onClose={() => setSidebarOpen(false)}
             currentPage={currentPage}
-            onNavigate={setCurrentPage}
+            onNavigate={(page: Page) => setCurrentPage(page)}
           />
           
           {/* Main content */}

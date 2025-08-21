@@ -73,19 +73,25 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
     queryFn: async () => {
       if (!invoiceId) throw new Error('Invoice ID is required');
       
-      const actor = await createActor();
+      const actor = await createActor(import.meta.env.VITE_LIPA_BACKEND_CANISTER_ID || 'ryjl3-tyaaa-aaaaa-aaaba-cai');
       const invoiceData = await actor.getInvoice(BigInt(invoiceId));
       
-      if (!invoiceData) {
+      if (!invoiceData || (Array.isArray(invoiceData) && invoiceData.length === 0)) {
         throw new Error('Invoice not found');
       }
 
       try {
-        const parsedDetails = JSON.parse(invoiceData.details);
+        // Handle the case where invoiceData is [Invoice] or []
+        const invoiceItem = Array.isArray(invoiceData) ? invoiceData[0] : invoiceData;
+        if (!invoiceItem) {
+          throw new Error('Invoice not found');
+        }
+        
+        const parsedDetails = JSON.parse(invoiceItem.details);
         return {
-          id: invoiceData.id,
+          id: invoiceItem.id,
           ...parsedDetails,
-          files: invoiceData.files
+          files: invoiceItem.files
         } as InvoiceData;
       } catch {
         throw new Error('Invalid invoice data');

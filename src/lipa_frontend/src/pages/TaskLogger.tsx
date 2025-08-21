@@ -84,7 +84,7 @@ const TaskLogger = ({ onNavigate }: TaskLoggerProps) => {
 
   // Timer effect
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (timer.isRunning) {
       interval = setInterval(() => {
         setTimer(prev => ({
@@ -250,7 +250,7 @@ const TaskLogger = ({ onNavigate }: TaskLoggerProps) => {
               <p className="text-2xl font-mono font-bold text-orange-600">
                 {getCurrentTimerTime()}
               </p>
-              {timer.taskId && (
+              {timer.taskId !== undefined && timer.taskId !== 0n && (
                 <p className="text-sm text-gray-600">
                   Tracking: {parsedTasks.find(t => t.id === timer.taskId)?.title || 'Unknown Task'}
                 </p>

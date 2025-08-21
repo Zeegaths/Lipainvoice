@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
-import { createActor } from '../backend';
 
 // Invoices
 export function useInvoices() {
@@ -157,18 +156,28 @@ export function useAddBadge() {
   });
 }
 
-// User Profile
+// User Profile - FIXED
 export function useUserProfile() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
   return useQuery<string | null>({
     queryKey: ['userProfile', identity?.getPrincipal().toString()],
-    queryFn: async () => {
+    queryFn: async (): Promise<string | null> => {
       if (!actor || !identity) return null;
-      // For now, we'll use the badge system to store profile data
-      // In a real implementation, this would be a dedicated profile endpoint
-      return actor.getBadge('__profile__');
+      try {
+        // For now, we'll use the badge system to store profile data
+        // In a real implementation, this would be a dedicated profile endpoint
+        const result = await actor.getBadge('__profile__');
+        // Handle the case where result is [string] | []
+        if (Array.isArray(result) && result.length > 0) {
+          return result[0] as string | null;
+        }
+        return null;
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
     },
     enabled: !!actor && !!identity && !isFetching,
   });

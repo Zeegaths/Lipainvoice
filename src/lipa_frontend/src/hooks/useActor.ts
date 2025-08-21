@@ -1,7 +1,8 @@
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { createActor } from '../../../declarations/lipa_backend';
+import { canisterId } from '../../../declarations/lipa_backend';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import backendInterface from '../../../declarations/lipa_backend/lipa_backend.did';
+import { _SERVICE } from '../../../declarations/lipa_backend/lipa_backend.did';
 import { useEffect } from 'react';
 
 const ACTOR_QUERY_KEY = 'actor';
@@ -9,14 +10,14 @@ export function useActor() {
     const { identity } = useInternetIdentity();
     const queryClient = useQueryClient();
 
-    const actorQuery = useQuery<backendInterface>({
+    const actorQuery = useQuery<_SERVICE>({
         queryKey: [ACTOR_QUERY_KEY, identity?.getPrincipal().toString()],
         queryFn: async () => {
             const isAuthenticated = !!identity;
 
             if (!isAuthenticated) {
                 // Return anonymous actor if not authenticated
-                return await createActor();
+                return await createActor(canisterId);
             }
 
             const actorOptions = {
@@ -25,7 +26,7 @@ export function useActor() {
                 }
             };
 
-            const actor = await createActor(actorOptions);
+            const actor = await createActor(canisterId, actorOptions);
             await actor.initializeAuth();
             return actor;
         },

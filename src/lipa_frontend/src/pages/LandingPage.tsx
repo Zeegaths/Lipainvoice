@@ -65,8 +65,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const features = [
@@ -263,14 +263,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       {/* Floating geometric shapes */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "4s" }}
-        />
+        <div className="absolute top-3/4 right-1/4 w-80 h-80 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div className="absolute bottom-1/4 left-1/3 w-64 h-64 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '4s' }} />
       </div>
 
       {/* Grid pattern */}
@@ -278,18 +272,9 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
       {/* Animated beams */}
       <div className="absolute inset-0">
-        <div
-          className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-orange-500/20 to-transparent animate-pulse"
-          style={{ animationDuration: "3s" }}
-        />
-        <div
-          className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-pulse"
-          style={{ animationDuration: "4s", animationDelay: "1s" }}
-        />
-        <div
-          className="absolute top-0 left-2/3 w-px h-full bg-gradient-to-b from-transparent via-blue-500/20 to-transparent animate-pulse"
-          style={{ animationDuration: "5s", animationDelay: "2s" }}
-        />
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-orange-500/20 to-transparent animate-pulse" style={{ animationDuration: '3s' }} />
+        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-purple-500/20 to-transparent animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }} />
+        <div className="absolute top-0 left-2/3 w-px h-full bg-gradient-to-b from-transparent via-blue-500/20 to-transparent animate-pulse" style={{ animationDuration: '5s', animationDelay: '2s' }} />
       </div>
     </div>
   );
@@ -355,11 +340,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
               >
-                {mobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
+                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
@@ -414,28 +395,16 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         {/* Advanced Animated Background System */}
         <div className="absolute inset-0 pointer-events-none">
           {/* Bitcoin Constellation Formation */}
-          <div
-            className="absolute top-20 left-1/4 w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-500 rounded-full flex items-center justify-center animate-orbit-1 shadow-2xl"
-            style={{ animationDuration: "20s" }}
-          >
+          <div className="absolute top-20 left-1/4 w-12 h-12 bg-gradient-to-r from-orange-400 to-yellow-500 rounded-full flex items-center justify-center animate-orbit-1 shadow-2xl" style={{ animationDuration: '20s' }}>
             <Bitcoin className="h-7 w-7 text-white animate-spin-slow" />
           </div>
-          <div
-            className="absolute top-40 right-1/4 w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-600 rounded-full flex items-center justify-center animate-orbit-2 shadow-2xl"
-            style={{ animationDuration: "15s" }}
-          >
+          <div className="absolute top-40 right-1/4 w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-600 rounded-full flex items-center justify-center animate-orbit-2 shadow-2xl" style={{ animationDuration: '15s' }}>
             <Bitcoin className="h-6 w-6 text-white animate-spin-reverse" />
           </div>
-          <div
-            className="absolute bottom-40 left-1/3 w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full flex items-center justify-center animate-orbit-3 shadow-2xl"
-            style={{ animationDuration: "25s" }}
-          >
+          <div className="absolute bottom-40 left-1/3 w-14 h-14 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full flex items-center justify-center animate-orbit-3 shadow-2xl" style={{ animationDuration: '25s' }}>
             <Bitcoin className="h-8 w-8 text-white animate-spin-slow" />
           </div>
-          <div
-            className="absolute bottom-20 right-1/3 w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center animate-orbit-4 shadow-2xl"
-            style={{ animationDuration: "18s" }}
-          >
+          <div className="absolute bottom-20 right-1/3 w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center animate-orbit-4 shadow-2xl" style={{ animationDuration: '18s' }}>
             <Bitcoin className="h-5 w-5 text-white animate-spin-reverse" />
           </div>
 
@@ -494,18 +463,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           {[...Array(50)].map((_, i) => (
             <div
               key={i}
-              className={`absolute w-1 h-1 bg-gradient-to-r ${
-                i % 3 === 0
-                  ? "from-purple-400 to-violet-400"
-                  : i % 3 === 1
-                  ? "from-orange-400 to-yellow-400"
-                  : "from-violet-400 to-fuchsia-400"
-              } rounded-full animate-cosmic-dust opacity-70`}
+              className={`absolute w-1 h-1 bg-gradient-to-r ${i % 3 === 0 ? 'from-purple-400 to-violet-400' :
+                  i % 3 === 1 ? 'from-orange-400 to-yellow-400' :
+                    'from-violet-400 to-fuchsia-400'
+                } rounded-full animate-cosmic-dust opacity-70`}
               style={{
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 10}s`,
-                animationDuration: `${15 + Math.random() * 10}s`,
+                animationDuration: `${15 + Math.random() * 10}s`
               }}
             />
           ))}
@@ -536,42 +502,24 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         </div>
 
         <div className="max-w-7xl mx-auto text-center relative">
-          <div
-            className={`transition-all duration-1000 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-10"
-            }`}
-          >
+          <div className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
             <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-purple-500/10 to-violet-500/10 border border-purple-500/20 backdrop-blur-sm mb-8 animate-holographic-badge shadow-lg shadow-purple-500/10">
               <Sparkles className="h-5 w-5 text-purple-400 mr-3 animate-sparkle-dance" />
-              <span className="text-base font-medium text-purple-300 animate-text-glow">
-                Introducing the future of invoicing
-              </span>
+              <span className="text-base font-medium text-purple-300 animate-text-glow">Introducing the future of invoicing</span>
             </div>
 
             <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-8 leading-none tracking-tight">
-              <span className="inline-block animate-title-emerge">
-                The Future of
-              </span>
+              <span className="inline-block animate-title-emerge">The Future of</span>
               <span className="block bg-gradient-to-r from-purple-400 via-violet-400 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent animate-title-rainbow bg-[length:300%_300%]">
                 Freelance Invoicing
               </span>
             </h1>
 
-            <p
-              className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-light animate-description-float"
-              style={{ animationDelay: "0.2s" }}
-            >
-              Create Bitcoin invoices, split payments with your team, track
-              tasks, and build your reputation on the decentralized web with
-              unparalleled sophistication.
+            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-light animate-description-float" style={{ animationDelay: '0.2s' }}>
+              Create Bitcoin invoices, split payments with your team, track tasks, and build your reputation on the decentralized web with unparalleled sophistication.
             </p>
 
-            <div
-              className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-buttons-materialize"
-              style={{ animationDelay: "0.4s" }}
-            >
+            <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16 animate-buttons-materialize" style={{ animationDelay: '0.4s' }}>
               <button
                 onClick={handleGetStarted}
                 className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/50 animate-button-power-up hover:animate-none"
@@ -597,32 +545,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </button>
             </div>
 
-            <div
-              className="flex items-center justify-center space-x-8 text-sm text-gray-500 animate-features-cascade"
-              style={{ animationDelay: "0.6s" }}
-            >
+            <div className="flex items-center justify-center space-x-8 text-sm text-gray-500 animate-features-cascade" style={{ animationDelay: '0.6s' }}>
               <div className="flex items-center hover:text-gray-400 transition-colors cursor-default animate-feature-glow">
                 <Check className="h-4 w-4 text-green-400 mr-2 animate-check-success" />
                 No credit card required
               </div>
-              <div
-                className="flex items-center hover:text-gray-400 transition-colors cursor-default animate-feature-glow"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <Check
-                  className="h-4 w-4 text-green-400 mr-2 animate-check-success"
-                  style={{ animationDelay: "0.2s" }}
-                />
+              <div className="flex items-center hover:text-gray-400 transition-colors cursor-default animate-feature-glow" style={{ animationDelay: '0.2s' }}>
+                <Check className="h-4 w-4 text-green-400 mr-2 animate-check-success" style={{ animationDelay: '0.2s' }} />
                 Free forever plan
               </div>
-              <div
-                className="flex items-center hover:text-gray-400 transition-colors cursor-default animate-feature-glow"
-                style={{ animationDelay: "0.4s" }}
-              >
-                <Check
-                  className="h-4 w-4 text-green-400 mr-2 animate-check-success"
-                  style={{ animationDelay: "0.4s" }}
-                />
+              <div className="flex items-center hover:text-gray-400 transition-colors cursor-default animate-feature-glow" style={{ animationDelay: '0.4s' }}>
+                <Check className="h-4 w-4 text-green-400 mr-2 animate-check-success" style={{ animationDelay: '0.4s' }} />
                 Setup in 2 minutes
               </div>
             </div>
@@ -636,743 +569,324 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
         </div>
 
-        <style>{`
-          /* ORBITAL ANIMATIONS */
-          @keyframes orbit-1 {
-            0% {
-              transform: rotate(0deg) translateX(150px) rotate(0deg);
-            }
-            100% {
-              transform: rotate(360deg) translateX(150px) rotate(-360deg);
-            }
-          }
-          @keyframes orbit-2 {
-            0% {
-              transform: rotate(0deg) translateX(120px) rotate(0deg);
-            }
-            100% {
-              transform: rotate(-360deg) translateX(120px) rotate(360deg);
-            }
-          }
-          @keyframes orbit-3 {
-            0% {
-              transform: rotate(0deg) translateX(180px) rotate(0deg);
-            }
-            100% {
-              transform: rotate(360deg) translateX(180px) rotate(-360deg);
-            }
-          }
-          @keyframes orbit-4 {
-            0% {
-              transform: rotate(0deg) translateX(100px) rotate(0deg);
-            }
-            100% {
-              transform: rotate(-360deg) translateX(100px) rotate(360deg);
-            }
-          }
+        <style jsx>{`
+    /* ORBITAL ANIMATIONS */
+    @keyframes orbit-1 {
+      0% { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+    }
+    @keyframes orbit-2 {
+      0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+      100% { transform: rotate(-360deg) translateX(120px) rotate(360deg); }
+    }
+    @keyframes orbit-3 {
+      0% { transform: rotate(0deg) translateX(180px) rotate(0deg); }
+      100% { transform: rotate(360deg) translateX(180px) rotate(-360deg); }
+    }
+    @keyframes orbit-4 {
+      0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
+      100% { transform: rotate(-360deg) translateX(100px) rotate(360deg); }
+    }
 
-          /* METEOR EFFECTS */
-          @keyframes meteor-1 {
-            0% {
-              transform: translate(-200px, -200px) rotate(45deg);
-              opacity: 0;
-            }
-            10% {
-              opacity: 1;
-            }
-            90% {
-              opacity: 1;
-            }
-            100% {
-              transform: translate(calc(100vw + 200px), calc(100vh + 200px))
-                rotate(45deg);
-              opacity: 0;
-            }
-          }
-          @keyframes meteor-2 {
-            0% {
-              transform: translate(-150px, -250px) rotate(30deg);
-              opacity: 0;
-            }
-            15% {
-              opacity: 1;
-            }
-            85% {
-              opacity: 1;
-            }
-            100% {
-              transform: translate(calc(100vw + 150px), calc(100vh + 250px))
-                rotate(30deg);
-              opacity: 0;
-            }
-          }
-          @keyframes meteor-3 {
-            0% {
-              transform: translate(-300px, -100px) rotate(60deg);
-              opacity: 0;
-            }
-            20% {
-              opacity: 1;
-            }
-            80% {
-              opacity: 1;
-            }
-            100% {
-              transform: translate(calc(100vw + 300px), calc(100vh + 100px))
-                rotate(60deg);
-              opacity: 0;
-            }
-          }
-          @keyframes meteor-4 {
-            0% {
-              transform: translate(-100px, -300px) rotate(20deg);
-              opacity: 0;
-            }
-            25% {
-              opacity: 1;
-            }
-            75% {
-              opacity: 1;
-            }
-            100% {
-              transform: translate(calc(100vw + 100px), calc(100vh + 300px))
-                rotate(20deg);
-              opacity: 0;
-            }
-          }
+    /* METEOR EFFECTS */
+    @keyframes meteor-1 {
+      0% { transform: translate(-200px, -200px) rotate(45deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translate(calc(100vw + 200px), calc(100vh + 200px)) rotate(45deg); opacity: 0; }
+    }
+    @keyframes meteor-2 {
+      0% { transform: translate(-150px, -250px) rotate(30deg); opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { transform: translate(calc(100vw + 150px), calc(100vh + 250px)) rotate(30deg); opacity: 0; }
+    }
+    @keyframes meteor-3 {
+      0% { transform: translate(-300px, -100px) rotate(60deg); opacity: 0; }
+      20% { opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translate(calc(100vw + 300px), calc(100vh + 100px)) rotate(60deg); opacity: 0; }
+    }
+    @keyframes meteor-4 {
+      0% { transform: translate(-100px, -300px) rotate(20deg); opacity: 0; }
+      25% { opacity: 1; }
+      75% { opacity: 1; }
+      100% { transform: translate(calc(100vw + 100px), calc(100vh + 300px)) rotate(20deg); opacity: 0; }
+    }
 
-          /* QUANTUM EFFECTS */
-          @keyframes quantum-spin {
-            0% {
-              transform: rotate(0deg) scale(1);
-            }
-            50% {
-              transform: rotate(180deg) scale(1.1);
-            }
-            100% {
-              transform: rotate(360deg) scale(1);
-            }
-          }
-          @keyframes quantum-spin-reverse {
-            0% {
-              transform: rotate(0deg) scale(1);
-            }
-            50% {
-              transform: rotate(-180deg) scale(0.9);
-            }
-            100% {
-              transform: rotate(-360deg) scale(1);
-            }
-          }
-          @keyframes quantum-pulse {
-            0%,
-            100% {
-              transform: translate(-50%, -50%) scale(1);
-              opacity: 1;
-            }
-            50% {
-              transform: translate(-50%, -50%) scale(1.5);
-              opacity: 0.5;
-            }
-          }
-          @keyframes quantum-tunnel {
-            0% {
-              transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-            }
-            100% {
-              transform: perspective(1000px) rotateX(360deg) rotateY(720deg);
-            }
-          }
-          @keyframes quantum-tunnel-inner {
-            0% {
-              transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
-            }
-            100% {
-              transform: perspective(1000px) rotateX(-360deg) rotateY(-720deg);
-            }
-          }
-          @keyframes quantum-tunnel-core {
-            0% {
-              transform: perspective(1000px) rotateX(0deg) rotateY(0deg)
-                scale(1);
-            }
-            50% {
-              transform: perspective(1000px) rotateX(180deg) rotateY(360deg)
-                scale(1.5);
-            }
-            100% {
-              transform: perspective(1000px) rotateX(360deg) rotateY(720deg)
-                scale(1);
-            }
-          }
+    /* QUANTUM EFFECTS */
+    @keyframes quantum-spin {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+    @keyframes quantum-spin-reverse {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(-180deg) scale(0.9); }
+      100% { transform: rotate(-360deg) scale(1); }
+    }
+    @keyframes quantum-pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.5; }
+    }
+    @keyframes quantum-tunnel {
+      0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+      100% { transform: perspective(1000px) rotateX(360deg) rotateY(720deg); }
+    }
+    @keyframes quantum-tunnel-inner {
+      0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+      100% { transform: perspective(1000px) rotateX(-360deg) rotateY(-720deg); }
+    }
+    @keyframes quantum-tunnel-core {
+      0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1); }
+      50% { transform: perspective(1000px) rotateX(180deg) rotateY(360deg) scale(1.5); }
+      100% { transform: perspective(1000px) rotateX(360deg) rotateY(720deg) scale(1); }
+    }
 
-          /* DNA HELIX */
-          @keyframes dna-helix {
-            0% {
-              transform: translateY(0px) rotate(0deg);
-            }
-            100% {
-              transform: translateY(-400px) rotate(720deg);
-            }
-          }
-          @keyframes dna-helix-reverse {
-            0% {
-              transform: translateY(0px) rotate(0deg);
-            }
-            100% {
-              transform: translateY(-400px) rotate(-720deg);
-            }
-          }
-          @keyframes dna-particle-1 {
-            0%,
-            100% {
-              transform: translateX(0px) scale(1);
-            }
-            25% {
-              transform: translateX(20px) scale(1.2);
-            }
-            50% {
-              transform: translateX(0px) scale(0.8);
-            }
-            75% {
-              transform: translateX(-20px) scale(1.2);
-            }
-          }
-          @keyframes dna-particle-2 {
-            0%,
-            100% {
-              transform: translateX(0px) scale(1);
-            }
-            25% {
-              transform: translateX(-15px) scale(0.9);
-            }
-            50% {
-              transform: translateX(0px) scale(1.3);
-            }
-            75% {
-              transform: translateX(15px) scale(0.9);
-            }
-          }
-          @keyframes dna-particle-3 {
-            0%,
-            100% {
-              transform: translateX(0px) scale(1);
-            }
-            25% {
-              transform: translateX(25px) scale(1.1);
-            }
-            50% {
-              transform: translateX(0px) scale(0.7);
-            }
-            75% {
-              transform: translateX(-25px) scale(1.1);
-            }
-          }
-          @keyframes dna-particle-4 {
-            0%,
-            100% {
-              transform: translateX(0px) scale(1);
-            }
-            25% {
-              transform: translateX(-10px) scale(1.4);
-            }
-            50% {
-              transform: translateX(0px) scale(0.6);
-            }
-            75% {
-              transform: translateX(10px) scale(1.4);
-            }
-          }
+    /* DNA HELIX */
+    @keyframes dna-helix {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-400px) rotate(720deg); }
+    }
+    @keyframes dna-helix-reverse {
+      0% { transform: translateY(0px) rotate(0deg); }
+      100% { transform: translateY(-400px) rotate(-720deg); }
+    }
+    @keyframes dna-particle-1 {
+      0%, 100% { transform: translateX(0px) scale(1); }
+      25% { transform: translateX(20px) scale(1.2); }
+      50% { transform: translateX(0px) scale(0.8); }
+      75% { transform: translateX(-20px) scale(1.2); }
+    }
+    @keyframes dna-particle-2 {
+      0%, 100% { transform: translateX(0px) scale(1); }
+      25% { transform: translateX(-15px) scale(0.9); }
+      50% { transform: translateX(0px) scale(1.3); }
+      75% { transform: translateX(15px) scale(0.9); }
+    }
+    @keyframes dna-particle-3 {
+      0%, 100% { transform: translateX(0px) scale(1); }
+      25% { transform: translateX(25px) scale(1.1); }
+      50% { transform: translateX(0px) scale(0.7); }
+      75% { transform: translateX(-25px) scale(1.1); }
+    }
+    @keyframes dna-particle-4 {
+      0%, 100% { transform: translateX(0px) scale(1); }
+      25% { transform: translateX(-10px) scale(1.4); }
+      50% { transform: translateX(0px) scale(0.6); }
+      75% { transform: translateX(10px) scale(1.4); }
+    }
 
-          /* LIGHTNING EFFECTS */
-          @keyframes lightning-1 {
-            0%,
-            90%,
-            100% {
-              opacity: 0;
-              transform: scaleY(0);
-            }
-            5%,
-            10% {
-              opacity: 1;
-              transform: scaleY(1) scaleX(2);
-            }
-            15%,
-            20% {
-              opacity: 0.7;
-              transform: scaleY(0.8) scaleX(1.5);
-            }
-          }
-          @keyframes lightning-2 {
-            0%,
-            70%,
-            100% {
-              opacity: 0;
-              transform: scaleY(0);
-            }
-            10%,
-            15% {
-              opacity: 1;
-              transform: scaleY(1) scaleX(3);
-            }
-            20%,
-            25% {
-              opacity: 0.5;
-              transform: scaleY(0.6) scaleX(2);
-            }
-          }
-          @keyframes lightning-3 {
-            0%,
-            80%,
-            100% {
-              opacity: 0;
-              transform: scaleY(0);
-            }
-            15%,
-            20% {
-              opacity: 1;
-              transform: scaleY(1) scaleX(2.5);
-            }
-            25%,
-            30% {
-              opacity: 0.6;
-              transform: scaleY(0.7) scaleX(1.8);
-            }
-          }
+    /* LIGHTNING EFFECTS */
+    @keyframes lightning-1 {
+      0%, 90%, 100% { opacity: 0; transform: scaleY(0); }
+      5%, 10% { opacity: 1; transform: scaleY(1) scaleX(2); }
+      15%, 20% { opacity: 0.7; transform: scaleY(0.8) scaleX(1.5); }
+    }
+    @keyframes lightning-2 {
+      0%, 70%, 100% { opacity: 0; transform: scaleY(0); }
+      10%, 15% { opacity: 1; transform: scaleY(1) scaleX(3); }
+      20%, 25% { opacity: 0.5; transform: scaleY(0.6) scaleX(2); }
+    }
+    @keyframes lightning-3 {
+      0%, 80%, 100% { opacity: 0; transform: scaleY(0); }
+      15%, 20% { opacity: 1; transform: scaleY(1) scaleX(2.5); }
+      25%, 30% { opacity: 0.6; transform: scaleY(0.7) scaleX(1.8); }
+    }
 
-          /* COSMIC DUST */
-          @keyframes cosmic-dust {
-            0% {
-              transform: translateY(0px) translateX(0px) scale(0);
-              opacity: 0;
-            }
-            10% {
-              opacity: 1;
-              transform: scale(1);
-            }
-            90% {
-              opacity: 1;
-            }
-            100% {
-              transform: translateY(-100vh) translateX(50px) scale(0);
-              opacity: 0;
-            }
-          }
+    /* COSMIC DUST */
+    @keyframes cosmic-dust {
+      0% { transform: translateY(0px) translateX(0px) scale(0); opacity: 0; }
+      10% { opacity: 1; transform: scale(1); }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) translateX(50px) scale(0); opacity: 0; }
+    }
 
-          /* GRID EFFECTS */
-          @keyframes grid-scan {
-            0% {
-              transform: translateX(-100%);
-            }
-            100% {
-              transform: translateX(100%);
-            }
-          }
-          @keyframes grid-scan-vertical {
-            0% {
-              transform: translateY(-100%);
-            }
-            100% {
-              transform: translateY(100%);
-            }
-          }
+    /* GRID EFFECTS */
+    @keyframes grid-scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    @keyframes grid-scan-vertical {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
 
-          /* PLASMA WAVES */
-          @keyframes plasma-wave {
-            0% {
-              transform: translateX(-100%) scaleY(1);
-            }
-            50% {
-              transform: translateX(50%) scaleY(2);
-            }
-            100% {
-              transform: translateX(200%) scaleY(1);
-            }
-          }
-          @keyframes plasma-wave-reverse {
-            0% {
-              transform: translateX(100%) scaleY(1);
-            }
-            50% {
-              transform: translateX(-50%) scaleY(2);
-            }
-            100% {
-              transform: translateX(-200%) scaleY(1);
-            }
-          }
+    /* PLASMA WAVES */
+    @keyframes plasma-wave {
+      0% { transform: translateX(-100%) scaleY(1); }
+      50% { transform: translateX(50%) scaleY(2); }
+      100% { transform: translateX(200%) scaleY(1); }
+    }
+    @keyframes plasma-wave-reverse {
+      0% { transform: translateX(100%) scaleY(1); }
+      50% { transform: translateX(-50%) scaleY(2); }
+      100% { transform: translateX(-200%) scaleY(1); }
+    }
 
-          /* ENERGY VORTEX */
-          @keyframes energy-vortex {
-            0% {
-              transform: rotate(0deg) scale(1);
-            }
-            100% {
-              transform: rotate(360deg) scale(1.2);
-            }
-          }
-          @keyframes vortex-1 {
-            0% {
-              transform: rotate(0deg) scale(1);
-              opacity: 0.3;
-            }
-            100% {
-              transform: rotate(360deg) scale(2);
-              opacity: 0;
-            }
-          }
-          @keyframes vortex-2 {
-            0% {
-              transform: rotate(0deg) scale(1);
-              opacity: 0.4;
-            }
-            100% {
-              transform: rotate(-360deg) scale(1.8);
-              opacity: 0;
-            }
-          }
-          @keyframes vortex-3 {
-            0% {
-              transform: rotate(0deg) scale(1);
-              opacity: 0.5;
-            }
-            100% {
-              transform: rotate(720deg) scale(1.5);
-              opacity: 0;
-            }
-          }
+    /* ENERGY VORTEX */
+    @keyframes energy-vortex {
+      0% { transform: rotate(0deg) scale(1); }
+      100% { transform: rotate(360deg) scale(1.2); }
+    }
+    @keyframes vortex-1 {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.3; }
+      100% { transform: rotate(360deg) scale(2); opacity: 0; }
+    }
+    @keyframes vortex-2 {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.4; }
+      100% { transform: rotate(-360deg) scale(1.8); opacity: 0; }
+    }
+    @keyframes vortex-3 {
+      0% { transform: rotate(0deg) scale(1); opacity: 0.5; }
+      100% { transform: rotate(720deg) scale(1.5); opacity: 0; }
+    }
 
-          /* TITLE EFFECTS */
-          @keyframes title-rainbow {
-            0% {
-              background-position: 0% 50%;
-            }
-            50% {
-              background-position: 100% 50%;
-            }
-            100% {
-              background-position: 0% 50%;
-            }
-          }
-          @keyframes title-emerge {
-            0% {
-              transform: translateY(50px) scale(0.8);
-              opacity: 0;
-            }
-            100% {
-              transform: translateY(0px) scale(1);
-              opacity: 1;
-            }
-          }
+    /* TITLE EFFECTS */
+    @keyframes title-rainbow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes title-emerge {
+      0% { transform: translateY(50px) scale(0.8); opacity: 0; }
+      100% { transform: translateY(0px) scale(1); opacity: 1; }
+    }
 
-          /* BUTTON EFFECTS */
-          @keyframes button-power-up {
-            0%,
-            100% {
-              box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
-            }
-            50% {
-              box-shadow: 0 0 40px rgba(168, 85, 247, 0.8),
-                0 0 60px rgba(139, 92, 246, 0.6);
-            }
-          }
-          @keyframes button-shimmer {
-            0% {
-              transform: translateX(-100%) skewX(-45deg);
-            }
-            100% {
-              transform: translateX(200%) skewX(-45deg);
-            }
-          }
-          @keyframes arrow-rocket {
-            0%,
-            100% {
-              transform: translateX(0px);
-            }
-            50% {
-              transform: translateX(10px) scale(1.2);
-            }
-          }
+    /* BUTTON EFFECTS */
+    @keyframes button-power-up {
+      0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+      50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8), 0 0 60px rgba(139, 92, 246, 0.6); }
+    }
+    @keyframes button-shimmer {
+      0% { transform: translateX(-100%) skewX(-45deg); }
+      100% { transform: translateX(200%) skewX(-45deg); }
+    }
+    @keyframes arrow-rocket {
+      0%, 100% { transform: translateX(0px); }
+      50% { transform: translateX(10px) scale(1.2); }
+    }
 
-          /* ADVANCED BADGE */
-          @keyframes holographic-badge {
-            0%,
-            100% {
-              background: linear-gradient(
-                45deg,
-                rgba(168, 85, 247, 0.1),
-                rgba(139, 92, 246, 0.1)
-              );
-              border-color: rgba(168, 85, 247, 0.2);
-            }
-            50% {
-              background: linear-gradient(
-                45deg,
-                rgba(139, 92, 246, 0.2),
-                rgba(168, 85, 247, 0.2)
-              );
-              border-color: rgba(139, 92, 246, 0.4);
-            }
-          }
-          @keyframes sparkle-dance {
-            0%,
-            100% {
-              transform: rotate(0deg) scale(1);
-            }
-            25% {
-              transform: rotate(90deg) scale(1.2);
-            }
-            50% {
-              transform: rotate(180deg) scale(0.8);
-            }
-            75% {
-              transform: rotate(270deg) scale(1.1);
-            }
-          }
-          @keyframes text-glow {
-            0%,
-            100% {
-              text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
-            }
-            50% {
-              text-shadow: 0 0 20px rgba(139, 92, 246, 0.8),
-                0 0 30px rgba(168, 85, 247, 0.6);
-            }
-          }
+    /* ADVANCED BADGE */
+    @keyframes holographic-badge {
+      0%, 100% { 
+        background: linear-gradient(45deg, rgba(168, 85, 247, 0.1), rgba(139, 92, 246, 0.1));
+        border-color: rgba(168, 85, 247, 0.2);
+      }
+      50% { 
+        background: linear-gradient(45deg, rgba(139, 92, 246, 0.2), rgba(168, 85, 247, 0.2));
+        border-color: rgba(139, 92, 246, 0.4);
+      }
+    }
+    @keyframes sparkle-dance {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      25% { transform: rotate(90deg) scale(1.2); }
+      50% { transform: rotate(180deg) scale(0.8); }
+      75% { transform: rotate(270deg) scale(1.1); }
+    }
+    @keyframes text-glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5); }
+      50% { text-shadow: 0 0 20px rgba(139, 92, 246, 0.8), 0 0 30px rgba(168, 85, 247, 0.6); }
+    }
 
-          /* SCROLL INDICATOR */
-          @keyframes scroll-magic {
-            0%,
-            100% {
-              transform: translateX(-50%) translateY(0px);
-            }
-            50% {
-              transform: translateX(-50%) translateY(-10px);
-            }
-          }
-          @keyframes scroll-glow {
-            0%,
-            100% {
-              box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
-            }
-            50% {
-              box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
-            }
-          }
-          @keyframes scroll-dot {
-            0% {
-              transform: translateY(0px);
-              opacity: 1;
-            }
-            100% {
-              transform: translateY(20px);
-              opacity: 0;
-            }
-          }
+    /* SCROLL INDICATOR */
+    @keyframes scroll-magic {
+      0%, 100% { transform: translateX(-50%) translateY(0px); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+    @keyframes scroll-glow {
+      0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.3); }
+      50% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.6); }
+    }
+    @keyframes scroll-dot {
+      0% { transform: translateY(0px); opacity: 1; }
+      100% { transform: translateY(20px); opacity: 0; }
+    }
 
-          /* SPIN VARIANTS */
-          @keyframes spin-slow {
-            0% {
-              transform: rotate(0deg);
-            }
-            100% {
-              transform: rotate(360deg);
-            }
-          }
-          @keyframes spin-reverse {
-            0% {
-              transform: rotate(0deg);
-            }
-            100% {
-              transform: rotate(-360deg);
-            }
-          }
+    /* SPIN VARIANTS */
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes spin-reverse {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(-360deg); }
+    }
 
-          /* APPLY ANIMATIONS */
-          .animate-orbit-1 {
-            animation: orbit-1 linear infinite;
-          }
-          .animate-orbit-2 {
-            animation: orbit-2 linear infinite;
-          }
-          .animate-orbit-3 {
-            animation: orbit-3 linear infinite;
-          }
-          .animate-orbit-4 {
-            animation: orbit-4 linear infinite;
-          }
+    /* APPLY ANIMATIONS */
+    .animate-orbit-1 { animation: orbit-1 linear infinite; }
+    .animate-orbit-2 { animation: orbit-2 linear infinite; }
+    .animate-orbit-3 { animation: orbit-3 linear infinite; }
+    .animate-orbit-4 { animation: orbit-4 linear infinite; }
+    
+    .animate-meteor-1 { animation: meteor-1 8s linear infinite; }
+    .animate-meteor-2 { animation: meteor-2 10s linear infinite; }
+    .animate-meteor-3 { animation: meteor-3 7s linear infinite; }
+    .animate-meteor-4 { animation: meteor-4 9s linear infinite; }
+    
+    .animate-quantum-spin { animation: quantum-spin 10s ease-in-out infinite; }
+    .animate-quantum-spin-reverse { animation: quantum-spin-reverse 8s ease-in-out infinite; }
+    .animate-quantum-pulse { animation: quantum-pulse 3s ease-in-out infinite; }
+    .animate-quantum-tunnel { animation: quantum-tunnel 15s linear infinite; }
+    .animate-quantum-tunnel-inner { animation: quantum-tunnel-inner 12s linear infinite; }
+    .animate-quantum-tunnel-core { animation: quantum-tunnel-core 8s ease-in-out infinite; }
+    
+    .animate-dna-helix { animation: dna-helix 20s linear infinite; }
+    .animate-dna-helix-reverse { animation: dna-helix-reverse 18s linear infinite; }
+    .animate-dna-particle-1 { animation: dna-particle-1 4s ease-in-out infinite; }
+    .animate-dna-particle-2 { animation: dna-particle-2 3s ease-in-out infinite; }
+    .animate-dna-particle-3 { animation: dna-particle-3 5s ease-in-out infinite; }
+    .animate-dna-particle-4 { animation: dna-particle-4 3.5s ease-in-out infinite; }
+    
+    .animate-lightning-1 { animation: lightning-1 5s ease-in-out infinite; }
+    .animate-lightning-2 { animation: lightning-2 7s ease-in-out infinite; }
+    .animate-lightning-3 { animation: lightning-3 6s ease-in-out infinite; }
+    
+    .animate-cosmic-dust { animation: cosmic-dust linear infinite; }
+    
+    .animate-grid-scan { animation: grid-scan 8s linear infinite; }
+    .animate-grid-scan-vertical { animation: grid-scan-vertical 10s linear infinite; }
+    
+    .animate-plasma-wave { animation: plasma-wave 6s ease-in-out infinite; }
+    .animate-plasma-wave-reverse { animation: plasma-wave-reverse 8s ease-in-out infinite; }
+    
+    .animate-energy-vortex { animation: energy-vortex 5s linear infinite; }
+    .animate-vortex-1 { animation: vortex-1 3s ease-out infinite; }
+    .animate-vortex-2 { animation: vortex-2 4s ease-out infinite; }
+    .animate-vortex-3 { animation: vortex-3 2.5s ease-out infinite; }
+    
+    .animate-title-rainbow { animation: title-rainbow 5s ease infinite; }
+    .animate-title-emerge { animation: title-emerge 1.2s ease-out; }
+    
+    .animate-button-power-up { animation: button-power-up 2s ease-in-out infinite; }
+    .animate-button-shimmer { animation: button-shimmer 3s ease-in-out infinite; }
+    .animate-arrow-rocket { animation: arrow-rocket 0.6s ease-in-out; }
+    
+    .animate-holographic-badge { animation: holographic-badge 4s ease-in-out infinite; }
+    .animate-sparkle-dance { animation: sparkle-dance 4s ease-in-out infinite; }
+    .animate-text-glow { animation: text-glow 3s ease-in-out infinite; }
+    
+    .animate-scroll-magic { animation: scroll-magic 2s ease-in-out infinite; }
+    .animate-scroll-glow { animation: scroll-glow 2s ease-in-out infinite; }
+    .animate-scroll-dot { animation: scroll-dot 1.5s ease-in-out infinite; }
+    
+    .animate-spin-slow { animation: spin-slow 10s linear infinite; }
+    .animate-spin-reverse { animation: spin-reverse 8s linear infinite; }
+    
+    .animate-description-float { animation: fadeInUp 1s ease-out 0.2s both; }
+    .animate-buttons-materialize { animation: fadeInUp 1s ease-out 0.4s both; }
+    .animate-features-cascade { animation: fadeInUp 1s ease-out 0.6s both; }
+    .animate-button-materialize { animation: fadeInUp 0.8s ease-out both; }
+    .animate-feature-glow { animation: text-glow 4s ease-in-out infinite; }
+    .animate-check-success { animation: quantum-pulse 2s ease-in-out infinite; }
+    .animate-play-pulse { animation: quantum-pulse 1s ease-in-out; }
+    .animate-energy-sweep { animation: button-shimmer 2s ease-in-out infinite; }
 
-          .animate-meteor-1 {
-            animation: meteor-1 8s linear infinite;
-          }
-          .animate-meteor-2 {
-            animation: meteor-2 10s linear infinite;
-          }
-          .animate-meteor-3 {
-            animation: meteor-3 7s linear infinite;
-          }
-          .animate-meteor-4 {
-            animation: meteor-4 9s linear infinite;
-          }
-
-          .animate-quantum-spin {
-            animation: quantum-spin 10s ease-in-out infinite;
-          }
-          .animate-quantum-spin-reverse {
-            animation: quantum-spin-reverse 8s ease-in-out infinite;
-          }
-          .animate-quantum-pulse {
-            animation: quantum-pulse 3s ease-in-out infinite;
-          }
-          .animate-quantum-tunnel {
-            animation: quantum-tunnel 15s linear infinite;
-          }
-          .animate-quantum-tunnel-inner {
-            animation: quantum-tunnel-inner 12s linear infinite;
-          }
-          .animate-quantum-tunnel-core {
-            animation: quantum-tunnel-core 8s ease-in-out infinite;
-          }
-
-          .animate-dna-helix {
-            animation: dna-helix 20s linear infinite;
-          }
-          .animate-dna-helix-reverse {
-            animation: dna-helix-reverse 18s linear infinite;
-          }
-          .animate-dna-particle-1 {
-            animation: dna-particle-1 4s ease-in-out infinite;
-          }
-          .animate-dna-particle-2 {
-            animation: dna-particle-2 3s ease-in-out infinite;
-          }
-          .animate-dna-particle-3 {
-            animation: dna-particle-3 5s ease-in-out infinite;
-          }
-          .animate-dna-particle-4 {
-            animation: dna-particle-4 3.5s ease-in-out infinite;
-          }
-
-          .animate-lightning-1 {
-            animation: lightning-1 5s ease-in-out infinite;
-          }
-          .animate-lightning-2 {
-            animation: lightning-2 7s ease-in-out infinite;
-          }
-          .animate-lightning-3 {
-            animation: lightning-3 6s ease-in-out infinite;
-          }
-
-          .animate-cosmic-dust {
-            animation: cosmic-dust linear infinite;
-          }
-
-          .animate-grid-scan {
-            animation: grid-scan 8s linear infinite;
-          }
-          .animate-grid-scan-vertical {
-            animation: grid-scan-vertical 10s linear infinite;
-          }
-
-          .animate-plasma-wave {
-            animation: plasma-wave 6s ease-in-out infinite;
-          }
-          .animate-plasma-wave-reverse {
-            animation: plasma-wave-reverse 8s ease-in-out infinite;
-          }
-
-          .animate-energy-vortex {
-            animation: energy-vortex 5s linear infinite;
-          }
-          .animate-vortex-1 {
-            animation: vortex-1 3s ease-out infinite;
-          }
-          .animate-vortex-2 {
-            animation: vortex-2 4s ease-out infinite;
-          }
-          .animate-vortex-3 {
-            animation: vortex-3 2.5s ease-out infinite;
-          }
-
-          .animate-title-rainbow {
-            animation: title-rainbow 5s ease infinite;
-          }
-          .animate-title-emerge {
-            animation: title-emerge 1.2s ease-out;
-          }
-
-          .animate-button-power-up {
-            animation: button-power-up 2s ease-in-out infinite;
-          }
-          .animate-button-shimmer {
-            animation: button-shimmer 3s ease-in-out infinite;
-          }
-          .animate-arrow-rocket {
-            animation: arrow-rocket 0.6s ease-in-out;
-          }
-
-          .animate-holographic-badge {
-            animation: holographic-badge 4s ease-in-out infinite;
-          }
-          .animate-sparkle-dance {
-            animation: sparkle-dance 4s ease-in-out infinite;
-          }
-          .animate-text-glow {
-            animation: text-glow 3s ease-in-out infinite;
-          }
-
-          .animate-scroll-magic {
-            animation: scroll-magic 2s ease-in-out infinite;
-          }
-          .animate-scroll-glow {
-            animation: scroll-glow 2s ease-in-out infinite;
-          }
-          .animate-scroll-dot {
-            animation: scroll-dot 1.5s ease-in-out infinite;
-          }
-
-          .animate-spin-slow {
-            animation: spin-slow 10s linear infinite;
-          }
-          .animate-spin-reverse {
-            animation: spin-reverse 8s linear infinite;
-          }
-
-          .animate-description-float {
-            animation: fadeInUp 1s ease-out 0.2s both;
-          }
-          .animate-buttons-materialize {
-            animation: fadeInUp 1s ease-out 0.4s both;
-          }
-          .animate-features-cascade {
-            animation: fadeInUp 1s ease-out 0.6s both;
-          }
-          .animate-button-materialize {
-            animation: fadeInUp 0.8s ease-out both;
-          }
-          .animate-feature-glow {
-            animation: text-glow 4s ease-in-out infinite;
-          }
-          .animate-check-success {
-            animation: quantum-pulse 2s ease-in-out infinite;
-          }
-          .animate-play-pulse {
-            animation: quantum-pulse 1s ease-in-out;
-          }
-          .animate-energy-sweep {
-            animation: button-shimmer 2s ease-in-out infinite;
-          }
-
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `}</style>
       </section>
 
       {/* Stats Section */}
@@ -1380,35 +894,13 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              {
-                number: "10K+",
-                label: "Active Users",
-                icon: Users,
-                color: "from-blue-500 to-cyan-500",
-              },
-              {
-                number: "₿2,500",
-                label: "Total Payments",
-                icon: Bitcoin,
-                color: "from-orange-500 to-yellow-500",
-              },
-              {
-                number: "50K+",
-                label: "Invoices Created",
-                icon: FileText,
-                color: "from-green-500 to-emerald-500",
-              },
-              {
-                number: "99.9%",
-                label: "Uptime",
-                icon: Shield,
-                color: "from-purple-500 to-pink-500",
-              },
+              { number: "10K+", label: "Active Users", icon: Users, color: "from-blue-500 to-cyan-500" },
+              { number: "₿2,500", label: "Total Payments", icon: Bitcoin, color: "from-orange-500 to-yellow-500" },
+              { number: "50K+", label: "Invoices Created", icon: FileText, color: "from-green-500 to-emerald-500" },
+              { number: "99.9%", label: "Uptime", icon: Shield, color: "from-purple-500 to-pink-500" },
             ].map((stat, index) => (
               <div key={index} className="text-center group">
-                <div
-                  className={`w-20 h-20 bg-gradient-to-br ${stat.color} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-2xl`}
-                >
+                <div className={`w-20 h-20 bg-gradient-to-br ${stat.color} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-2xl`}>
                   <stat.icon className="h-10 w-10 text-white" />
                 </div>
                 <div className="text-4xl md:text-5xl font-black text-white mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
@@ -1422,17 +914,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Features Section */}
-      <section
-        id="features"
-        className="relative z-10 py-40 px-4 sm:px-6 lg:px-8"
-      >
+      <section id="features" className="relative z-10 py-40 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 backdrop-blur-sm mb-8">
               <Target className="h-4 w-4 text-purple-400 mr-2" />
-              <span className="text-sm font-medium text-purple-300">
-                Powerful Features
-              </span>
+              <span className="text-sm font-medium text-purple-300">Powerful Features</span>
             </div>
 
             <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight">
@@ -1443,9 +930,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </h2>
 
             <p className="text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              Powerful tools designed for modern freelancers and agencies who
-              want to get paid faster, work smarter, and build lasting
-              professional relationships.
+              Powerful tools designed for modern freelancers and agencies who want to get paid faster, work smarter, and build lasting professional relationships.
             </p>
           </div>
 
@@ -1455,14 +940,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 key={index}
                 className="group relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/15 transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl overflow-hidden"
               >
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                 <div className="relative z-10">
-                  <div
-                    className={`w-20 h-20 bg-gradient-to-br ${feature.color} rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-all duration-500 shadow-2xl`}
-                  >
+                  <div className={`w-20 h-20 bg-gradient-to-br ${feature.color} rounded-3xl flex items-center justify-center mb-8 group-hover:scale-110 transition-all duration-500 shadow-2xl`}>
                     <feature.icon className="h-10 w-10 text-white" />
                   </div>
 
@@ -1476,13 +957,8 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
                   <ul className="space-y-3">
                     {feature.benefits.map((benefit, benefitIndex) => (
-                      <li
-                        key={benefitIndex}
-                        className="flex items-center text-gray-400 group-hover:text-gray-300 transition-colors duration-300"
-                      >
-                        <div
-                          className={`w-5 h-5 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center mr-3 flex-shrink-0`}
-                        >
+                      <li key={benefitIndex} className="flex items-center text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                        <div className={`w-5 h-5 rounded-full bg-gradient-to-r ${feature.color} flex items-center justify-center mr-3 flex-shrink-0`}>
                           <Check className="h-3 w-3 text-white" />
                         </div>
                         <span className="font-medium">{benefit}</span>
@@ -1502,17 +978,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           <div className="text-center mb-20">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20 backdrop-blur-sm mb-8">
               <Quote className="h-4 w-4 text-green-400 mr-2" />
-              <span className="text-sm font-medium text-green-300">
-                What our users say
-              </span>
+              <span className="text-sm font-medium text-green-300">What our users say</span>
             </div>
 
             <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
               Loved by
-              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                {" "}
-                Thousands
-              </span>
+              <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent"> Thousands</span>
             </h2>
           </div>
 
@@ -1523,28 +994,19 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 className="group relative bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/10 rounded-3xl p-8 hover:bg-gradient-to-br hover:from-white/10 hover:to-white/15 transition-all duration-500 hover:transform hover:scale-105 hover:shadow-2xl"
               >
                 <div className="flex items-center mb-6">
-                  <div
-                    className={`w-16 h-16 bg-gradient-to-br ${testimonial.gradient} rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-xl`}
-                  >
+                  <div className={`w-16 h-16 bg-gradient-to-br ${testimonial.gradient} rounded-2xl flex items-center justify-center text-white font-bold text-lg mr-4 shadow-xl`}>
                     {testimonial.avatar}
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-lg">
-                      {testimonial.name}
-                    </h4>
+                    <h4 className="text-white font-bold text-lg">{testimonial.name}</h4>
                     <p className="text-gray-400 text-sm">{testimonial.role}</p>
-                    <p className="text-gray-500 text-xs">
-                      {testimonial.company}
-                    </p>
+                    <p className="text-gray-500 text-xs">{testimonial.company}</p>
                   </div>
                 </div>
 
                 <div className="flex mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-5 w-5 text-yellow-400 fill-current"
-                    />
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
                   ))}
                 </div>
 
@@ -1558,30 +1020,21 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* How It Works Section */}
-      <section
-        id="how-it-works"
-        className="relative z-10 py-40 px-4 sm:px-6 lg:px-8"
-      >
+      <section id="how-it-works" className="relative z-10 py-40 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-blue-500/20 backdrop-blur-sm mb-8">
               <Layers className="h-4 w-4 text-blue-400 mr-2" />
-              <span className="text-sm font-medium text-blue-300">
-                Simple Process
-              </span>
+              <span className="text-sm font-medium text-blue-300">Simple Process</span>
             </div>
 
             <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight">
               Get Started in
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                {" "}
-                Minutes
-              </span>
+              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"> Minutes</span>
             </h2>
 
             <p className="text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              Simple, powerful workflow designed for modern freelancers who want
-              to focus on their craft, not administrative overhead.
+              Simple, powerful workflow designed for modern freelancers who want to focus on their craft, not administrative overhead.
             </p>
           </div>
 
@@ -1590,41 +1043,35 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               {
                 step: "01",
                 title: "Create Account",
-                description:
-                  "Sign up with Internet Identity for secure, decentralized authentication that puts you in control.",
+                description: "Sign up with Internet Identity for secure, decentralized authentication that puts you in control.",
                 icon: Shield,
                 color: "from-green-500 to-emerald-500",
               },
               {
                 step: "02",
                 title: "Track Your Work",
-                description:
-                  "Log tasks, track time, and organize your projects with our intuitive tools designed for maximum productivity.",
+                description: "Log tasks, track time, and organize your projects with our intuitive tools designed for maximum productivity.",
                 icon: CheckSquare,
                 color: "from-blue-500 to-cyan-500",
               },
               {
                 step: "03",
                 title: "Generate Invoice",
-                description:
-                  "Create professional Bitcoin invoices with team splits and file attachments in seconds, not hours.",
+                description: "Create professional Bitcoin invoices with team splits and file attachments in seconds, not hours.",
                 icon: FileText,
                 color: "from-purple-500 to-pink-500",
               },
               {
                 step: "04",
                 title: "Get Paid",
-                description:
-                  "Share payment portals with clients and receive instant Bitcoin payments with real-time notifications.",
+                description: "Share payment portals with clients and receive instant Bitcoin payments with real-time notifications.",
                 icon: Bitcoin,
                 color: "from-orange-500 to-yellow-500",
               },
             ].map((step, index) => (
               <div key={index} className="text-center group relative">
                 <div className="relative mb-12">
-                  <div
-                    className={`w-24 h-24 bg-gradient-to-br ${step.color} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-2xl group-hover:shadow-3xl`}
-                  >
+                  <div className={`w-24 h-24 bg-gradient-to-br ${step.color} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-all duration-500 shadow-2xl group-hover:shadow-3xl`}>
                     <step.icon className="h-12 w-12 text-white" />
                   </div>
 
@@ -1651,17 +1098,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
       </section>
 
       {/* Pricing Section */}
-      <section
-        id="pricing"
-        className="relative z-10 py-40 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm"
-      >
+      <section id="pricing" className="relative z-10 py-40 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-white/5 to-white/10 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-24">
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 backdrop-blur-sm mb-8">
               <Bitcoin className="h-4 w-4 text-yellow-400 mr-2" />
-              <span className="text-sm font-medium text-yellow-300">
-                Transparent Pricing
-              </span>
+              <span className="text-sm font-medium text-yellow-300">Transparent Pricing</span>
             </div>
 
             <h2 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight">
@@ -1672,8 +1114,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </h2>
 
             <p className="text-xl text-gray-300 max-w-4xl mx-auto font-light leading-relaxed">
-              Start free and scale as you grow. No hidden fees, no surprises.
-              Pay with Bitcoin and join the future of payments.
+              Start free and scale as you grow. No hidden fees, no surprises. Pay with Bitcoin and join the future of payments.
             </p>
           </div>
 
@@ -1681,11 +1122,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             {pricingPlans.map((plan, index) => (
               <div
                 key={index}
-                className={`relative rounded-3xl p-10 transition-all duration-500 hover:scale-105 group overflow-hidden ${
-                  plan.popular
+                className={`relative rounded-3xl p-10 transition-all duration-500 hover:scale-105 group overflow-hidden ${plan.popular
                     ? "bg-gradient-to-br from-orange-500 to-yellow-500 text-white shadow-2xl transform scale-105 ring-4 ring-orange-500/50"
                     : "bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl border border-white/10 text-white hover:bg-gradient-to-br hover:from-white/10 hover:to-white/15"
-                }`}
+                  }`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
@@ -1696,9 +1136,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </div>
                 )}
 
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${plan.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`}
-                />
+                <div className={`absolute inset-0 bg-gradient-to-br ${plan.gradient} opacity-5 group-hover:opacity-10 transition-opacity duration-500`} />
 
                 <div className="relative z-10">
                   <div className="text-center mb-10">
@@ -1710,19 +1148,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                       {plan.price}
                     </div>
 
-                    <div
-                      className={`text-sm font-medium ${
-                        plan.popular ? "text-orange-100" : "text-gray-400"
-                      }`}
-                    >
+                    <div className={`text-sm font-medium ${plan.popular ? "text-orange-100" : "text-gray-400"}`}>
                       {plan.period}
                     </div>
 
-                    <p
-                      className={`mt-6 font-light ${
-                        plan.popular ? "text-orange-100" : "text-gray-300"
-                      }`}
-                    >
+                    <p className={`mt-6 font-light ${plan.popular ? "text-orange-100" : "text-gray-300"}`}>
                       {plan.description}
                     </p>
                   </div>
@@ -1730,22 +1160,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   <ul className="space-y-4 mb-10">
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-center">
-                        <div
-                          className={`w-6 h-6 rounded-full ${
-                            plan.popular ? "bg-white/20" : "bg-green-500/20"
-                          } flex items-center justify-center mr-4 flex-shrink-0`}
-                        >
-                          <Check
-                            className={`h-4 w-4 ${
-                              plan.popular ? "text-white" : "text-green-400"
-                            }`}
-                          />
+                        <div className={`w-6 h-6 rounded-full ${plan.popular ? "bg-white/20" : "bg-green-500/20"} flex items-center justify-center mr-4 flex-shrink-0`}>
+                          <Check className={`h-4 w-4 ${plan.popular ? "text-white" : "text-green-400"}`} />
                         </div>
-                        <span
-                          className={`font-medium ${
-                            plan.popular ? "text-white" : "text-gray-300"
-                          }`}
-                        >
+                        <span className={`font-medium ${plan.popular ? "text-white" : "text-gray-300"}`}>
                           {feature}
                         </span>
                       </li>
@@ -1754,19 +1172,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
                   <button
                     onClick={handleGetStarted}
-                    className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${
-                      plan.popular
+                    className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${plan.popular
                         ? "bg-white text-orange-500 hover:bg-gray-100 shadow-2xl"
                         : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600"
-                    }`}
+                      }`}
                   >
-                    <div
-                      className={`absolute inset-0 ${
-                        plan.popular
-                          ? "bg-gray-100"
-                          : "bg-gradient-to-r from-orange-600 to-yellow-600"
-                      } opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                    />
+                    <div className={`absolute inset-0 ${plan.popular ? "bg-gray-100" : "bg-gradient-to-r from-orange-600 to-yellow-600"} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                     <span className="relative flex items-center justify-center">
                       {plan.cta}
                       <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
@@ -1786,9 +1197,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
         <div className="max-w-5xl mx-auto text-center px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="inline-flex items-center px-6 py-3 rounded-full bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30 backdrop-blur-sm mb-12">
             <Zap className="h-5 w-5 text-orange-400 mr-3" />
-            <span className="text-base font-medium text-orange-300">
-              Ready to get started?
-            </span>
+            <span className="text-base font-medium text-orange-300">Ready to get started?</span>
           </div>
 
           <h2 className="text-5xl md:text-7xl font-black text-white mb-12 leading-tight">
@@ -1799,9 +1208,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </h2>
 
           <p className="text-2xl text-gray-300 mb-16 leading-relaxed font-light max-w-4xl mx-auto">
-            Join thousands of freelancers who are already earning more, working
-            smarter, and building stronger client relationships with
-            LipaInvoice.
+            Join thousands of freelancers who are already earning more, working smarter, and building stronger client relationships with LipaInvoice.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-8 justify-center">
@@ -1864,28 +1271,17 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </div>
 
               <p className="text-gray-400 mb-10 max-w-md leading-relaxed font-light text-lg">
-                The future of freelance invoicing. Create Bitcoin invoices,
-                split payments, track tasks, and build your reputation on the
-                decentralized web.
+                The future of freelance invoicing. Create Bitcoin invoices, split payments, track tasks, and build your reputation on the decentralized web.
               </p>
 
               <div className="flex space-x-4">
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30"
-                >
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30">
                   <Twitter className="h-6 w-6" />
                 </a>
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30"
-                >
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30">
                   <Github className="h-6 w-6" />
                 </a>
-                <a
-                  href="#"
-                  className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30"
-                >
+                <a href="#" className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white hover:bg-orange-500/20 transition-all duration-300 backdrop-blur-sm border border-white/10 hover:border-orange-500/30">
                   <Linkedin className="h-6 w-6" />
                 </a>
               </div>

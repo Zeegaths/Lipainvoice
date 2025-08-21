@@ -16,6 +16,7 @@ import NotificationCenter from './components/NotificationCenter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
+import BitcoinPaymentPage from './pages/BitcoinPaymentPage'
 
 type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 

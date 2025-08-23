@@ -18,6 +18,7 @@ type StreamingCallback = func (StreamingToken) ->
                           (StreamingCallbackHttpResponse) query;
 type Invoice = 
  record {
+   bitcoinAddress: opt text;
    details: text;
    files: vec FileMetadata;
    id: nat;
@@ -57,10 +58,15 @@ type FileMetadata =
  };
 service : {
   addBadge: (name: text, description: text) -> ();
-  addInvoice: (id: nat, details: text) -> ();
+  addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
   addTask: (id: nat, description: text) -> ();
+  getAllBitcoinMappings: () -> (vec record {
+                                      nat;
+                                      text;
+                                    });
   getBadge: (name: text) -> (opt text) query;
   getInvoice: (id: nat) -> (opt Invoice) query;
+  getInvoiceBitcoinAddress: (invoiceId: nat) -> (opt text) query;
   getInvoiceFiles: (invoiceId: nat) -> (vec FileMetadata) query;
   getTask: (id: nat) -> (opt text) query;
   httpStreamingCallback: (token: StreamingToken) ->
@@ -83,4 +89,5 @@ service : {
                         }) query;
   uploadInvoiceFile: (invoiceId: nat, fileName: text, mimeType: text, chunk:
    blob, complete: bool) -> (opt text);
+  validateBitcoinAddress: (address: text) -> (bool) query;
 }

@@ -3,7 +3,12 @@ type Asset__969461360 = {chunks : [Blob]; mimeType : Text};
 type FileMetadata__784263387 =
   {mimeType : Text; name : Text; path : Text; size : Nat; uploadedAt : Int};
 type Invoice__705886527 =
-  {details : Text; files : [FileMetadata__784263387]; id : Nat};
+  {
+    bitcoinAddress : ?Text;
+    details : Text;
+    files : [FileMetadata__784263387];
+    id : Nat
+  };
 type Map__713177669<K, V> = {root : Tree__925007165<K, V>; size : Nat};
 type Tree__925007165<K, V> =
   {
@@ -18,6 +23,8 @@ actor {
       root : Tree__925007165<Principal, Map__713177669<Text, Text>>;
       size : Nat
     };
+  stable var bitcoinAddressMap : [(Nat, Text)];
+  stable var bitcoinMappingsStable : [(Nat, Text)];
   stable var fileCounter : Nat;
   stable var invoices :
     {

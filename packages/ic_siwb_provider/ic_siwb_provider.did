@@ -1,0 +1,11 @@
+type ServiceInfo = record {
+  name: text;
+  version: text;
+  status: text;
+};
+
+service : {
+  get_service_info: () -> (ServiceInfo) query;
+  set_status: (text) -> (ServiceInfo);
+  ping: () -> (text) query;
+}

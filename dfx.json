@@ -4,6 +4,12 @@
       "main": "src/lipa_backend/main.mo",
       "type": "motoko"
     },
+    "ic_siwb_provider":{
+      "candid": "packages/ic_siwb_provider/ic_siwb_provider.did",
+      "package": "ic_siwb_provider",
+      "type": "rust"
+
+    },
     "lipa_frontend": {
       "dependencies": [
         "lipa_backend"

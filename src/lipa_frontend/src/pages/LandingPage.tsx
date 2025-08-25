@@ -636,7 +636,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
         </div>
 
-        <style jsx>{`
+        <style>{`
           /* ORBITAL ANIMATIONS */
           @keyframes orbit-1 {
             0% {

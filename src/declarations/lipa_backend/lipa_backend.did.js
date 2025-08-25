@@ -9,6 +9,7 @@ export const idlFactory = ({ IDL }) => {
   const Invoice = IDL.Record({
     'id' : IDL.Nat,
     'files' : IDL.Vec(FileMetadata),
+    'bitcoinAddress' : IDL.Opt(IDL.Text),
     'details' : IDL.Text,
   });
   const StreamingToken = IDL.Record({
@@ -50,10 +51,20 @@ export const idlFactory = ({ IDL }) => {
   });
   return IDL.Service({
     'addBadge' : IDL.Func([IDL.Text, IDL.Text], [], []),
-    'addInvoice' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'addInvoice' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'getAllBitcoinMappings' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
+        [],
+      ),
     'getBadge' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Text)], ['query']),
     'getInvoice' : IDL.Func([IDL.Nat], [IDL.Opt(Invoice)], ['query']),
+    'getInvoiceBitcoinAddress' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(IDL.Text)],
+        ['query'],
+      ),
     'getInvoiceFiles' : IDL.Func([IDL.Nat], [IDL.Vec(FileMetadata)], ['query']),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
@@ -85,6 +96,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(IDL.Text)],
         [],
       ),
+    'validateBitcoinAddress' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };
 export const init = ({ IDL }) => { return []; };

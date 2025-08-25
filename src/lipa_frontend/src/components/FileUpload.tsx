@@ -95,7 +95,8 @@ const FileUpload = ({ invoiceId, onUploadComplete, className = '' }: FileUploadP
       });
 
       if (result && onUploadComplete) {
-        onUploadComplete(result);
+        const filePath = Array.isArray(result) ? result[0] : result;
+        onUploadComplete(typeof filePath === 'string' ? filePath : String(filePath || ''));
       }
 
       // Remove from uploading files after a delay

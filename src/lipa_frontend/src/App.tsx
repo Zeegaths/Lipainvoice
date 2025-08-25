@@ -24,10 +24,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { identity, isLoggingIn } = useInternetIdentity();
+  const { identity, status:loginStatus } = useInternetIdentity();
 
-  const isAuthenticated = !isLoggingIn;
-  const isLoading = isLoggingIn;
+  const isAuthenticated = !!identity;
+  const isLoading = loginStatus === 'logging-in';
 
   // Check if we should show client portal or public invoice view based on URL
   const urlParams = new URLSearchParams(window.location.search);

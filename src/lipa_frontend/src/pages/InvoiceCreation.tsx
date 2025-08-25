@@ -29,7 +29,7 @@ interface Task {
 
 const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const addInvoiceMutation = useAddInvoice();
-  const { data: tasks = [] } = useTasks();
+  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
 
   const [formData, setFormData] = useState({
     clientName: '',
@@ -136,32 +136,46 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    const invoiceData = {
-      ...formData,
-      totalBtc,
-      totalUsd,
-      effectiveHours,
-      selectedTasks: formData.useTaskSelection ? selectedTasks.map(id => id.toString()) : [],
-      teamMembers: formData.useTeamSplit ? teamMembers : [],
-      bitcoinAddress: generatedAddress,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      uploadedFiles,
-    };
+    // Validate required fields
+    if (!formData.clientName.trim()) {
+      alert('Please enter a client name');
+      return;
+    }
+
+    if (!formData.projectTitle.trim()) {
+      alert('Please enter a project title');
+      return;
+    }
+
+    if (!formData.ratePerHour || parseFloat(formData.ratePerHour) <= 0) {
+      alert('Please enter a valid rate per hour');
+      return;
+    }
+
+    // Create a structured details string that matches the backend format
+    const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}`;
 
     try {
       const invoiceId = BigInt(Date.now());
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
-        details: JSON.stringify(invoiceData)
+        details: details
       });
 
       setCreatedInvoiceId(invoiceId);
-      alert('Invoice created successfully!');
+      
+      // Show success message
+      const successMessage = `Invoice #${invoiceId} created successfully!`;
+      alert(successMessage);
+      
+      // Navigate back to dashboard
       onNavigate('dashboard');
     } catch (error) {
       console.error('Error creating invoice:', error);
-      alert('Failed to create invoice. Please try again.');
+      
+      // Show more specific error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice. Please try again.';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -449,7 +463,11 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           {formData.useTaskSelection ? (
             <div className="space-y-4">
               <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-                {parsedTasks.length === 0 ? (
+                {tasksLoading ? (
+                  <div className="p-4 text-center text-gray-500">
+                    <p>Loading tasks...</p>
+                  </div>
+                ) : parsedTasks.length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
                     <p>No tasks available</p>
                     <button

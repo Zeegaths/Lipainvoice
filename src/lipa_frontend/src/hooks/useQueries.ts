@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
 
-// Invoices
 export function useInvoices() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
@@ -24,8 +23,9 @@ export function useAddInvoice() {
 
   return useMutation({
     mutationFn: async ({ id, details }: { id: bigint; details: string }) => {
-      if (!actor || !identity) throw new Error('Actor or identity not available');
-      return actor.addInvoice(id, details, []);
+      if (!identity) throw new Error('Identity not available');
+      if (!actor) throw new Error('Actor not available');
+      return actor.addInvoice(id, details, ["sam"]); 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 

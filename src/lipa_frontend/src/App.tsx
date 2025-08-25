@@ -137,7 +137,7 @@ function App() {
                     case 'settings':
                       return <FreelancerSettings onNavigate={setCurrentPage} />;
                     default:
-                      return <Dashboard />;
+                      return <Dashboard onNavigate={setCurrentPage} />;
                   }
                 })()}
               </div>

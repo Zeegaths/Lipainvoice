@@ -1,8 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Search, ChevronDown, Calendar, Download, Filter } from 'lucide-react';
-import useInvoices from '../hooks/useInvoices';
+import { Search, Plus } from 'lucide-react';
+import { useInvoices } from '../hooks/useQueries';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+
+interface DashboardProps {
+  onNavigate: (page: Page) => void;
+}
+
+interface BackendInvoice {
+  id: bigint;
+  details: string;
+  files: Array<{
+    name: string;
+    mimeType: string;
+    size: bigint;
+    uploadedAt: bigint;
+    path: string;
+  }>;
+  bitcoinAddress?: string;
+}
 
 interface Invoice {
   id: number;
@@ -15,25 +33,39 @@ interface Invoice {
 
 type Tab = "all" | "pending" | "paid"
 
-const Dashboard = () => {
-  const { invoices, isLoading, error } = useInvoices();
-  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>(invoices || [])
-  const [loading, setIsLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState<Tab>("all")
+const Dashboard = ({ onNavigate }: DashboardProps) => {
+  const { data: backendInvoices, isLoading, error } = useInvoices();
+  const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
+  const [activeTab, setActiveTab] = useState<Tab>("all");
+
+  const transformInvoices = (backendInvoices: Array<[bigint, BackendInvoice]>): Invoice[] => {
+    return backendInvoices.map(([id, invoice]) => {
+      const details = invoice.details;
+      const clientMatch = details.match(/Client:\s*([^,]+)/);
+      const amountMatch = details.match(/Amount:\s*(\d+)/);
+      const statusMatch = details.match(/Status:\s*(\w+)/);
+      
+      return {
+        id: Number(id),
+        taskId: null,
+        client: clientMatch ? clientMatch[1].trim() : 'Unknown Client',
+        amount: amountMatch ? parseInt(amountMatch[1]) : 0,
+        status: statusMatch ? statusMatch[1].toLowerCase() : 'pending',
+        date: new Date().toLocaleDateString(),
+      };
+    });
+  };
 
   useEffect(() => {
-    const checkInvoices = async () => {
-      setIsLoading(true)
-      if (invoices) {
-        setIsLoading(false)
-      }
+    if (backendInvoices) {
+      const transformed = transformInvoices(backendInvoices);
+      setFilteredInvoices(transformed);
     }
-    checkInvoices()
-  }, [invoices])
+  }, [backendInvoices]);
 
 
 
-  if (!invoices || isLoading || loading) {
+  if (isLoading) {
     return (
       <div className='flex items-center justify-center h-screen w-screen'>
         <LoadingSpinner />
@@ -42,11 +74,18 @@ const Dashboard = () => {
   }
 
   if (error) {
-    <div>
-      <p className='text-red-500'>
-        {error.message}
-      </p>
-    </div>
+    return (
+      <div className='flex items-center justify-center h-screen w-screen'>
+        <div className='text-center'>
+          <p className='text-red-500 text-lg mb-4'>
+            Error loading invoices
+          </p>
+          <p className='text-gray-600'>
+            {error.message}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   const filterByStatus = (status: string) => {
@@ -68,18 +107,21 @@ const Dashboard = () => {
     }
 
     if (status === "all") {
-      setFilteredInvoices(invoices)
+      const transformed = backendInvoices ? transformInvoices(backendInvoices) : [];
+      setFilteredInvoices(transformed)
       return;
     }
-    const filtered = invoices.filter((invoice) => invoice.status.toLowerCase() === status)
+    const transformed = backendInvoices ? transformInvoices(backendInvoices) : [];
+    const filtered = transformed.filter((invoice: Invoice) => invoice.status.toLowerCase() === status)
     setFilteredInvoices(filtered || [])
 
   }
 
-  const totalInvoices = invoices.length;
-  const totalPaid = invoices.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0);
-  const totalUnpaid = invoices.filter(inv => inv.status === 'unpaid').reduce((sum, inv) => sum + inv.amount, 0);
-  const totalOverdue = invoices.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + inv.amount, 0);
+  const transformedInvoices = backendInvoices ? transformInvoices(backendInvoices) : [];
+  const totalInvoices = transformedInvoices.length;
+  const totalPaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'paid').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
+  const totalUnpaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
+  const totalOverdue = transformedInvoices.filter((inv: Invoice) => inv.status === 'overdue').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -170,14 +212,18 @@ const Dashboard = () => {
               className={`${activeTab === "pending" ? 'text-green-600 border-b-2 border-green-600' : null} text-sm font-medium pb-2 whitespace-nowrap`}
             >
               Unpaid
-              <span className="ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">4</span>
+              <span className="ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
+                {transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid').length}
+              </span>
             </button>
             <button
               onClick={() => filterByStatus("paid")}
               className={`${activeTab === "paid" ? 'text-green-600 border-b-2 border-green-600' : null} text-sm font-medium pb-2 whitespace-nowrap`}
             >
               Paid
-              <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">7</span>
+              <span className="ml-2 bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+                {transformedInvoices.filter((inv: Invoice) => inv.status === 'paid').length}
+              </span>
             </button>
           </div>
 
@@ -192,8 +238,12 @@ const Dashboard = () => {
                 />
               </div>
             </div>
-            <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              <span>+ New Invoice</span>
+            <button 
+              onClick={() => onNavigate('create-invoice')}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>New Invoice</span>
             </button>
           </div>
 

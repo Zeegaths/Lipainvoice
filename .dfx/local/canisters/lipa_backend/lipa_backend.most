@@ -1,26 +1,26 @@
 // Version: 1.0.0
-type Asset__969461360 = {chunks : [Blob]; mimeType : Text};
-type FileMetadata__784263387 =
+type Asset__420380144 = {chunks : [Blob]; mimeType : Text};
+type FileMetadata__953483564 =
   {mimeType : Text; name : Text; path : Text; size : Nat; uploadedAt : Int};
-type Invoice__705886527 =
+type Invoice__455950024 =
   {
     bitcoinAddress : ?Text;
     details : Text;
-    files : [FileMetadata__784263387];
+    files : [FileMetadata__953483564];
     id : Nat
   };
-type Map__713177669<K, V> = {root : Tree__925007165<K, V>; size : Nat};
-type Tree__925007165<K, V> =
+type Map__741173682<K, V> = {root : Tree__389090240<K, V>; size : Nat};
+type Tree__389090240<K, V> =
   {
-    #black : (Tree__925007165<K, V>, K, V, Tree__925007165<K, V>);
+    #black : (Tree__389090240<K, V>, K, V, Tree__389090240<K, V>);
     #leaf;
-    #red : (Tree__925007165<K, V>, K, V, Tree__925007165<K, V>)
+    #red : (Tree__389090240<K, V>, K, V, Tree__389090240<K, V>)
   };
 actor {
   stable adminState : {var adminPrincipal : ?Principal};
   stable var badges :
     {
-      root : Tree__925007165<Principal, Map__713177669<Text, Text>>;
+      root : Tree__389090240<Principal, Map__741173682<Text, Text>>;
       size : Nat
     };
   stable var bitcoinAddressMap : [(Nat, Text)];
@@ -29,17 +29,17 @@ actor {
   stable var invoices :
     {
       root :
-        Tree__925007165<Principal, Map__713177669<Nat, Invoice__705886527>>;
+        Tree__389090240<Principal, Map__741173682<Nat, Invoice__455950024>>;
       size : Nat
     };
   stable var storage :
     {
-      var assets : Map__713177669<Text, Asset__969461360>;
-      var pending : Map__713177669<Text, Asset__969461360>
+      var assets : Map__741173682<Text, Asset__420380144>;
+      var pending : Map__741173682<Text, Asset__420380144>
     };
   stable var tasks :
     {
-      root : Tree__925007165<Principal, Map__713177669<Nat, Text>>;
+      root : Tree__389090240<Principal, Map__741173682<Nat, Text>>;
       size : Nat
     }
 };

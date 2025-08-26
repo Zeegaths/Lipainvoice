@@ -1,42 +1,37 @@
-# TypeScript Build Error Fixes
+# Bitcoin Address Generation Implementation
 
-## Overview
-This file tracks the fixes for all 14 TypeScript compilation errors found during the build process.
+## Steps to Complete:
 
-## Error Categories
-- [ ] Type Mismatch Errors (App.tsx, FileUpload.tsx)
-- [ ] Query Function Return Type Issues (useQueries.ts)
-- [ ] Missing Arguments (createActor calls)
-- [ ] Property Access Issues (Invoice type handling)
-- [ ] Namespace Issues (NodeJS.Timeout)
-- [ ] React Type Issues (JSX properties)
+### Phase 1: Setup and Dependencies
+- [x] Add Bitcoin libraries to frontend package.json
+- [x] Install dependencies
+- [x] Create Bitcoin service for address generation
 
-## Fix Checklist
+### Phase 2: Backend Updates
+- [x] Create Bitcoin utilities module in Motoko
+- [ ] Update main.mo to handle Bitcoin addresses
+- [ ] Add address storage and validation
 
-### 1. App.tsx - onNavigate Type Error
-- [ ] Fix type compatibility between setCurrentPage and expected callback type
+### Phase 3: Frontend Implementation
+- [ ] Update InvoiceCreation.tsx to generate unique addresses
+- [ ] Add Bitcoin address validation
+- [ ] Update payment portal to handle generated addresses
 
-### 2. FileUpload.tsx - onUploadComplete Type Error
-- [ ] Fix parameter type mismatch in onUploadComplete callback
+### Phase 4: Security & Testing
+- [ ] Implement proper key derivation
+- [ ] Add address reuse prevention
+- [ ] Test with Bitcoin testnet
 
-### 3. useQueries.ts - Query Function Return Type
-- [ ] Fix return type for queryFn to match expected string | null
+## Technical Details:
+- Address Format: Native SegWit (bech32) - bc1q...
+- Library: bitcoinjs-lib + bip39
+- Security: HD wallet with proper derivation paths
+- Storage: Backend address-invoice mapping
 
-### 4. ClientInvoiceView.tsx - Multiple Errors
-- [ ] Add canisterId parameter to createActor()
-- [ ] Fix unsafe property access on Invoice type
-- [ ] Handle null/empty array cases properly
-
-### 5. ClientPaymentPortal.tsx - Same as ClientInvoiceView
-- [ ] Apply same fixes as ClientInvoiceView.tsx
-
-### 6. LandingPage.tsx - Style JSX Error
-- [ ] Remove invalid jsx property from style element
-
-### 7. TaskLogger.tsx - Namespace and Type Issues
-- [ ] Fix NodeJS.Timeout type reference
-- [ ] Fix BigInt type compatibility
-
-## Testing
-- [ ] Run npm run build to verify all fixes
-- [ ] Run npm run dev to ensure runtime functionality
+## Files to Create/Modify:
+- src/lipa_frontend/package.json (add dependencies) ✓
+- src/lipa_frontend/src/services/bitcoinService.ts (new) ✓
+- src/lipa_backend/bitcoin.mo (new) ✓
+- src/lipa_backend/main.mo (modify)
+- src/lipa_frontend/src/pages/InvoiceCreation.tsx (modify)
+- src/lipa_frontend/src/hooks/useQueries.ts (modify)

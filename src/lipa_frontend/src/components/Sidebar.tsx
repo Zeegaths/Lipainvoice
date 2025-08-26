@@ -108,7 +108,7 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
               </li>
             ))}
 
-            {/* Admin section */}
+            {/* Admin section
             {adminLoading ? (
               <li className="pt-4">
                 <div className="flex items-center px-4 py-2">
@@ -141,7 +141,7 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
                   </li>
                 ))}
               </>
-            )}
+            )} */}
           </ul>
         </nav>
 

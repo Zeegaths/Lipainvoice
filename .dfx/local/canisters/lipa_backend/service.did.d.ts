@@ -30,6 +30,7 @@ export interface HttpResponse {
 export interface Invoice {
   'id' : bigint,
   'files' : Array<FileMetadata>,
+  'bitcoinAddress' : [] | [string],
   'details' : string,
 }
 export type StreamingCallback = ActorMethod<
@@ -46,10 +47,12 @@ export type StreamingStrategy = {
 export interface StreamingToken { 'resource' : string, 'index' : bigint }
 export interface _SERVICE {
   'addBadge' : ActorMethod<[string, string], undefined>,
-  'addInvoice' : ActorMethod<[bigint, string], undefined>,
+  'addInvoice' : ActorMethod<[bigint, string, [] | [string]], undefined>,
   'addTask' : ActorMethod<[bigint, string], undefined>,
+  'getAllBitcoinMappings' : ActorMethod<[], Array<[bigint, string]>>,
   'getBadge' : ActorMethod<[string], [] | [string]>,
   'getInvoice' : ActorMethod<[bigint], [] | [Invoice]>,
+  'getInvoiceBitcoinAddress' : ActorMethod<[bigint], [] | [string]>,
   'getInvoiceFiles' : ActorMethod<[bigint], Array<FileMetadata>>,
   'getTask' : ActorMethod<[bigint], [] | [string]>,
   'httpStreamingCallback' : ActorMethod<
@@ -67,6 +70,7 @@ export interface _SERVICE {
     [bigint, string, string, Uint8Array | number[], boolean],
     [] | [string]
   >,
+  'validateBitcoinAddress' : ActorMethod<[string], boolean>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

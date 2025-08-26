@@ -1,19 +1,40 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
+import { useToast } from '../components/ToastContainer';
 
-// Invoices
+
 export function useInvoices() {
-  const { actor, isFetching } = useActor();
-  const { identity } = useInternetIdentity();
+  const { showToast } = useToast();
+  const actor = useActor();
+  const { identity, login } = useInternetIdentity();
 
-  return useQuery<Array<[bigint, any]>>({
+  return useQuery<Array<[bigint, any]>, Error>({
     queryKey: ['invoices', identity?.getPrincipal().toString()],
     queryFn: async () => {
-      if (!actor || !identity) return [];
-      return actor.listInvoices();
+      login();
+      if (!identity) {
+        showToast({
+          title: "Error fetching invoices",
+          message: "No authentication found",
+          type: "error",
+        });
+        return []
+      };
+      try {
+        const invoices = await actor.actor?.listInvoices();
+        return invoices || [];
+      } catch (error) {
+        showToast({
+          title: "Error fetching invoices",
+          message: error instanceof Error ? error.message : "Unknown error",
+          type: "error",
+        });
+        console.log(error)
+        return []
+      }
     },
-    enabled: !!actor && !!identity && !isFetching,
+    enabled: !!identity,
   });
 }
 
@@ -23,9 +44,10 @@ export function useAddInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, details }: { id: bigint; details: string }) => {
-      if (!actor || !identity) throw new Error('Actor or identity not available');
-      return actor.addInvoice(id, details);
+    mutationFn: async ({ id, details, address }: { id: bigint; details: string, address:string }) => {
+      if (!identity) throw new Error('Identity not available');
+      if (!actor) throw new Error('Actor not available');
+      return actor.addInvoice(id, details, [address]); 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
@@ -76,7 +98,7 @@ export function useInvoiceFiles(invoiceId: bigint) {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
-  return useQuery({
+  return useQuery<any[], Error>({
     queryKey: ['invoice-files', invoiceId.toString(), identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -91,7 +113,7 @@ export function useTasks() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
-  return useQuery<Array<[bigint, string]>>({
+  return useQuery<Array<[bigint, string]>, Error>({
     queryKey: ['tasks', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -126,7 +148,7 @@ export function useBadges() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
-  return useQuery<Array<[string, string]>>({
+  return useQuery<Array<[string, string]>, Error>({
     queryKey: ['badges', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -161,7 +183,7 @@ export function useUserProfile() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
-  return useQuery<string | null>({
+  return useQuery<string | null, Error>({
     queryKey: ['userProfile', identity?.getPrincipal().toString()],
     queryFn: async (): Promise<string | null> => {
       if (!actor || !identity) return null;
@@ -208,7 +230,7 @@ export function useNotifications() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
 
-  return useQuery<Array<any>>({
+  return useQuery<Array<any>, Error>({
     queryKey: ['notifications', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -285,7 +307,7 @@ export function useMarkAllNotificationsRead() {
 export function useTopPerformers() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Array<any>>({
+  return useQuery<Array<any>, Error>({
     queryKey: ['topPerformers'],
     queryFn: async () => {
       if (!actor) return [];
@@ -299,7 +321,7 @@ export function useTopPerformers() {
 export function useLeaderboards() {
   const { actor, isFetching } = useActor();
 
-  return useQuery<Array<any>>({
+  return useQuery<Array<any>, Error>({
     queryKey: ['leaderboards'],
     queryFn: async () => {
       if (!actor) return [];
@@ -315,7 +337,7 @@ export function useIsCurrentUserAdmin() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   
-  const result = useQuery<boolean>({
+  const result = useQuery<boolean, Error>({
     queryKey: ['isCurrentUserAdmin', identity?.getPrincipal().toString()],
     queryFn: async () => {
       if (!actor || !identity) return false;
@@ -332,7 +354,7 @@ export function useAdminAllInvoices() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   
-  return useQuery<Array<{ user: string; invoices: Array<[bigint, any]> }>>({
+  return useQuery<Array<{ user: string; invoices: Array<[bigint, any]> }>, Error>({
     queryKey: ['admin-invoices'],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -348,7 +370,7 @@ export function useAdminAllTasks() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   
-  return useQuery<Array<{ user: string; tasks: Array<[bigint, string]> }>>({
+  return useQuery<Array<{ user: string; tasks: Array<[bigint, string]> }>, Error>({
     queryKey: ['admin-tasks'],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -364,7 +386,7 @@ export function useAdminAllBadges() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   
-  return useQuery<Array<{ user: string; badges: Array<[string, string]> }>>({
+  return useQuery<Array<{ user: string; badges: Array<[string, string]> }>, Error>({
     queryKey: ['admin-badges'],
     queryFn: async () => {
       if (!actor || !identity) return [];
@@ -381,7 +403,7 @@ export function useAdminAllFiles() {
   const { actor, isFetching } = useActor();
   const { identity } = useInternetIdentity();
   
-  return useQuery<Array<{ user: string; files: Array<any> }>>({
+  return useQuery<Array<{ user: string; files: Array<any> }>, Error>({
     queryKey: ['admin-files'],
     queryFn: async () => {
       if (!actor || !identity) return [];

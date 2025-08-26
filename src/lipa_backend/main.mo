@@ -8,11 +8,14 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Blob "mo:base/Blob";
 import Array "mo:base/Array";
+import HashMap "mo:base/HashMap";
+import Hash "mo:base/Hash";
 
 
 import AdminSystem "auth-single-user/management";
 import Http "file-storage/http";
 import FileStorage "file-storage/file-storage";
+import Bitcoin "bitcoin";
 
 
 persistent actor FreelancerDashboard {
@@ -35,15 +38,22 @@ persistent actor FreelancerDashboard {
         path : Text;
     };
 
-    // Invoice type with file attachments
+    // Invoice type with file attachments and Bitcoin address
     public type Invoice = {
         id : Nat;
         details : Text;
         files : [FileMetadata];
+        bitcoinAddress : ?Text; // Optional Bitcoin address for payment
     };
 
     // Invoices - now stores Invoice records instead of just Text
     var invoices : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Invoice>> = principalMap.empty();
+
+    // Bitcoin address mappings (stable storage)
+    stable var bitcoinMappingsStable : [(Nat, Text)] = [];
+    
+    // Bitcoin address map (stable representation for persistent storage)
+    stable var bitcoinAddressMap : [(Nat, Text)] = [];
 
     // Tasks
     var tasks : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Text>> = principalMap.empty();
@@ -64,11 +74,28 @@ persistent actor FreelancerDashboard {
         AdminSystem.isCurrentUserAdmin(adminState, caller);
     };
 
-    // Add Invoice
-    public shared ({ caller }) func addInvoice(id : Nat, details : Text) : async () {
+    // Add Invoice with optional Bitcoin address
+    public shared ({ caller }) func addInvoice(id : Nat, details : Text, bitcoinAddress : ?Text) : async () {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot add invoices");
         };
+        
+        // Validate Bitcoin address if provided
+        switch (bitcoinAddress) {
+            case null {};
+            case (?address) {
+                if (not Bitcoin.validateBitcoinAddress(address)) {
+                    Debug.trap("Invalid Bitcoin address format");
+                };
+                // Check if address is already used
+                if (Bitcoin.isAddressUsed(bitcoinAddressMap, address)) {
+                    Debug.trap("Bitcoin address is already in use");
+                };
+                // Store the address mapping
+                bitcoinAddressMap := Bitcoin.addInvoiceAddress(bitcoinAddressMap, id, address);
+            };
+        };
+        
         let userInvoices = switch (principalMap.get(invoices, caller)) {
             case null natMap.empty();
             case (?existing) existing;
@@ -77,6 +104,7 @@ persistent actor FreelancerDashboard {
             id = id;
             details = details;
             files = [];
+            bitcoinAddress = bitcoinAddress;
         };
         let updatedInvoices = natMap.put(userInvoices, id, newInvoice);
         invoices := principalMap.put(invoices, caller, updatedInvoices);
@@ -154,7 +182,7 @@ persistent actor FreelancerDashboard {
         };
     };
 
-    // Get Invoice with files
+    // Get Invoice with files and Bitcoin address
     public query ({ caller }) func getInvoice(id : Nat) : async ?Invoice {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot get invoices");
@@ -275,6 +303,24 @@ persistent actor FreelancerDashboard {
             case null [];
             case (?userBadges) Iter.toArray(textMap.entries(userBadges));
         };
+    };
+
+    // Get Bitcoin address for invoice
+    public query func getInvoiceBitcoinAddress(invoiceId : Nat) : async ?Text {
+        Bitcoin.getInvoiceAddress(bitcoinAddressMap, invoiceId);
+    };
+
+    // Validate Bitcoin address
+    public query func validateBitcoinAddress(address : Text) : async Bool {
+        Bitcoin.validateBitcoinAddress(address);
+    };
+
+    // Get all Bitcoin address mappings (admin only)
+    public shared ({ caller }) func getAllBitcoinMappings() : async [(Nat, Text)] {
+        if (not AdminSystem.isCurrentUserAdmin(adminState, caller)) {
+            Debug.trap("Only admin can access all Bitcoin mappings");
+        };
+        Bitcoin.getAllMappings(bitcoinAddressMap);
     };
 };
 

@@ -471,7 +471,8 @@ const AdminDashboard = () => {
       if (showAddForm.type === 'invoice') {
         await addInvoiceMutation.mutateAsync({
           id: BigInt(newItemData.id),
-          details: newItemData.value
+          details: newItemData.value,
+          address: "bc1pakh422aqdz74nvpnf2hpua9x8nhhfxts9ykq5mncgxwn2dkepwusgr0jcx"
         });
       } else {
         await addTaskMutation.mutateAsync({

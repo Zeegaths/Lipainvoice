@@ -1,5 +1,7 @@
 # Freelancer Dashboard Application
 
+Mainent Demo [click here](https://mpigd-gqaaa-aaaaj-qnsoq-cai.icp0.io/)
+
 ## Overview
 A dashboard application for freelancers to manage their work and track their professional activities with secure user authentication. The application includes admin functionality for managing all users and a Bitcoin-based invoice creation system with integrated task logging, time tracking capabilities, comprehensive team payment splitting functionality, file upload support for invoice documentation, a client payment portal with rating system and freelancer profile display, automated milestone notifications, comprehensive freelancer profile management, a publicly accessible Client Invoice View page, and a visually stunning landing page showcasing all platform features.
 

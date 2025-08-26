@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip } from 'lucide-react';
-import { useAddInvoice, useTasks } from '../hooks/useQueries';
+import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
+import { useToast } from '../components/ToastContainer';
 
 type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger';
 
@@ -29,7 +30,8 @@ interface Task {
 
 const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const addInvoiceMutation = useAddInvoice();
-  const { data: tasks = [] } = useTasks();
+  const { showToast } = useToast();
+  const { data: tasks = [], isLoading: tasksLoading } = useInvoices();
 
   const [formData, setFormData] = useState({
     clientName: '',
@@ -48,8 +50,8 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   ]);
 
   const [showPreview, setShowPreview] = useState(false);
-  const [btcToUsd, setBtcToUsd] = useState(45000); // Mock BTC to USD rate
-  const [generatedAddress] = useState('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'); // Mock Bitcoin address
+  const [btcToUsd, setBtcToUsd] = useState(110_000); 
+  const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm'); // Mock Bitcoin address
   const [createdInvoiceId, setCreatedInvoiceId] = useState<bigint | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
@@ -127,41 +129,77 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
     e.preventDefault();
 
     if (formData.useTeamSplit && totalPercentage !== 100) {
-      alert('Team member percentages must total 100%');
+      showToast({
+        title: 'Team member percentages must total 100%',
+        type: 'error',
+      });
       return;
     }
 
     if (formData.useTaskSelection && selectedTasks.length === 0) {
-      alert('Please select at least one task');
+      showToast({
+        title: 'Please select at least one task',
+        type: 'error',
+      });
       return;
     }
 
-    const invoiceData = {
-      ...formData,
-      totalBtc,
-      totalUsd,
-      effectiveHours,
-      selectedTasks: formData.useTaskSelection ? selectedTasks.map(id => id.toString()) : [],
-      teamMembers: formData.useTeamSplit ? teamMembers : [],
-      bitcoinAddress: generatedAddress,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      uploadedFiles,
-    };
+    // Validate required fields
+    if (!formData.clientName.trim()) {
+      showToast({
+        title: 'Please enter a client name',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (!formData.projectTitle.trim()) {
+      showToast({
+        title: 'Please enter a project title',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (!formData.ratePerHour || parseFloat(formData.ratePerHour) <= 0) {
+      showToast({
+        title: 'Please enter a valid rate per hour',
+        type: 'error',
+      });
+      return;
+    }
+
+    // Create a structured details string that matches the backend format
+    const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}`;
 
     try {
       const invoiceId = BigInt(Date.now());
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
-        details: JSON.stringify(invoiceData)
+        details: details,
+        address: formData.clientWallet
       });
 
       setCreatedInvoiceId(invoiceId);
-      alert('Invoice created successfully!');
+      
+      // Show success message
+      const successMessage = `Invoice #${invoiceId} created successfully!`;
+      showToast({
+        title: successMessage,
+        type: 'success',
+      });
+      
+      // Navigate back to dashboard
       onNavigate('dashboard');
     } catch (error) {
       console.error('Error creating invoice:', error);
-      alert('Failed to create invoice. Please try again.');
+      
+      // Show more specific error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice. Please try again.';
+      showToast({
+        title: `Error: ${errorMessage}`,
+        type: 'error',
+      });
     }
   };
 
@@ -449,7 +487,11 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           {formData.useTaskSelection ? (
             <div className="space-y-4">
               <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-                {parsedTasks.length === 0 ? (
+                {tasksLoading ? (
+                  <div className="p-4 text-center text-gray-500">
+                    <p>Loading tasks...</p>
+                  </div>
+                ) : parsedTasks.length === 0 ? (
                   <div className="p-4 text-center text-gray-500">
                     <p>No tasks available</p>
                     <button

@@ -44,10 +44,10 @@ export function useAddInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, details }: { id: bigint; details: string }) => {
+    mutationFn: async ({ id, details, address }: { id: bigint; details: string, address:string }) => {
       if (!identity) throw new Error('Identity not available');
       if (!actor) throw new Error('Actor not available');
-      return actor.addInvoice(id, details, ["sam"]); 
+      return actor.addInvoice(id, details, [address]); 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 

@@ -120,7 +120,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   const transformedInvoices = backendInvoices ? transformInvoices(backendInvoices) : [];
   const totalInvoices = transformedInvoices.length;
   const totalPaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'paid').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
-  const totalUnpaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
+  const totalUnpaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid' || inv.status === 'pending').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
   const totalOverdue = transformedInvoices.filter((inv: Invoice) => inv.status === 'overdue').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,14 +133,12 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalInvoices * 632).toLocaleString()}</p>
-                  <div className="flex items-center mt-2">
-                    <span className="text-green-500 text-sm">↗</span>
-                    <span className="text-green-600 text-sm font-medium ml-1">+17%/month</span>
-                  </div>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">{(totalInvoices).toLocaleString()}</p>
                 </div>
                 <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 text-lg lg:text-xl font-bold">$</span>
+                  <span className="text-green-600 text-lg lg:text-xl font-bold">
+                    📅
+                  </span>
                 </div>
               </div>
             </div>
@@ -149,14 +147,12 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-600">Paid</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalPaid * 100000).toLocaleString()}</p>
-                  <div className="flex items-center mt-2">
-                    <span className="text-purple-500 text-sm">↗</span>
-                    <span className="text-purple-600 text-sm font-medium ml-1">+32%/month</span>
-                  </div>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalPaid).toLocaleString()}</p>
                 </div>
                 <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-600 text-lg lg:text-xl font-bold">$</span>
+                  <span className="text-purple-600 text-lg lg:text-xl font-bold">
+                    💰
+                  </span>
                 </div>
               </div>
             </div>
@@ -165,14 +161,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-gray-600">Unpaid</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalUnpaid * 100000).toLocaleString()}</p>
-                  <div className="flex items-center mt-2">
-                    <span className="text-red-500 text-sm">↘</span>
-                    <span className="text-red-600 text-sm font-medium ml-1">-17%/month</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-red-600 text-lg lg:text-xl font-bold">$</span>
+                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalUnpaid).toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -213,7 +202,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             >
               Unpaid
               <span className="ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded-full">
-                {transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid').length}
+                {transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid' || inv.status === 'pending').length}
               </span>
             </button>
             <button
@@ -276,7 +265,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@{invoice.client.toLowerCase().replace(/\s+/g, '')}@gmail.com</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{invoice.date}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${(invoice.amount * 100000).toFixed(0)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${(invoice.amount).toFixed(2)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
                           invoice.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :

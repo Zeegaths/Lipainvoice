@@ -24,7 +24,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { identity, loginStatus } = useInternetIdentity();
+  const { identity, status:loginStatus } = useInternetIdentity();
 
   const isAuthenticated = !!identity;
   const isLoading = loginStatus === 'logging-in';
@@ -137,7 +137,7 @@ function App() {
                     case 'settings':
                       return <FreelancerSettings onNavigate={setCurrentPage} />;
                     default:
-                      return <Dashboard />;
+                      return <Dashboard onNavigate={setCurrentPage} />;
                   }
                 })()}
               </div>

@@ -5,14 +5,14 @@ import LoadingSpinner from "./LoadingSpinner";
 import { useToast } from "./ToastContainer";
 
 const LoginScreen = () => {
-  const { login, loginStatus } = useInternetIdentity();
+  const { login, isLoggingIn: isLoggingInFromHook, error } = useInternetIdentity();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { showError } = useToast();
 
   const handleLogin = async () => {
     try {
       setIsLoggingIn(true);
-      await login();
+      login();
     } catch (error: any) {
       console.error("Login error:", error);
       setIsLoggingIn(false);
@@ -29,7 +29,7 @@ const LoginScreen = () => {
     }
   };
 
-  const isLoading = loginStatus === "logging-in" || isLoggingIn;
+  const isLoading = isLoggingInFromHook || isLoggingIn;
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -120,7 +120,7 @@ const LoginScreen = () => {
         </div>
 
         {/* Error State */}
-        {loginStatus === "error" && (
+        {error && (
           <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-red-600 mr-2" />

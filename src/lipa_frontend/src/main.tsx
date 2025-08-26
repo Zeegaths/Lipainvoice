@@ -8,7 +8,17 @@ const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
-        <InternetIdentityProvider>
+        <InternetIdentityProvider
+            createOptions={{
+                idleOptions: {
+                    disableDefaultIdleCallback: true,
+                    disableIdle: true,
+                },
+            }}
+            loginOptions={{
+                identityProvider: "https://identity.ic0.app"
+            }}
+        >
             <App />
         </InternetIdentityProvider>
     </QueryClientProvider>

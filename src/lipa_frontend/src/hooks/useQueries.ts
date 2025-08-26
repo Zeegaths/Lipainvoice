@@ -1,18 +1,40 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
+import { useToast } from '../components/ToastContainer';
+
 
 export function useInvoices() {
-  const { actor, isFetching } = useActor();
-  const { identity } = useInternetIdentity();
+  const { showToast } = useToast();
+  const actor = useActor();
+  const { identity, login } = useInternetIdentity();
 
   return useQuery<Array<[bigint, any]>, Error>({
     queryKey: ['invoices', identity?.getPrincipal().toString()],
     queryFn: async () => {
-      if (!actor || !identity) return [];
-      return actor.listInvoices();
+      login();
+      if (!identity) {
+        showToast({
+          title: "Error fetching invoices",
+          message: "No authentication found",
+          type: "error",
+        });
+        return []
+      };
+      try {
+        const invoices = await actor.actor?.listInvoices();
+        return invoices || [];
+      } catch (error) {
+        showToast({
+          title: "Error fetching invoices",
+          message: error instanceof Error ? error.message : "Unknown error",
+          type: "error",
+        });
+        console.log(error)
+        return []
+      }
     },
-    enabled: !!actor && !!identity && !isFetching,
+    enabled: !!identity,
   });
 }
 

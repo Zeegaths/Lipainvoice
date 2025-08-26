@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip } from 'lucide-react';
-import { useAddInvoice, useTasks } from '../hooks/useQueries';
+import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 
 type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger';
@@ -29,7 +29,7 @@ interface Task {
 
 const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const addInvoiceMutation = useAddInvoice();
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks();
+  const { data: tasks = [], isLoading: tasksLoading } = useInvoices();
 
   const [formData, setFormData] = useState({
     clientName: '',

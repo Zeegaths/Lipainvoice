@@ -8,14 +8,10 @@ import { useEffect, useState } from 'react';
 const ACTOR_QUERY_KEY = 'actor';
 
 export function useActor() {
-    const { identity, status } = useInternetIdentity();
+    const { identity } = useInternetIdentity();
     const queryClient = useQueryClient();
     const [principal, setPrincipal] = useState<string | null>(null);
 
-    // Determine if user is authenticated
-    const isAuthenticated = !!identity && status === 'idle';
-
-    // Update principal when identity changes
     useEffect(() => {
         if (identity) {
             setPrincipal(identity.getPrincipal().toString());
@@ -27,7 +23,7 @@ export function useActor() {
     const actorQuery = useQuery<_SERVICE>({
         queryKey: [ACTOR_QUERY_KEY, principal],
         queryFn: async () => {
-            if (!identity || !isAuthenticated) {
+            if (!identity) {
                 // Return anonymous actor if not authenticated
                 return await createActor(canisterId);
             }
@@ -38,7 +34,7 @@ export function useActor() {
                 }
             };
 
-            const actor = await createActor(canisterId, actorOptions);
+            const actor =  createActor(canisterId, actorOptions);
             
             // Initialize auth if the method exists
             try {
@@ -74,18 +70,14 @@ export function useActor() {
     return {
         actor: actorQuery.data || null,
         isFetching: actorQuery.isFetching,
-        isAuthenticated,
         identity,
         principal,
         // Helper method to check if actor is ready for authenticated calls
-        isReady: !!actorQuery.data && isAuthenticated,
+        isReady: !!actorQuery.data,
         // Helper method for making authenticated calls
         makeAuthenticatedCall: async <T>(callFn: (actor: _SERVICE) => Promise<T>): Promise<T> => {
             if (!actorQuery.data) {
                 throw new Error('Actor not initialized');
-            }
-            if (!isAuthenticated) {
-                throw new Error('User not authenticated');
             }
             return await callFn(actorQuery.data);
         }

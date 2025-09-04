@@ -1,4 +1,3 @@
-import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopNavigation from './components/TopNavigation';
@@ -16,6 +15,7 @@ import NotificationCenter from './components/NotificationCenter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
+import { useAuth } from '@nfid/identitykit/react';
 
 type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
@@ -24,10 +24,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { identity, status:loginStatus } = useInternetIdentity();
+  const { connect, disconnect, isConnecting, user } = useAuth();
 
-  const isAuthenticated = !!identity;
-  const isLoading = loginStatus === 'logging-in';
+  const isAuthenticated = !!user;
+  const isLoading = isConnecting;
 
   // Check if we should show client portal or public invoice view based on URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -93,7 +93,7 @@ function App() {
       return (
         <ErrorBoundary>
           <ToastProvider>
-            <LoginScreen />
+            <LoginScreen onNavigate={setCurrentPage} />
           </ToastProvider>
         </ErrorBoundary>
       );

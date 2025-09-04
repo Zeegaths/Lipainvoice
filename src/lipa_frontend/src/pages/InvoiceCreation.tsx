@@ -684,7 +684,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 md:justify-end justify-between">
           <button
             type="button"
             onClick={() => setShowPreview(true)}
@@ -696,7 +696,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           <button
             type="submit"
             disabled={addInvoiceMutation.isPending || (formData.useTeamSplit && totalPercentage !== 100) || (formData.useTaskSelection && selectedTasks.length === 0)}
-            className="flex items-center w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center md:w-1/4 w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             {addInvoiceMutation.isPending ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : 'Create'}
           </button>

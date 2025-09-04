@@ -44,13 +44,28 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
-  const ICRC21ConsentMessageRequest = IDL.Record({
+  const ConsentMessageRequest = IDL.Record({
     'arg' : IDL.Vec(IDL.Nat8),
     'method' : IDL.Text,
-    'consent_preferences' : IDL.Record({ 'language' : IDL.Text }),
+    'consent_preferences' : IDL.Opt(IDL.Record({ 'language' : IDL.Text })),
   });
+  const ConsentMessage = IDL.Variant({
+    'LineDisplayMessage' : IDL.Record({
+      'pages' : IDL.Vec(IDL.Record({ 'lines' : IDL.Vec(IDL.Text) })),
+    }),
+    'GenericDisplayMessage' : IDL.Text,
+  });
+  const ConsentInfo = IDL.Record({
+    'metadata' : IDL.Record({
+      'utc_offset_minutes' : IDL.Opt(IDL.Int),
+      'language' : IDL.Text,
+    }),
+    'consent_message' : ConsentMessage,
+  });
+  const ErrorInfo = IDL.Record({ 'description' : IDL.Text });
   const ICRC21ConsentMessageResponse = IDL.Variant({
-    'Ok' : IDL.Record({ 'consent_message' : IDL.Text, 'language' : IDL.Text }),
+    'Ok' : ConsentInfo,
+    'Err' : ErrorInfo,
   });
   const FileMetadata__1 = IDL.Record({
     'path' : IDL.Text,
@@ -82,7 +97,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'icrc21_canister_call_consent_message' : IDL.Func(
-        [ICRC21ConsentMessageRequest],
+        [ConsentMessageRequest],
         [ICRC21ConsentMessageResponse],
         [],
       ),

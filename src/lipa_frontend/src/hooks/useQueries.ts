@@ -2,6 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useActor } from './useActor';
 import { useToast } from '../components/ToastContainer';
+import { useAgent, useAuth } from '@nfid/identitykit/react';
+import { canisterId, idlFactory } from '../../../declarations/lipa_backend';
+import { Actor } from '@dfinity/agent';
 
 
 export function useInvoices() {
@@ -39,23 +42,42 @@ export function useInvoices() {
 }
 
 export function useAddInvoice() {
-  const { actor } = useActor();
-  const { identity } = useInternetIdentity();
+  const { user } = useAuth();
+  const agent = useAgent();
+  const { showToast} = useToast()
   const queryClient = useQueryClient();
+
+ 
+
 
   return useMutation({
     mutationFn: async ({ id, details, address }: { id: bigint; details: string, address:string }) => {
-      if (!identity) throw new Error('Identity not available');
-      if (!actor) throw new Error('Actor not available');
-      return actor.addInvoice(id, details, [address]); 
+      if(!agent || !user) {
+        console.log("Agent or user not available");
+        console.log(agent);
+        console.log(user);
+        throw new Error('Agent or user not available, will likely fail in the backend.');
+      }
+      console.log(canisterId)
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      })
+      return backendActor.addInvoice(id, details, [address]); 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ 
-        queryKey: ['invoices', identity?.getPrincipal().toString()] 
+        queryKey: ['invoices', user?.principal.toString()] 
       });
-      // Also invalidate admin queries if user is admin
-      queryClient.invalidateQueries({ queryKey: ['admin-invoices'] });
     },
+    onError: (error) => {
+      showToast({
+        title: "Error adding invoice",
+        message: error instanceof Error ? error.message.substring(100) : "Unknown error",
+        type: "error",
+      });
+      console.log(error)
+    }
   });
 }
 

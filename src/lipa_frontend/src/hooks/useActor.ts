@@ -1,42 +1,39 @@
-import { useInternetIdentity } from 'ic-use-internet-identity';
-import { createActor } from '../../../declarations/lipa_backend';
+import { useAgent } from "@nfid/identitykit/react"
+import { createActor, CreateActorOptions } from '../../../declarations/lipa_backend';
 import { canisterId } from '../../../declarations/lipa_backend';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { _SERVICE } from '../../../declarations/lipa_backend/lipa_backend.did';
 import { useEffect, useState } from 'react';
+import { useAuth, useIdentity } from '@nfid/identitykit/react';
+ 
 
 const ACTOR_QUERY_KEY = 'actor';
 
 export function useActor() {
-    const { identity } = useInternetIdentity();
+    const { user } = useAuth();
+    const  identity = useIdentity();
+    const agent = useAgent(); 
     const queryClient = useQueryClient();
     const [principal, setPrincipal] = useState<string | null>(null);
 
     useEffect(() => {
-        if (identity) {
-            setPrincipal(identity.getPrincipal().toString());
+        if (user) {
+            setPrincipal(user.principal.toString());
         } else {
             setPrincipal(null);
         }
-    }, [identity]);
+    }, [user]);
 
     const actorQuery = useQuery<_SERVICE>({
         queryKey: [ACTOR_QUERY_KEY, principal],
         queryFn: async () => {
-            if (!identity) {
-                // Return anonymous actor if not authenticated
-                return await createActor(canisterId);
-            }
-
-            const actorOptions = {
-                agentOptions: {
-                    identity
-                }
+            console.log("identity", identity)
+            const actorOptions: CreateActorOptions = {
+                agent,
             };
 
             const actor =  createActor(canisterId, actorOptions);
-            
-            // Initialize auth if the method exists
+
             try {
                 await actor.initializeAuth();
             } catch (error) {
@@ -45,13 +42,10 @@ export function useActor() {
             
             return actor;
         },
-        // Only refetch when identity changes
         staleTime: Infinity,
-        // This will cause the actor to be recreated when the identity changes
         enabled: true
     });
 
-    // When the actor changes, invalidate dependent queries
     useEffect(() => {
         if (actorQuery.data) {
             queryClient.invalidateQueries({
@@ -72,9 +66,7 @@ export function useActor() {
         isFetching: actorQuery.isFetching,
         identity,
         principal,
-        // Helper method to check if actor is ready for authenticated calls
         isReady: !!actorQuery.data,
-        // Helper method for making authenticated calls
         makeAuthenticatedCall: async <T>(callFn: (actor: _SERVICE) => Promise<T>): Promise<T> => {
             if (!actorQuery.data) {
                 throw new Error('Actor not initialized');

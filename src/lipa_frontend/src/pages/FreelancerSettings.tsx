@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, User, Camera, Save, Check, AlertCircle, Bitcoin, Bell, Shield, Link as LinkIcon, Star, Award, Eye, EyeOff } from 'lucide-react';
-import { useUserProfile, useSaveUserProfile, useBadges } from '../hooks/useQueries';
 import { useAuth } from '@nfid/identitykit/react';
+import { Page } from '../App';
 
-type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings';
 
 interface FreelancerSettingsProps {
   onNavigate: (page: Page) => void;
@@ -43,11 +42,17 @@ interface UserProfile {
 }
 
 const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
-  const { data: userProfile, isLoading } = useUserProfile();
-  const { data: badges = [] } = useBadges();
-  const saveProfileMutation = useSaveUserProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+  
+  // Placeholder for saveProfileMutation
+  const saveProfileMutation = {
+    mutateAsync: async (data: string) => {
+      console.log('Saving profile data:', data);
+      return Promise.resolve();
+    },
+    isPending: false
+  };
   
   const [activeTab, setActiveTab] = useState<'profile' | 'wallet' | 'notifications' | 'privacy'>('profile');
   const [hasChanges, setHasChanges] = useState(false);
@@ -86,15 +91,15 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
 
   // Load user profile data when available
   React.useEffect(() => {
-    if (userProfile) {
+    if (user) {
       try {
-        const parsed = typeof userProfile === 'string' ? JSON.parse(userProfile) : userProfile;
+        const parsed = typeof user === 'string' ? JSON.parse(user) : user;
         setProfileData(prev => ({ ...prev, ...parsed }));
       } catch (error) {
         console.error('Error parsing user profile:', error);
       }
     }
-  }, [userProfile]);
+  }, [user]);
 
   const handleInputChange = (field: string, value: any) => {
     setProfileData(prev => {
@@ -197,6 +202,13 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       { client: 'DesignCo', rating: 4, comment: 'Great quality, minor revisions needed', date: '2025-01-05' }
     ]
   };
+
+  // Placeholder badges data
+  const badges = [
+    { name: 'Gold Tier', description: 'Top performer' },
+    { name: 'Silver Tier', description: 'Consistent quality' },
+    { name: 'Bronze Tier', description: 'Getting started' }
+  ];
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },

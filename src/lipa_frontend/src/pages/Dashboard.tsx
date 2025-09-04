@@ -3,8 +3,7 @@ import { Search, Plus } from 'lucide-react';
 import { useInvoices } from '../hooks/useQueries';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useAuth } from '@nfid/identitykit/react';
-
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+import { Page } from '../App';
 
 interface DashboardProps {
   onNavigate: (page: Page) => void;

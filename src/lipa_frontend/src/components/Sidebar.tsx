@@ -1,7 +1,6 @@
 import { X, Home, Settings, LogOut, Shield, Plus, Wallet } from 'lucide-react';
 import { useAuth } from '@nfid/identitykit/react';
-
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+import { Page } from '../App';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,10 +36,6 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
     { name: 'Create Invoice', icon: Plus, page: 'create-invoice', current: currentPage === 'create-invoice', hasPage: true },
     { name: "My Wallet", icon: Wallet, page: 'my-wallet', current: currentPage === 'my-wallet', hasPage: true },
     { name: 'Settings', icon: Settings, page: 'settings', current: currentPage === 'settings', hasPage: true },
-  ];
-
-  const adminItems: NavigationItem[] = [
-    { name: 'Admin Panel', icon: Shield, page: 'admin', current: currentPage === 'admin', hasPage: true },
   ];
 
   return (

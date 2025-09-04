@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, File, Image, FileText, Archive, AlertCircle, CheckCircle } from 'lucide-react';
-import { useUploadInvoiceFile } from '../hooks/useQueries';
 
 interface FileUploadProps {
   invoiceId: bigint;
@@ -19,7 +18,22 @@ const FileUpload = ({ invoiceId, onUploadComplete, className = '' }: FileUploadP
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadingFiles, setUploadingFiles] = useState<Map<string, UploadingFile>>(new Map());
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadMutation = useUploadInvoiceFile();
+  
+  // Placeholder for useUploadInvoiceFile
+  const uploadMutation = {
+    mutateAsync: async ({ invoiceId, fileName, mimeType, chunk, complete }: {
+      invoiceId: bigint;
+      fileName: string;
+      mimeType: string;
+      chunk: Uint8Array;
+      complete: boolean;
+    }) => {
+      console.log('Uploading file:', { invoiceId, fileName, mimeType, chunkSize: chunk.length, complete });
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return `uploaded_${fileName}`;
+    }
+  };
 
   const allowedTypes = [
     'application/pdf',

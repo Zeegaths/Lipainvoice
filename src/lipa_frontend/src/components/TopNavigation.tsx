@@ -1,7 +1,6 @@
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { Menu, Bell, Search, User, LogOut, Settings } from 'lucide-react';
 import { useState } from 'react';
-import { useNotifications } from '../hooks/useQueries';
 
 interface TopNavigationProps {
   onMenuClick: () => void;
@@ -11,7 +10,7 @@ interface TopNavigationProps {
 
 const TopNavigation = ({ onMenuClick, onSettingsClick, onNotificationsClick }: TopNavigationProps) => {
   const { clear, identity } = useInternetIdentity();
-  const { data: notifications = [] } = useNotifications();
+  const data: any[] = [];
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -21,13 +20,11 @@ const TopNavigation = ({ onMenuClick, onSettingsClick, onNotificationsClick }: T
   const userPrincipal = identity?.getPrincipal().toString();
   const shortPrincipal = userPrincipal ? `${userPrincipal.slice(0, 5)}...${userPrincipal.slice(-3)}` : '';
   
-  // Count unread notifications
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = data.filter(n => !n.read).length;
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="flex items-center justify-between h-16 px-6">
-        {/* Left side */}
         <div className="flex items-center">
           <button
             onClick={onMenuClick}
@@ -48,7 +45,6 @@ const TopNavigation = ({ onMenuClick, onSettingsClick, onNotificationsClick }: T
           </div>
         </div>
 
-        {/* Right side */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
           <button 

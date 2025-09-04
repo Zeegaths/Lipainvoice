@@ -3,8 +3,6 @@ import Sidebar from './components/Sidebar';
 import TopNavigation from './components/TopNavigation';
 import Dashboard from './pages/Dashboard';
 import InvoiceCreation from './pages/InvoiceCreation';
-import AdminDashboard from './pages/AdminDashboard';
-import TaskLogger from './pages/TaskLogger';
 import TeamPayments from './pages/TeamPayments';
 import ClientPaymentPortal from './pages/ClientPaymentPortal';
 import FreelancerSettings from './pages/FreelancerSettings';
@@ -17,7 +15,7 @@ import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
 import { useAuth } from '@nfid/identitykit/react';
 
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+export type Page = 'landing' | 'dashboard' | 'create-invoice' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -128,10 +126,6 @@ function App() {
                   switch (currentPage) {
                     case 'create-invoice':
                       return <InvoiceCreation onNavigate={setCurrentPage} />;
-                    case 'admin':
-                      return <AdminDashboard />;
-                    case 'task-logger':
-                      return <TaskLogger onNavigate={setCurrentPage} />;
                     case 'team-payments':
                       return <TeamPayments onNavigate={setCurrentPage} />;
                     case 'settings':

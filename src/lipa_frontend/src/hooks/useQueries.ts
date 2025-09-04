@@ -9,24 +9,27 @@ import { Actor } from '@dfinity/agent';
 
 export function useInvoices() {
   const { showToast } = useToast();
-  const actor = useActor();
-  const { identity, login } = useInternetIdentity();
+  const  agent  = useAgent();
+  const { user } = useAuth();
 
   return useQuery<Array<[bigint, any]>, Error>({
-    queryKey: ['invoices', identity?.getPrincipal().toString()],
-    queryFn: async () => {
-      login();
-      if (!identity) {
+    queryKey: ['invoices', user?.principal.toString()],
+    queryFn: async (): Promise<Array<[bigint, any]>> => {
+      if (!user) {
         showToast({
           title: "Error fetching invoices",
           message: "No authentication found",
           type: "error",
         });
-        return []
-      };
+        return [];
+      }
       try {
-        const invoices = await actor.actor?.listInvoices();
-        return invoices || [];
+        const backendActor = Actor.createActor(idlFactory, {
+          agent,
+          canisterId
+        })
+        const invoices = await backendActor.listInvoices();
+        return Array.isArray(invoices) ? invoices : [];
       } catch (error) {
         showToast({
           title: "Error fetching invoices",
@@ -34,10 +37,10 @@ export function useInvoices() {
           type: "error",
         });
         console.log(error)
-        return []
+        return [];
       }
     },
-    enabled: !!identity,
+    enabled: !!user,
   });
 }
 
@@ -47,9 +50,6 @@ export function useAddInvoice() {
   const { showToast} = useToast()
   const queryClient = useQueryClient();
 
- 
-
-
   return useMutation({
     mutationFn: async ({ id, details, address }: { id: bigint; details: string, address:string }) => {
       if(!agent || !user) {
@@ -58,7 +58,6 @@ export function useAddInvoice() {
         console.log(user);
         throw new Error('Agent or user not available, will likely fail in the backend.');
       }
-      console.log(canisterId)
       const backendActor = Actor.createActor(idlFactory, {
         agent,
         canisterId

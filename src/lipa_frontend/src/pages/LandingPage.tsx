@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import { ConnectedWalletButtonProps, ConnectWallet, ConnectWalletButtonProps } from '@nfid/identitykit/react';
 import { useAuth } from "@nfid/identitykit/react"
+import { Page } from '../App';
 
 export function CustomConnectWallet({ onClick, ...props }: ConnectWalletButtonProps) {
   return (
@@ -63,15 +64,6 @@ export function CustomConnectedWallet({ connectedAccount, icpBalance, loading, .
   );
 }
 
-export type Page =
-  | "landing"
-  | "dashboard"
-  | "create-invoice"
-  | "admin"
-  | "task-logger"
-  | "team-payments"
-  | "client-portal"
-  | "settings";
 
 interface LandingPageProps {
   onNavigate: (page: Page) => void;

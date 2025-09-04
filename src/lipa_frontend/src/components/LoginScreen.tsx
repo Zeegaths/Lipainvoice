@@ -3,7 +3,8 @@ import { useInternetIdentity } from "ic-use-internet-identity";
 import { LogIn, Shield, Users, Award, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useToast } from "./ToastContainer";
-import { CustomConnectedWallet, CustomConnectWallet, Page } from "../pages/LandingPage";
+import { CustomConnectedWallet, CustomConnectWallet } from "../pages/LandingPage";
+import { Page } from "../App";
 import { ConnectWallet, useAuth } from "@nfid/identitykit/react";
 
 interface LoginScreenProps {

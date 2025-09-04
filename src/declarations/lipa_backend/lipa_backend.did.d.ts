@@ -2,6 +2,20 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
+export interface ConsentInfo {
+  'metadata' : { 'utc_offset_minutes' : [] | [bigint], 'language' : string },
+  'consent_message' : ConsentMessage,
+}
+export type ConsentMessage = {
+    'LineDisplayMessage' : { 'pages' : Array<{ 'lines' : Array<string> }> }
+  } |
+  { 'GenericDisplayMessage' : string };
+export interface ConsentMessageRequest {
+  'arg' : Uint8Array | number[],
+  'method' : string,
+  'consent_preferences' : [] | [{ 'language' : string }],
+}
+export interface ErrorInfo { 'description' : string }
 export interface FileMetadata {
   'name' : string,
   'path' : string,
@@ -27,6 +41,8 @@ export interface HttpResponse {
   'streaming_strategy' : [] | [StreamingStrategy],
   'status_code' : number,
 }
+export type ICRC21ConsentMessageResponse = { 'Ok' : ConsentInfo } |
+  { 'Err' : ErrorInfo };
 export interface Invoice {
   'id' : bigint,
   'files' : Array<FileMetadata>,
@@ -60,6 +76,10 @@ export interface _SERVICE {
     StreamingCallbackHttpResponse
   >,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
+  'icrc21_canister_call_consent_message' : ActorMethod<
+    [ConsentMessageRequest],
+    ICRC21ConsentMessageResponse
+  >,
   'initializeAuth' : ActorMethod<[], undefined>,
   'isCurrentUserAdmin' : ActorMethod<[], boolean>,
   'listBadges' : ActorMethod<[], Array<[string, string]>>,

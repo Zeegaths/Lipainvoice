@@ -23,6 +23,11 @@ type Invoice =
    files: vec FileMetadata;
    id: nat;
  };
+type ICRC21ConsentMessageResponse = 
+ variant {
+   Err: ErrorInfo;
+   Ok: ConsentInfo;
+ };
 type HttpResponse = 
  record {
    body: blob;
@@ -56,6 +61,26 @@ type FileMetadata =
    size: nat;
    uploadedAt: int;
  };
+type ErrorInfo = record {description: text;};
+type ConsentMessageRequest = 
+ record {
+   arg: blob;
+   consent_preferences: opt record {language: text;};
+   method: text;
+ };
+type ConsentMessage = 
+ variant {
+   GenericDisplayMessage: text;
+   LineDisplayMessage: record {pages: vec record {lines: vec text;};};
+ };
+type ConsentInfo = 
+ record {
+   consent_message: ConsentMessage;
+   metadata: record {
+               language: text;
+               utc_offset_minutes: opt int;
+             };
+ };
 service : {
   addBadge: (name: text, description: text) -> ();
   addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
@@ -72,6 +97,8 @@ service : {
   httpStreamingCallback: (token: StreamingToken) ->
    (StreamingCallbackHttpResponse) query;
   http_request: (request: HttpRequest) -> (HttpResponse) query;
+  icrc21_canister_call_consent_message: (request: ConsentMessageRequest) ->
+   (ICRC21ConsentMessageResponse);
   initializeAuth: () -> ();
   isCurrentUserAdmin: () -> (bool) query;
   listBadges: () -> (vec record {

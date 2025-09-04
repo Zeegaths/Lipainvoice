@@ -44,6 +44,14 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const ICRC21ConsentMessageRequest = IDL.Record({
+    'arg' : IDL.Vec(IDL.Nat8),
+    'method' : IDL.Text,
+    'consent_preferences' : IDL.Record({ 'language' : IDL.Text }),
+  });
+  const ICRC21ConsentMessageResponse = IDL.Variant({
+    'Ok' : IDL.Record({ 'consent_message' : IDL.Text, 'language' : IDL.Text }),
+  });
   const FileMetadata__1 = IDL.Record({
     'path' : IDL.Text,
     'size' : IDL.Nat,
@@ -73,6 +81,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
+    'icrc21_canister_call_consent_message' : IDL.Func(
+        [ICRC21ConsentMessageRequest],
+        [ICRC21ConsentMessageResponse],
+        [],
+      ),
     'initializeAuth' : IDL.Func([], [], []),
     'isCurrentUserAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'listBadges' : IDL.Func(

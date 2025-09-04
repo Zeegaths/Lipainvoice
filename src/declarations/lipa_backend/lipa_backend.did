@@ -23,6 +23,18 @@ type Invoice =
    files: vec FileMetadata;
    id: nat;
  };
+type ICRC21ConsentMessageResponse = variant {
+                                      Ok:
+                                       record {
+                                         consent_message: text;
+                                         language: text;
+                                       };};
+type ICRC21ConsentMessageRequest = 
+ record {
+   arg: blob;
+   consent_preferences: record {language: text;};
+   method: text;
+ };
 type HttpResponse = 
  record {
    body: blob;
@@ -72,6 +84,8 @@ service : {
   httpStreamingCallback: (token: StreamingToken) ->
    (StreamingCallbackHttpResponse) query;
   http_request: (request: HttpRequest) -> (HttpResponse) query;
+  icrc21_canister_call_consent_message: (request:
+   ICRC21ConsentMessageRequest) -> (ICRC21ConsentMessageResponse);
   initializeAuth: () -> ();
   isCurrentUserAdmin: () -> (bool) query;
   listBadges: () -> (vec record {

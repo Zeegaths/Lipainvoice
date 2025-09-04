@@ -64,6 +64,49 @@ persistent actor FreelancerDashboard {
     // File counter for unique file paths
     var fileCounter : Nat = 0;
 
+    public type ICRC21ConsentMessageResponse = {
+        #Ok : {
+            consent_message : Text;
+            language : Text;
+        };
+        #Err : {
+            description : Text;
+        };
+    };
+
+    public type ICRC21ConsentMessageRequest = {
+        method : Text;
+        arg : Blob;
+        consent_preferences : {
+            language : Text;
+        };
+    };
+
+    public shared func icrc21_canister_call_consent_message(request : ICRC21ConsentMessageRequest) : async ICRC21ConsentMessageResponse {
+        let consent_message = switch (request.method) {
+            case "addInvoice" {
+                "Approve Lipa Invoice to add a new invoice";
+            };
+            case "addTask" {
+                "Approve Lipa Invoice to add a new task";
+            };
+            case "addBadge" {
+                "Approve Lipa Invoice to add a new badge";
+            };
+            case "uploadInvoiceFile" {
+                "Approve Lipa Invoice to upload a file";
+            };
+            case _ {
+                "Approve Lipa Invoice to execute " # request.method;
+            };
+        };
+        
+        return #Ok({
+            consent_message = consent_message;
+            language = request.consent_preferences.language;
+        });
+    };
+
     // Initialize admin (first caller becomes admin)
     public shared ({ caller }) func initializeAuth() : async () {
         AdminSystem.initializeAuth(adminState, caller);

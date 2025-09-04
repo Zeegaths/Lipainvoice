@@ -27,6 +27,14 @@ export interface HttpResponse {
   'streaming_strategy' : [] | [StreamingStrategy],
   'status_code' : number,
 }
+export interface ICRC21ConsentMessageRequest {
+  'arg' : Uint8Array | number[],
+  'method' : string,
+  'consent_preferences' : { 'language' : string },
+}
+export type ICRC21ConsentMessageResponse = {
+    'Ok' : { 'consent_message' : string, 'language' : string }
+  };
 export interface Invoice {
   'id' : bigint,
   'files' : Array<FileMetadata>,
@@ -60,6 +68,10 @@ export interface _SERVICE {
     StreamingCallbackHttpResponse
   >,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
+  'icrc21_canister_call_consent_message' : ActorMethod<
+    [ICRC21ConsentMessageRequest],
+    ICRC21ConsentMessageResponse
+  >,
   'initializeAuth' : ActorMethod<[], undefined>,
   'isCurrentUserAdmin' : ActorMethod<[], boolean>,
   'listBadges' : ActorMethod<[], Array<[string, string]>>,

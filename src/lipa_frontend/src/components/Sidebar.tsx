@@ -1,7 +1,5 @@
-import { useInternetIdentity } from 'ic-use-internet-identity';
 import { X, Home, Settings, LogOut, Shield, Plus, Wallet } from 'lucide-react';
-import { useIsCurrentUserAdmin } from '../hooks/useQueries';
-import LoadingSpinner from './LoadingSpinner';
+import { useAuth } from '@nfid/identitykit/react';
 
 type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
@@ -22,11 +20,11 @@ interface NavigationItem {
 }
 
 const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => {
-  const { clear } = useInternetIdentity();
-  const { data: isAdmin = false, isLoading: adminLoading } = useIsCurrentUserAdmin();
+  const { disconnect } = useAuth();
 
   const handleLogout = async () => {
-    await clear();
+    await disconnect();
+    onNavigate('landing');
   };
 
   const handleNavigation = (page: Page) => {
@@ -107,41 +105,6 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
                 )}
               </li>
             ))}
-
-            {/* Admin section
-            {adminLoading ? (
-              <li className="pt-4">
-                <div className="flex items-center px-4 py-2">
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  <span className="text-xs text-gray-500">Loading admin status...</span>
-                </div>
-              </li>
-            ) : isAdmin && (
-              <>
-                <li className="pt-4">
-                  <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Admin
-                  </div>
-                </li>
-                {adminItems.map((item) => (
-                  <li key={item.name}>
-                    <button
-                      onClick={() => item.page && handleNavigation(item.page)}
-                      className={`
-                        w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 transform hover:scale-105
-                        ${item.current
-                          ? 'bg-red-50 text-red-700 border-r-2 border-red-700 shadow-sm'
-                          : 'text-gray-700 hover:bg-red-50 hover:text-red-700 hover:shadow-sm'
-                        }
-                      `}
-                    >
-                      <item.icon className="mr-3 h-5 w-5" />
-                      {item.name}
-                    </button>
-                  </li>
-                ))}
-              </>
-            )} */}
           </ul>
         </nav>
 

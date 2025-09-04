@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, User, Camera, Save, Check, AlertCircle, Bitcoin, Bell, Shield, Link as LinkIcon, Star, Award, Eye, EyeOff } from 'lucide-react';
-import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useUserProfile, useSaveUserProfile, useBadges } from '../hooks/useQueries';
+import { useAuth } from '@nfid/identitykit/react';
 
 type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings';
 
@@ -42,11 +43,11 @@ interface UserProfile {
 }
 
 const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
-  const { identity } = useInternetIdentity();
   const { data: userProfile, isLoading } = useUserProfile();
   const { data: badges = [] } = useBadges();
   const saveProfileMutation = useSaveUserProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   
   const [activeTab, setActiveTab] = useState<'profile' | 'wallet' | 'notifications' | 'privacy'>('profile');
   const [hasChanges, setHasChanges] = useState(false);
@@ -204,7 +205,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     { id: 'privacy', name: 'Privacy & Security', icon: Shield }
   ];
 
-  if (!identity) {
+  if (!user) {
     return (
       <div className="p-6">
         <div className="text-center py-8">

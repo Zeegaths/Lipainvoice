@@ -1,35 +1,26 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { useInternetIdentity } from "ic-use-internet-identity";
 import { LogIn, Shield, Users, Award, AlertCircle } from "lucide-react";
-import { useState } from "react";
-import LoadingSpinner from "./LoadingSpinner";
+import { useEffect, useState } from "react";
 import { useToast } from "./ToastContainer";
+import { CustomConnectedWallet, CustomConnectWallet, Page } from "../pages/LandingPage";
+import { ConnectWallet, useAuth } from "@nfid/identitykit/react";
 
-const LoginScreen = () => {
+interface LoginScreenProps {
+  onNavigate: (page: Page) => void;
+}
+
+const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
   const { login, isLoggingIn: isLoggingInFromHook, error } = useInternetIdentity();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { showError } = useToast();
+  const { connect, disconnect, isConnecting, user, } = useAuth();
 
-  const handleLogin = async () => {
-    try {
-      setIsLoggingIn(true);
-      login();
-    } catch (error: any) {
-      console.error("Login error:", error);
-      setIsLoggingIn(false);
-
-      // Handle "already authenticated" error
-      if (error.message === "User is already authenticated") {
-        window.location.reload();
-      } else {
-        showError(
-          "Login Failed",
-          "Unable to connect to Internet Identity. Please try again."
-        );
-      }
-    }
-  };
-
-  const isLoading = isLoggingInFromHook || isLoggingIn;
+ useEffect(() => {
+  if(user) {
+    onNavigate("dashboard");
+  }
+ }, [user, onNavigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -91,28 +82,9 @@ const LoginScreen = () => {
         </div>
 
         {/* Login Button */}
-        <div className="p-4">
-          <button
-            onClick={handleLogin}
-            disabled={isLoading}
-            className="w-full flex items-center justify-center px-6 py-3 bg-orange-500 text-white rounded-full font-bold"
-          >
-            {isLoading ? (
-              <>
-                <LoadingSpinner
-                  size="sm"
-                  color="gray"
-                  className="mr-2 border-white"
-                />
-                Connecting...
-              </>
-            ) : (
-              <>
-                <LogIn className="h-5 w-5 mr-2" />
-                Login with Internet Identity
-              </>
-            )}
-          </button>
+        <div className="p-4 w-full flex justify-center flex-col items-center">
+          {/* @ts-ignore */}
+        <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet}/>
           <p className="text-xs text-gray-500 text-center mt-3 font-info">
             Secure, decentralized authentication powered by the Internet
             Computer

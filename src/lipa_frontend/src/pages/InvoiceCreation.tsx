@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip } from 'lucide-react';
+import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2 } from 'lucide-react';
 import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
@@ -193,13 +193,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       onNavigate('dashboard');
     } catch (error) {
       console.error('Error creating invoice:', error);
-      
-      // Show more specific error message
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice. Please try again.';
-      showToast({
-        title: `Error: ${errorMessage}`,
-        type: 'error',
-      });
     }
   };
 
@@ -698,14 +691,14 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
           >
             <QrCode className="h-5 w-5 mr-2" />
-            Preview Invoice
+            Preview
           </button>
           <button
             type="submit"
             disabled={addInvoiceMutation.isPending || (formData.useTeamSplit && totalPercentage !== 100) || (formData.useTaskSelection && selectedTasks.length === 0)}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {addInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
+            {addInvoiceMutation.isPending ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : 'Create'}
           </button>
         </div>
       </form>

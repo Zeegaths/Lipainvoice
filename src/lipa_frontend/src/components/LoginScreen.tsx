@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useInternetIdentity } from "ic-use-internet-identity";
-import { LogIn, Shield, Users, Award, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useToast } from "./ToastContainer";
+import { LogIn, Shield, Users, Award } from "lucide-react";
+import { useEffect } from "react";
 import { CustomConnectedWallet, CustomConnectWallet } from "../pages/LandingPage";
 import { Page } from "../App";
 import { ConnectWallet, useAuth } from "@nfid/identitykit/react";
@@ -12,16 +10,13 @@ interface LoginScreenProps {
 }
 
 const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
-  const { login, isLoggingIn: isLoggingInFromHook, error } = useInternetIdentity();
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const { showError } = useToast();
-  const { connect, disconnect, isConnecting, user, } = useAuth();
+  const { connect, disconnect, isConnecting, user } = useAuth();
 
- useEffect(() => {
-  if(user) {
-    onNavigate("dashboard");
-  }
- }, [user, onNavigate]);
+  useEffect(() => {
+    if (user) {
+      onNavigate("dashboard");
+    }
+  }, [user, onNavigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -85,25 +80,14 @@ const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
         {/* Login Button */}
         <div className="p-4 w-full flex justify-center flex-col items-center">
           {/* @ts-ignore */}
-        <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet}/>
+          <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet} />
           <p className="text-xs text-gray-500 text-center mt-3 font-info">
             Secure, decentralized authentication powered by the Internet
             Computer
           </p>
         </div>
 
-        {/* Error State */}
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
-            <div className="flex items-center">
-              <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-              <p className="text-red-800 text-sm">
-                Authentication failed. Please try again or check your internet
-                connection.
-              </p>
-            </div>
-          </div>
-        )}
+
       </div>
     </div>
   );

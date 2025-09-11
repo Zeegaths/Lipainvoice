@@ -16,12 +16,20 @@ type StreamingCallbackHttpResponse =
  };
 type StreamingCallback = func (StreamingToken) ->
                           (StreamingCallbackHttpResponse) query;
+type LightningInvoice = 
+ record {
+   amount: nat;
+   expiry: nat;
+   invoiceString: text;
+   status: text;
+ };
 type Invoice = 
  record {
    bitcoinAddress: opt text;
    details: text;
    files: vec FileMetadata;
    id: nat;
+   lightningInvoice: opt LightningInvoice;
  };
 type ICRC21ConsentMessageResponse = 
  variant {
@@ -85,6 +93,7 @@ service : {
   addBadge: (name: text, description: text) -> ();
   addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
   addTask: (id: nat, description: text) -> ();
+  createLightningInvoice: (invoiceId: nat, amount: nat) -> (LightningInvoice);
   getAllBitcoinMappings: () -> (vec record {
                                       nat;
                                       text;
@@ -93,6 +102,7 @@ service : {
   getInvoice: (id: nat) -> (opt Invoice) query;
   getInvoiceBitcoinAddress: (invoiceId: nat) -> (opt text) query;
   getInvoiceFiles: (invoiceId: nat) -> (vec FileMetadata) query;
+  getLightningInvoice: (invoiceId: nat) -> (opt LightningInvoice) query;
   getTask: (id: nat) -> (opt text) query;
   httpStreamingCallback: (token: StreamingToken) ->
    (StreamingCallbackHttpResponse) query;

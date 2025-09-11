@@ -16,18 +16,18 @@ import AdminSystem "auth-single-user/management";
 import Http "file-storage/http";
 import FileStorage "file-storage/file-storage";
 import Bitcoin "bitcoin";
-
+import HttpOutcalls "http-outcalls/outcall";
 
 persistent actor FreelancerDashboard {
     // Initialize the admin system state
-    let adminState = AdminSystem.initState();
+    transient let adminState = AdminSystem.initState();
 
     transient let natMap = OrderedMap.Make<Nat>(Nat.compare);
     transient let textMap = OrderedMap.Make<Text>(Text.compare);
     transient let principalMap = OrderedMap.Make<Principal>(Principal.compare);
 
     // File storage
-    var storage = FileStorage.new();
+    transient var storage = FileStorage.new();
 
     // File metadata type
     public type FileMetadata = {
@@ -38,31 +38,48 @@ persistent actor FreelancerDashboard {
         path : Text;
     };
 
+    // Lightning invoice type
+    public type LightningInvoice = {
+        invoiceString : Text;
+        amount : Nat;
+        expiry : Nat;
+        status : Text; // e.g. "pending", "paid"
+    };
+
     // Invoice type with file attachments and Bitcoin address
     public type Invoice = {
         id : Nat;
         details : Text;
         files : [FileMetadata];
         bitcoinAddress : ?Text; // Optional Bitcoin address for payment
+        lightningInvoice : ?LightningInvoice; // Optional lightning invoice
     };
 
     // Invoices - now stores Invoice records instead of just Text
-    var invoices : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Invoice>> = principalMap.empty();
+    transient var invoices : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Invoice>> = principalMap.empty();
 
     // Bitcoin address mappings (stable storage)
     stable var bitcoinMappingsStable : [(Nat, Text)] = [];
-    
+
     // Bitcoin address map (stable representation for persistent storage)
     stable var bitcoinAddressMap : [(Nat, Text)] = [];
 
+    // Lightning invoices stable storage mapped by invoice ID
+    stable var lightningInvoicesStable : [(Nat, LightningInvoice)] = [];
+
+    // Lightning invoices HashMap for runtime operations
+    transient var lightningInvoices : HashMap.HashMap<Nat, LightningInvoice> = HashMap.HashMap<Nat, LightningInvoice>(10, Nat.equal, Hash.hash);
+
     // Tasks
-    var tasks : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Text>> = principalMap.empty();
+    transient var tasks : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Text>> = principalMap.empty();
 
     // Reputation Badges
-    var badges : OrderedMap.Map<Principal, OrderedMap.Map<Text, Text>> = principalMap.empty();
+    transient var badges : OrderedMap.Map<Principal, OrderedMap.Map<Text, Text>> = principalMap.empty();
 
     // File counter for unique file paths
-    var fileCounter : Nat = 0;
+    transient var fileCounter : Nat = 0;
+
+
 
     public type ConsentMessageRequest = {
         method : Text;
@@ -168,9 +185,99 @@ persistent actor FreelancerDashboard {
             details = details;
             files = [];
             bitcoinAddress = bitcoinAddress;
+            lightningInvoice = null;
         };
         let updatedInvoices = natMap.put(userInvoices, id, newInvoice);
         invoices := principalMap.put(invoices, caller, updatedInvoices);
+    };
+
+    // Helper function to get lightning invoice from stable array
+    func getLightningInvoiceFromStable(id : Nat) : ?LightningInvoice {
+        for ((invoiceId, invoice) in lightningInvoicesStable.vals()) {
+            if (invoiceId == id) {
+                return ?invoice;
+            };
+        };
+        null;
+    };
+
+    // Helper function to put lightning invoice in stable array
+    func putLightningInvoiceInStable(id : Nat, invoice : LightningInvoice) {
+        var found = false;
+        var newArray : [(Nat, LightningInvoice)] = [];
+        for ((invoiceId, inv) in lightningInvoicesStable.vals()) {
+            if (invoiceId == id) {
+                newArray := Array.append(newArray, [(id, invoice)]);
+                found := true;
+            } else {
+                newArray := Array.append(newArray, [(invoiceId, inv)]);
+            };
+        };
+        if (not found) {
+            newArray := Array.append(newArray, [(id, invoice)]);
+        };
+        lightningInvoicesStable := newArray;
+    };
+
+    // Create Lightning Invoice via Universal Bitcoin Bridge API
+    public shared ({ caller }) func createLightningInvoice(invoiceId : Nat, amount : Nat) : async LightningInvoice {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot create lightning invoices");
+        };
+
+        // Construct request payload
+        let payload = "{\"amount\": " # Nat.toText(amount) # "}";
+
+        // Call Universal Bitcoin Bridge API to create lightning invoice
+        let url = "https://lightning.infernal.finance/api/v1/invoices";
+
+        // Mock response for now (replace with real HTTP call)
+        let response = "{\"invoice\":\"lnbc1mockinvoice" # Nat.toText(amount) # "\",\"expiry\":3600}";
+
+        // Parse response JSON (simplified)
+        // Assume response is JSON with invoice string and expiry
+        let invoiceString = response; // placeholder, in real code parse JSON
+        let expiry : Nat = 3600; // 1 hour expiry
+        let status : Text = "pending";
+
+        let lightningInvoice : LightningInvoice = {
+            invoiceString = invoiceString;
+            amount = amount;
+            expiry = expiry;
+            status = status;
+        };
+
+        // Store lightning invoice in stable storage
+        putLightningInvoiceInStable(invoiceId, lightningInvoice);
+
+        // Update invoice record to include lightning invoice
+        let userInvoices = switch (principalMap.get(invoices, caller)) {
+            case null natMap.empty();
+            case (?existing) existing;
+        };
+        let invoiceOpt = natMap.get(userInvoices, invoiceId);
+        switch (invoiceOpt) {
+            case null {
+                Debug.trap("Invoice not found");
+            };
+            case (?invoice) {
+                let updatedInvoice : Invoice = {
+                    invoice with lightningInvoice = ?lightningInvoice;
+                };
+                let updatedUserInvoices = natMap.put(userInvoices, invoiceId, updatedInvoice);
+                invoices := principalMap.put(invoices, caller, updatedUserInvoices);
+            };
+        };
+
+        lightningInvoice;
+    };
+
+    // Query lightning invoice details
+    public query ({ caller }) func getLightningInvoice(invoiceId : Nat) : async ?LightningInvoice {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot query lightning invoices");
+        };
+        getLightningInvoiceFromStable(invoiceId);
     };
 
     // Upload file for invoice

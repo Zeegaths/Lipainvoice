@@ -46,8 +46,15 @@ export type ICRC21ConsentMessageResponse = { 'Ok' : ConsentInfo } |
 export interface Invoice {
   'id' : bigint,
   'files' : Array<FileMetadata>,
+  'lightningInvoice' : [] | [LightningInvoice],
   'bitcoinAddress' : [] | [string],
   'details' : string,
+}
+export interface LightningInvoice {
+  'status' : string,
+  'expiry' : bigint,
+  'amount' : bigint,
+  'invoiceString' : string,
 }
 export type StreamingCallback = ActorMethod<
   [StreamingToken],
@@ -65,11 +72,13 @@ export interface _SERVICE {
   'addBadge' : ActorMethod<[string, string], undefined>,
   'addInvoice' : ActorMethod<[bigint, string, [] | [string]], undefined>,
   'addTask' : ActorMethod<[bigint, string], undefined>,
+  'createLightningInvoice' : ActorMethod<[bigint, bigint], LightningInvoice>,
   'getAllBitcoinMappings' : ActorMethod<[], Array<[bigint, string]>>,
   'getBadge' : ActorMethod<[string], [] | [string]>,
   'getInvoice' : ActorMethod<[bigint], [] | [Invoice]>,
   'getInvoiceBitcoinAddress' : ActorMethod<[bigint], [] | [string]>,
   'getInvoiceFiles' : ActorMethod<[bigint], Array<FileMetadata>>,
+  'getLightningInvoice' : ActorMethod<[bigint], [] | [LightningInvoice]>,
   'getTask' : ActorMethod<[bigint], [] | [string]>,
   'httpStreamingCallback' : ActorMethod<
     [StreamingToken],

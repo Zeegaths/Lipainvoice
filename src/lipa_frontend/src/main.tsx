@@ -12,10 +12,14 @@ const queryClient = new QueryClient();
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
         <IdentityKitProvider
-            authType={IdentityKitAuthType.ACCOUNTS}
+            authType={IdentityKitAuthType.DELEGATION}
             signers={[OISY]}
             theme={IdentityKitTheme.SYSTEM}
             allowInternetIdentityPinAuthentication
+            signerClientOptions={{
+                targets: ['https://identity.ic0.app'],
+                derivationOrigin: window.location.origin,
+            }}
         >
             <App />
         </IdentityKitProvider>

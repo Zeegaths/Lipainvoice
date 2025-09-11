@@ -1,4 +1,10 @@
 export const idlFactory = ({ IDL }) => {
+  const LightningInvoice = IDL.Record({
+    'status' : IDL.Text,
+    'expiry' : IDL.Nat,
+    'amount' : IDL.Nat,
+    'invoiceString' : IDL.Text,
+  });
   const FileMetadata = IDL.Record({
     'name' : IDL.Text,
     'path' : IDL.Text,
@@ -9,6 +15,7 @@ export const idlFactory = ({ IDL }) => {
   const Invoice = IDL.Record({
     'id' : IDL.Nat,
     'files' : IDL.Vec(FileMetadata),
+    'lightningInvoice' : IDL.Opt(LightningInvoice),
     'bitcoinAddress' : IDL.Opt(IDL.Text),
     'details' : IDL.Text,
   });
@@ -76,6 +83,11 @@ export const idlFactory = ({ IDL }) => {
     'addBadge' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'addInvoice' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'createLightningInvoice' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [LightningInvoice],
+        [],
+      ),
     'getAllBitcoinMappings' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
@@ -89,6 +101,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getInvoiceFiles' : IDL.Func([IDL.Nat], [IDL.Vec(FileMetadata)], ['query']),
+    'getLightningInvoice' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(LightningInvoice)],
+        ['query'],
+      ),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
         [StreamingToken],

@@ -8,7 +8,8 @@ import {
   Award,
 } from "lucide-react";
 import { useState } from "react";
-import { Page, scrollToSection } from "../../pages/LandingPage";
+import { Page } from "../../App";
+import { scrollToSection } from "../../pages/LandingPage";
 import bitcoinAnimation from "../../assets/lottie/Bitcoin Animation.json";
 import Lottie from "lottie-react";
 

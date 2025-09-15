@@ -12,6 +12,7 @@ import { Page } from "../../App";
 import { scrollToSection } from "../../pages/LandingPage";
 import bitcoinAnimation from "../../assets/lottie/Bitcoin Animation.json";
 import Lottie from "lottie-react";
+import { useInternetIdentity } from "../../hooks/useInternetIdentity";
 
 export default function Hero({
   onNavigate,
@@ -19,7 +20,18 @@ export default function Hero({
   onNavigate: (page: Page) => void;
 }) {
   const [isVisible, setIsVisible] = useState(true);
-  const handleGetStarted = () => {
+  const { identity, login } = useInternetIdentity();
+  const isAuthenticated = !!identity;
+
+  const handleGetStarted = async () => {
+    if (!isAuthenticated) {
+      try {
+        await login();
+      } catch (error) {
+        console.error("Login failed:", error);
+        return;
+      }
+    }
     onNavigate("dashboard");
   };
   return (

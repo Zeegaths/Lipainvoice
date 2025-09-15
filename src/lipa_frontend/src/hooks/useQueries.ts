@@ -1,19 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../components/ToastContainer';
-import { useAgent, useAuth } from '@nfid/identitykit/react';
+import { useInternetIdentity } from 'ic-use-internet-identity';
 import { createActor, idlFactory } from '../../../declarations/lipa_backend';
-import { Actor } from '@dfinity/agent';
+import { Actor, HttpAgent } from '@dfinity/agent';
 import { CANISTER_IDS } from '../config/canisterConfig';
 
 export function useInvoices() {
   const { showToast } = useToast();
-  const agent = useAgent();
-  const { user } = useAuth();
+  const { identity } = useInternetIdentity();
+  const agent = identity ? new HttpAgent({ identity }) : null;
 
   return useQuery<Array<[bigint, any]>, Error>({
-    queryKey: ['invoices', user?.principal.toString()],
+    queryKey: ['invoices', identity?.getPrincipal().toString()],
     queryFn: async (): Promise<Array<[bigint, any]>> => {
-      if (!user || !agent) {
+      if (!identity || !agent) {
         showToast({
           title: "Error fetching invoices",
           message: "No authentication found",
@@ -44,23 +44,23 @@ export function useInvoices() {
         return [];
       }
     },
-    enabled: !!user && !!agent,
+    enabled: !!identity && !!agent,
   });
 }
 
 export function useAddInvoice() {
-  const { user } = useAuth();
-  const agent = useAgent();
+  const { identity } = useInternetIdentity();
+  const agent = identity ? new HttpAgent({ identity }) : null;
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, details, address }: { id: bigint; details: string, address: string }) => {
-      if (!agent || !user) {
-        console.log("Agent or user not available");
+      if (!agent || !identity) {
+        console.log("Agent or identity not available");
         console.log(agent);
-        console.log(user);
-        throw new Error('Agent or user not available, will likely fail in the backend.');
+        console.log(identity);
+        throw new Error('Agent or identity not available, will likely fail in the backend.');
       }
 
       const canisterId = CANISTER_IDS.lipa_backend;
@@ -77,7 +77,7 @@ export function useAddInvoice() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['invoices', user?.principal.toString()]
+        queryKey: ['invoices', identity?.getPrincipal().toString()]
       });
     },
     onError: (error) => {

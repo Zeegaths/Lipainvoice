@@ -1,27 +1,15 @@
 import ReactDOM from 'react-dom/client';
-import { InternetIdentityProvider } from 'ic-use-internet-identity';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { InternetIdentityProvider } from 'ic-use-internet-identity';
 import App from './App';
 import './index.css';
-import '@nfid/identitykit/react/styles.css';
-import { IdentityKitProvider, IdentityKitTheme } from '@nfid/identitykit/react';
-import { IdentityKitAuthType, OISY } from '@nfid/identitykit';
 
 const queryClient = new QueryClient();
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
-        <IdentityKitProvider
-            authType={IdentityKitAuthType.DELEGATION}
-            signers={[OISY]}
-            theme={IdentityKitTheme.SYSTEM}
-            allowInternetIdentityPinAuthentication
-            signerClientOptions={{
-                targets: ['https://identity.ic0.app'],
-                derivationOrigin: window.location.origin,
-            }}
-        >
+        <InternetIdentityProvider>
             <App />
-        </IdentityKitProvider>
+        </InternetIdentityProvider>
     </QueryClientProvider>
 );

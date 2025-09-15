@@ -1,5 +1,5 @@
 /**
- * Utility functions for handling canister signature verification errors
+ * Utility functions for handling canister signature verification errors and SIWB authentication
  */
 
 export interface SignatureVerificationError extends Error {
@@ -9,7 +9,7 @@ export interface SignatureVerificationError extends Error {
 
 export const handleSignatureError = (error: unknown): SignatureVerificationError => {
   const err = error as Error;
-  
+
   // Check for common signature verification errors
   if (err.message.includes('Invalid combined threshold signature')) {
     return {
@@ -19,7 +19,7 @@ export const handleSignatureError = (error: unknown): SignatureVerificationError
       details: err.message
     };
   }
-  
+
   if (err.message.includes('certificate') || err.message.includes('delegation')) {
     return {
       name: 'SignatureVerificationError',
@@ -28,7 +28,7 @@ export const handleSignatureError = (error: unknown): SignatureVerificationError
       details: err.message
     };
   }
-  
+
   if (err.message.includes('BLS') || err.message.includes('root key')) {
     return {
       name: 'SignatureVerificationError',
@@ -37,7 +37,7 @@ export const handleSignatureError = (error: unknown): SignatureVerificationError
       details: err.message
     };
   }
-  
+
   // Generic error
   return {
     name: 'SignatureVerificationError',
@@ -60,15 +60,15 @@ export const shouldRetrySignatureRequest = (error: SignatureVerificationError): 
   // Retry for timeout or high load issues, but not for permanent errors
   const retryableCodes = ['GENERIC_SIGNATURE_ERROR'];
   const nonRetryableCodes = ['INVALID_THRESHOLD_SIGNATURE', 'CERTIFICATE_VERIFICATION_FAILED', 'BLS_ROOT_KEY_MISMATCH'];
-  
+
   if (nonRetryableCodes.includes(error.code || '')) {
     return false;
   }
-  
+
   // Check if error suggests timeout or temporary issue
   if (error.details?.includes('timeout') || error.details?.includes('load')) {
     return true;
   }
-  
+
   return retryableCodes.includes(error.code || '');
 };

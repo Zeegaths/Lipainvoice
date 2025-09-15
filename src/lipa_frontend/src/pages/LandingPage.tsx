@@ -33,11 +33,11 @@ import {
   Eye,
   Loader2,
 } from "lucide-react";
-import { ConnectedWalletButtonProps, ConnectWallet, ConnectWalletButtonProps } from '@nfid/identitykit/react';
-import { useAuth } from "@nfid/identitykit/react"
+import { useInternetIdentity } from "ic-use-internet-identity";
 import { Page } from '../App';
+import Hero from '../components/landing/Hero';
 
-export function CustomConnectWallet({ onClick, ...props }: ConnectWalletButtonProps) {
+export function CustomConnectWallet({ onClick }: { onClick: () => void }) {
   return (
     <button
       onClick={onClick}
@@ -51,15 +51,13 @@ export function CustomConnectWallet({ onClick, ...props }: ConnectWalletButtonPr
   );
 }
 
-{/* @ts-ignore */}
-export function CustomConnectedWallet({ connectedAccount, icpBalance, loading, ...props }: ConnectedWalletButtonProps) {
+export function CustomConnectedWallet({ principal, loading }: { principal?: string; loading?: boolean }) {
   return (
     <button
       className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 group"
     >
      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-     {connectedAccount && <span className="text-xs mr-2">{connectedAccount.slice(0, 6)}...{connectedAccount.slice(-4)}</span>}
-     {icpBalance && <span className="text-xs mr-2 font-bold">{icpBalance} ICP</span>}
+     {principal && <span className="text-xs mr-2">{principal.slice(0, 6)}...{principal.slice(-4)}</span>}
     </button>
   );
 }
@@ -81,8 +79,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const { connect, disconnect, isConnecting, user } = useAuth()
+  const { identity: user, login: connect } = useInternetIdentity();
 
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (error) {
+      console.error("Connection error:", error);
+    }
+  };
 
   useEffect(() => {
     setIsVisible(true);
@@ -314,11 +319,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     </div>
   );
 
-  if(isConnecting) {
-    return <div className="relative min-h-screen bg-slate-950">
-      <Loader2 size="xl" className="mx-auto mb-4" />
-    </div>
-  }
+  // Loading state removed - Internet Identity handles this internally
 
   if(user) {
     onNavigate("dashboard");
@@ -368,8 +369,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 Pricing
                 <div className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-orange-500 to-yellow-500 group-hover:w-full transition-all duration-300" />
               </button>
-                    {/* @ts-ignore */}
-              <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet}/>
+              {user ? (
+                <CustomConnectedWallet principal={user.getPrincipal().toString()} />
+              ) : (
+                <CustomConnectWallet onClick={connect} />
+              )}
             </div>
 
             <div className="md:hidden">
@@ -416,8 +420,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 >
                   Pricing
                 </button>
-                {/* @ts-ignore */}
-                <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet}/>
+              {user ? (
+                <CustomConnectedWallet principal={user.getPrincipal().toString()} />
+              ) : (
+                <CustomConnectWallet onClick={connect} />
+              )}
               </div>
             </div>
           )}
@@ -588,7 +595,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               style={{ animationDelay: "0.4s" }}
             >
               <button
-                onClick={() => connect()}
+                onClick={() => handleConnect()}
                 className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/50 animate-button-power-up hover:animate-none"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -601,7 +608,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               </button>
 
               <button
-                onClick={() => connect()}
+                onClick={() => handleConnect()}
                 className="group relative border-2 border-purple-500/30 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-purple-500/10 backdrop-blur-sm transition-all duration-500 hover:border-purple-400/50 overflow-hidden hover:shadow-lg hover:shadow-purple-500/20 animate-button-materialize"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1767,14 +1774,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={() => connect()}
-                    className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${
-                      plan.popular
-                        ? "bg-white text-orange-500 hover:bg-gray-100 shadow-2xl"
-                        : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600"
-                    }`}
-                  >
+              <button
+                onClick={() => connect()}
+                className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${
+                  plan.popular
+                    ? "bg-white text-orange-500 hover:bg-gray-100 shadow-2xl"
+                    : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600"
+                }`}
+              >
                     <div
                       className={`absolute inset-0 ${
                         plan.popular
@@ -1926,10 +1933,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 </li>
                 <li>
-                  <button
-                    onClick={() => connect()}
-                    className="text-gray-400 hover:text-white transition-colors duration-300 font-medium"
-                  >
+                    <button
+                      onClick={() => handleConnect()}
+                      className="text-gray-400 hover:text-white transition-colors duration-300 font-medium"
+                    >
                     Dashboard
                   </button>
                 </li>

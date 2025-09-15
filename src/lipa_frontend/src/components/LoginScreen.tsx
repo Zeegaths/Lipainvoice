@@ -1,22 +1,44 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-import { LogIn, Shield, Users, Award } from "lucide-react";
-import { useEffect } from "react";
-import { CustomConnectedWallet, CustomConnectWallet } from "../pages/LandingPage";
+import { LogIn, Shield, Users, Award, AlertCircle, CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Page } from "../App";
-import { ConnectWallet, useAuth } from "@nfid/identitykit/react";
+import { useInternetIdentity } from "../hooks/useInternetIdentity";
 
 interface LoginScreenProps {
   onNavigate: (page: Page) => void;
 }
 
 const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
-  const { connect, disconnect, isConnecting, user } = useAuth();
+  const { identity, login, logout, isAuthenticated } = useInternetIdentity();
+  const [authStatus, setAuthStatus] = useState<'idle' | 'connecting' | 'success' | 'error'>('idle');
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (user) {
+    if (isAuthenticated) {
       onNavigate("dashboard");
     }
-  }, [user, onNavigate]);
+  }, [isAuthenticated, onNavigate]);
+
+  const handleLogin = async () => {
+    try {
+      setAuthStatus('connecting');
+      setAuthError(null);
+
+      await login();
+
+      setAuthStatus('success');
+      setTimeout(() => onNavigate("dashboard"), 1000);
+    } catch (error) {
+      console.error("Internet Identity login error:", error);
+      setAuthStatus('error');
+      setAuthError(`Authentication failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setAuthStatus('idle');
+    onNavigate("landing");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -44,7 +66,7 @@ const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
                   Secure Authentication
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Your data is protected with Internet Identity
+                  Your data is protected with decentralized wallets
                 </p>
               </div>
             </div>
@@ -77,17 +99,68 @@ const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
           </div>
         </div>
 
-        {/* Login Button */}
+        {/* Authentication Status */}
+        {authStatus !== 'idle' && (
+          <div className="px-6 mb-4">
+            <div className={`flex items-center p-3 rounded-lg ${
+              authStatus === 'success' ? 'bg-green-50 border border-green-200' :
+              authStatus === 'error' ? 'bg-red-50 border border-red-200' :
+              'bg-blue-50 border border-blue-200'
+            }`}>
+              {authStatus === 'success' ? (
+                <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
+              ) : authStatus === 'error' ? (
+                <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
+              ) : (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+              )}
+              <div>
+                <p className={`text-sm font-medium ${
+                  authStatus === 'success' ? 'text-green-800' :
+                  authStatus === 'error' ? 'text-red-800' :
+                  'text-blue-800'
+                }`}>
+                  {authStatus === 'connecting' && 'Connecting to wallet...'}
+                  {authStatus === 'success' && 'Authentication successful!'}
+                  {authStatus === 'error' && 'Authentication failed'}
+                </p>
+                {authError && (
+                  <p className="text-sm text-red-600 mt-1">{authError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Login/Logout Button */}
         <div className="p-4 w-full flex justify-center flex-col items-center">
-          {/* @ts-ignore */}
-          <ConnectWallet connectButtonComponent={CustomConnectWallet} connectedButtonComponent={CustomConnectedWallet} />
+          {!isAuthenticated ? (
+            <button
+              onClick={handleLogin}
+              disabled={authStatus === 'connecting'}
+              className={`w-full max-w-xs px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                authStatus === 'connecting'
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl'
+              }`}
+            >
+              {authStatus === 'connecting'
+                ? 'Authenticating...'
+                : 'Connect Wallet'
+              }
+            </button>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="w-full max-w-xs px-6 py-3 rounded-xl font-medium bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl"
+            >
+              Logout
+            </button>
+          )}
           <p className="text-xs text-gray-500 text-center mt-3 font-info">
-            Secure, decentralized authentication powered by the Internet
-            Computer
+            Secure, decentralized authentication powered by Internet Identity
           </p>
         </div>
-
-
       </div>
     </div>
   );

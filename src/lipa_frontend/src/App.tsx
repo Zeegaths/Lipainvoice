@@ -13,7 +13,7 @@ import NotificationCenter from './components/NotificationCenter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
-import { useAuth } from '@nfid/identitykit/react';
+import { useInternetIdentity } from 'ic-use-internet-identity';
 
 export type Page = 'landing' | 'dashboard' | 'create-invoice' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
@@ -22,10 +22,10 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { connect, disconnect, isConnecting, user } = useAuth();
+  const { identity, login } = useInternetIdentity();
 
-  const isAuthenticated = !!user;
-  const isLoading = isConnecting;
+  const isAuthenticated = !!identity;
+  const isLoading = false;
 
   // Check if we should show client portal or public invoice view based on URL
   const urlParams = new URLSearchParams(window.location.search);

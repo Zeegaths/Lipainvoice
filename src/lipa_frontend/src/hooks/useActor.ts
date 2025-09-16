@@ -1,22 +1,18 @@
 import { createActor } from '../../../declarations/lipa_backend';
 import { useQuery } from '@tanstack/react-query';
 import { _SERVICE } from '../../../declarations/lipa_backend/lipa_backend.did';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useInternetIdentity } from './useInternetIdentity';
-import { HttpAgent } from '@dfinity/agent';
+import { useAgent } from './useAgent';
 import { CANISTER_IDS } from '../config/canisterConfig';
+import { getHost } from '../utils';
 
 const ACTOR_QUERY_KEY = 'actor';
 
 export function useActor() {
     const { identity } = useInternetIdentity();
     const [principal, setPrincipal] = useState<string | null>(null);
-
-    // Create agent from identity
-    const agent = useMemo(() => {
-        if (!identity) return null;
-        return new HttpAgent({ identity });
-    }, [identity]);
+    const agent = useAgent();
 
     useEffect(() => {
         if (identity) {
@@ -40,6 +36,11 @@ export function useActor() {
 
             const backendActor = createActor(canisterId, {
                 agent,
+                agentOptions: {
+                    identity,
+                    host: getHost()
+                }
+
             });
             return backendActor;
         },

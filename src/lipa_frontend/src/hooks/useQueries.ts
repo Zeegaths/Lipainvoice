@@ -2,13 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '../components/ToastContainer';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { createActor, idlFactory } from '../../../declarations/lipa_backend';
-import { Actor, HttpAgent } from '@dfinity/agent';
+import { Actor } from '@icp-sdk/core/agent';
 import { CANISTER_IDS } from '../config/canisterConfig';
+import { useAgent } from './useAgent';
 
 export function useInvoices() {
   const { showToast } = useToast();
-  const { identity } = useInternetIdentity();
-  const agent = identity ? new HttpAgent({ identity }) : null;
+    const { identity } = useInternetIdentity();
+    const agent = useAgent();
 
   return useQuery<Array<[bigint, any]>, Error>({
     queryKey: ['invoices', identity?.getPrincipal().toString()],
@@ -50,7 +51,7 @@ export function useInvoices() {
 
 export function useAddInvoice() {
   const { identity } = useInternetIdentity();
-  const agent = identity ? new HttpAgent({ identity }) : null;
+  const agent = useAgent();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 

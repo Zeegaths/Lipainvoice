@@ -8,18 +8,23 @@ import { CANISTER_IDS } from '../config/canisterConfig';
 export function useInvoices() {
   const { showToast } = useToast();
   const { identity } = useInternetIdentity();
-  const agent = identity ? new HttpAgent({ identity }) : null;
 
   return useQuery<Array<[bigint, any]>, Error>({
     queryKey: ['invoices', identity?.getPrincipal().toString()],
     queryFn: async (): Promise<Array<[bigint, any]>> => {
-      if (!identity || !agent) {
+      if (!identity) {
         showToast({
           title: "Error fetching invoices",
           message: "No authentication found",
           type: "error",
         });
         return [];
+      }
+
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ identity, host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
       }
 
       const canisterId = CANISTER_IDS.lipa_backend;
@@ -44,23 +49,27 @@ export function useInvoices() {
         return [];
       }
     },
-    enabled: !!identity && !!agent,
+    enabled: !!identity,
   });
 }
 
 export function useAddInvoice() {
   const { identity } = useInternetIdentity();
-  const agent = identity ? new HttpAgent({ identity }) : null;
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, details, address }: { id: bigint; details: string, address: string }) => {
-      if (!agent || !identity) {
-        console.log("Agent or identity not available");
-        console.log(agent);
+      if (!identity) {
+        console.log("Identity not available");
         console.log(identity);
-        throw new Error('Agent or identity not available, will likely fail in the backend.');
+        throw new Error('Identity not available, will likely fail in the backend.');
+      }
+
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ identity, host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
       }
 
       const canisterId = CANISTER_IDS.lipa_backend;

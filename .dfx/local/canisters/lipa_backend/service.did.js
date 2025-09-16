@@ -5,6 +5,30 @@ export const idlFactory = ({ IDL }) => {
     'amount' : IDL.Nat,
     'invoiceString' : IDL.Text,
   });
+  const Network = IDL.Variant({
+    'mainnet' : IDL.Null,
+    'regtest' : IDL.Null,
+    'testnet' : IDL.Null,
+  });
+  const Satoshi = IDL.Nat64;
+  const MillisatoshiPerVByte = IDL.Nat64;
+  const Page = IDL.Vec(IDL.Nat8);
+  const BlockHash = IDL.Vec(IDL.Nat8);
+  const OutPoint = IDL.Record({
+    'txid' : IDL.Vec(IDL.Nat8),
+    'vout' : IDL.Nat32,
+  });
+  const Utxo = IDL.Record({
+    'height' : IDL.Nat32,
+    'value' : Satoshi,
+    'outpoint' : OutPoint,
+  });
+  const GetUtxosResponse = IDL.Record({
+    'next_page' : IDL.Opt(Page),
+    'tip_height' : IDL.Nat32,
+    'tip_block_hash' : BlockHash,
+    'utxos' : IDL.Vec(Utxo),
+  });
   const FileMetadata = IDL.Record({
     'name' : IDL.Text,
     'path' : IDL.Text,
@@ -94,6 +118,13 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'getBadge' : IDL.Func([IDL.Text], [IDL.Opt(IDL.Text)], ['query']),
+    'getBitcoinBalance' : IDL.Func([IDL.Text, Network], [Satoshi], []),
+    'getBitcoinFeePercentiles' : IDL.Func(
+        [Network],
+        [IDL.Vec(MillisatoshiPerVByte)],
+        [],
+      ),
+    'getBitcoinUtxos' : IDL.Func([IDL.Text, Network], [GetUtxosResponse], []),
     'getInvoice' : IDL.Func([IDL.Nat], [IDL.Opt(Invoice)], ['query']),
     'getInvoiceBitcoinAddress' : IDL.Func(
         [IDL.Nat],
@@ -106,6 +137,8 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(LightningInvoice)],
         ['query'],
       ),
+    'getP2pkhAddress' : IDL.Func([Network], [IDL.Text], []),
+    'getP2trAddress' : IDL.Func([Network], [IDL.Text], []),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
         [StreamingToken],
@@ -135,6 +168,16 @@ export const idlFactory = ({ IDL }) => {
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
         ['query'],
+      ),
+    'sendBitcoinP2pkh' : IDL.Func(
+        [IDL.Text, Satoshi, Network],
+        [IDL.Vec(IDL.Nat8)],
+        [],
+      ),
+    'sendBitcoinP2tr' : IDL.Func(
+        [IDL.Text, Satoshi, Network],
+        [IDL.Vec(IDL.Nat8)],
+        [],
       ),
     'uploadInvoiceFile' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8), IDL.Bool],

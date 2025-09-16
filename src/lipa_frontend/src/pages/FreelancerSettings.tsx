@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, User, Camera, Save, Check, AlertCircle, Bitcoin, Bell, Shield, Link as LinkIcon, Star, Award, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@nfid/identitykit/react';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Page } from '../App';
-
 
 interface FreelancerSettingsProps {
   onNavigate: (page: Page) => void;
@@ -43,7 +42,7 @@ interface UserProfile {
 
 const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { isAuthenticated } = useInternetIdentity();
   
   // Placeholder for saveProfileMutation
   const saveProfileMutation = {
@@ -91,15 +90,11 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
 
   // Load user profile data when available
   React.useEffect(() => {
-    if (user) {
-      try {
-        const parsed = typeof user === 'string' ? JSON.parse(user) : user;
-        setProfileData(prev => ({ ...prev, ...parsed }));
-      } catch (error) {
-        console.error('Error parsing user profile:', error);
-      }
+    if (isAuthenticated) {
+      // TODO: Load user profile data from backend when authenticated
+      // For now, just use default profile data
     }
-  }, [user]);
+  }, [isAuthenticated]);
 
   const handleInputChange = (field: string, value: any) => {
     setProfileData(prev => {
@@ -217,7 +212,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     { id: 'privacy', name: 'Privacy & Security', icon: Shield }
   ];
 
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div className="p-6">
         <div className="text-center py-8">

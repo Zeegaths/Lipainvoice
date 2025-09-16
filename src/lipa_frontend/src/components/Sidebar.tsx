@@ -1,5 +1,5 @@
 import { X, Home, Settings, LogOut, Shield, Plus, Wallet } from 'lucide-react';
-import { useAuth } from '@nfid/identitykit/react';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Page } from '../App';
 
 interface SidebarProps {
@@ -19,10 +19,10 @@ interface NavigationItem {
 }
 
 const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => {
-  const { disconnect } = useAuth();
+  const { logout } = useInternetIdentity();
 
   const handleLogout = async () => {
-    await disconnect();
+    await logout();
     onNavigate('landing');
   };
 

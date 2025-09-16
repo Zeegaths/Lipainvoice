@@ -16,8 +16,6 @@
     "@dfinity/candid": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
     "@dfinity/ledger-icp": "^4.1.0",
-    "@nfid/identitykit": "1.0.15",
-
     "@dfinity/principal": "^2.4.1",
     "@dfinity/utils": "^2.13.1",
     "@types/bip39": "^3.0.4",

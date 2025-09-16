@@ -37,6 +37,7 @@ module {
       headers;
       body = null;
       method = #get;
+      is_replicated = null;
       transform = ?{
         function = transform;
         context = Blob.fromArray([]);
@@ -61,6 +62,7 @@ module {
       headers;
       body = ?requestBody;
       method = #post;
+      is_replicated = null;
       transform = ?{
         function = transform;
         context = Blob.fromArray([]);

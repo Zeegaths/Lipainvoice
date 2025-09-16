@@ -8,4 +8,7 @@ service : {
   get_service_info: () -> (ServiceInfo) query;
   set_status: (text) -> (ServiceInfo);
   ping: () -> (text) query;
+
+  generate_challenge: () -> (text);
+  verify_signature: (text, text, text) -> (bool);
 }

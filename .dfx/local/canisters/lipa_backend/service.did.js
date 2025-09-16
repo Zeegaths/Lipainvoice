@@ -1,4 +1,10 @@
 export const idlFactory = ({ IDL }) => {
+  const LightningInvoice = IDL.Record({
+    'status' : IDL.Text,
+    'expiry' : IDL.Nat,
+    'amount' : IDL.Nat,
+    'invoiceString' : IDL.Text,
+  });
   const FileMetadata = IDL.Record({
     'name' : IDL.Text,
     'path' : IDL.Text,
@@ -9,6 +15,7 @@ export const idlFactory = ({ IDL }) => {
   const Invoice = IDL.Record({
     'id' : IDL.Nat,
     'files' : IDL.Vec(FileMetadata),
+    'lightningInvoice' : IDL.Opt(LightningInvoice),
     'bitcoinAddress' : IDL.Opt(IDL.Text),
     'details' : IDL.Text,
   });
@@ -44,6 +51,29 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const ConsentMessageRequest = IDL.Record({
+    'arg' : IDL.Vec(IDL.Nat8),
+    'method' : IDL.Text,
+    'consent_preferences' : IDL.Opt(IDL.Record({ 'language' : IDL.Text })),
+  });
+  const ConsentMessage = IDL.Variant({
+    'LineDisplayMessage' : IDL.Record({
+      'pages' : IDL.Vec(IDL.Record({ 'lines' : IDL.Vec(IDL.Text) })),
+    }),
+    'GenericDisplayMessage' : IDL.Text,
+  });
+  const ConsentInfo = IDL.Record({
+    'metadata' : IDL.Record({
+      'utc_offset_minutes' : IDL.Opt(IDL.Int),
+      'language' : IDL.Text,
+    }),
+    'consent_message' : ConsentMessage,
+  });
+  const ErrorInfo = IDL.Record({ 'description' : IDL.Text });
+  const ICRC21ConsentMessageResponse = IDL.Variant({
+    'Ok' : ConsentInfo,
+    'Err' : ErrorInfo,
+  });
   const FileMetadata__1 = IDL.Record({
     'path' : IDL.Text,
     'size' : IDL.Nat,
@@ -53,6 +83,11 @@ export const idlFactory = ({ IDL }) => {
     'addBadge' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'addInvoice' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
+    'createLightningInvoice' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [LightningInvoice],
+        [],
+      ),
     'getAllBitcoinMappings' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(IDL.Nat, IDL.Text))],
@@ -66,6 +101,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'getInvoiceFiles' : IDL.Func([IDL.Nat], [IDL.Vec(FileMetadata)], ['query']),
+    'getLightningInvoice' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(LightningInvoice)],
+        ['query'],
+      ),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
         [StreamingToken],
@@ -73,6 +113,11 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
+    'icrc21_canister_call_consent_message' : IDL.Func(
+        [ConsentMessageRequest],
+        [ICRC21ConsentMessageResponse],
+        [],
+      ),
     'initializeAuth' : IDL.Func([], [], []),
     'isCurrentUserAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'listBadges' : IDL.Func(

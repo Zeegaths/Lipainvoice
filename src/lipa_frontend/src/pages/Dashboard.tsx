@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Search, Plus } from 'lucide-react';
 import { useInvoices } from '../hooks/useQueries';
 import LoadingSpinner from '../components/LoadingSpinner';
-
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { Page } from '../App';
 
 interface DashboardProps {
   onNavigate: (page: Page) => void;
@@ -37,6 +37,13 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   const { data: backendInvoices, isLoading, error } = useInvoices();
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("all");
+  const { isAuthenticated } = useInternetIdentity();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      onNavigate('landing');
+    }
+  }, [isAuthenticated, onNavigate]);
 
   const transformInvoices = (backendInvoices: Array<[bigint, BackendInvoice]>): Invoice[] => {
     return backendInvoices.map(([id, invoice]) => {

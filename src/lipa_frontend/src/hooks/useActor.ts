@@ -1,16 +1,22 @@
-import { useInternetIdentity } from 'ic-use-internet-identity';
 import { createActor } from '../../../declarations/lipa_backend';
-import { canisterId } from '../../../declarations/lipa_backend';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { _SERVICE } from '../../../declarations/lipa_backend/lipa_backend.did';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useInternetIdentity } from './useInternetIdentity';
+import { HttpAgent } from '@dfinity/agent';
+import { CANISTER_IDS } from '../config/canisterConfig';
 
 const ACTOR_QUERY_KEY = 'actor';
 
 export function useActor() {
     const { identity } = useInternetIdentity();
-    const queryClient = useQueryClient();
     const [principal, setPrincipal] = useState<string | null>(null);
+
+    // Create agent from identity
+    const agent = useMemo(() => {
+        if (!identity) return null;
+        return new HttpAgent({ identity });
+    }, [identity]);
 
     useEffect(() => {
         if (identity) {
@@ -23,63 +29,23 @@ export function useActor() {
     const actorQuery = useQuery<_SERVICE>({
         queryKey: [ACTOR_QUERY_KEY, principal],
         queryFn: async () => {
-            if (!identity) {
-                // Return anonymous actor if not authenticated
-                return await createActor(canisterId);
+            const canisterId = CANISTER_IDS.lipa_backend;
+            if (!canisterId) {
+                throw new Error('Canister ID for lipa_backend is not set');
             }
 
-            const actorOptions = {
-                agentOptions: {
-                    identity
-                }
-            };
-
-            const actor =  createActor(canisterId, actorOptions);
-            
-            // Initialize auth if the method exists
-            try {
-                await actor.initializeAuth();
-            } catch (error) {
-                console.warn('initializeAuth method not available or failed:', error);
+            if (!agent) {
+                throw new Error('Agent is not available. Please connect your wallet first.');
             }
-            
-            return actor;
+
+            const backendActor = createActor(canisterId, {
+                agent,
+            });
+            return backendActor;
         },
-        // Only refetch when identity changes
         staleTime: Infinity,
-        // This will cause the actor to be recreated when the identity changes
-        enabled: true
+        enabled: !!agent && !!identity
     });
 
-    // When the actor changes, invalidate dependent queries
-    useEffect(() => {
-        if (actorQuery.data) {
-            queryClient.invalidateQueries({
-                predicate: (query) => {
-                    return !query.queryKey.includes(ACTOR_QUERY_KEY);
-                }
-            });
-            queryClient.refetchQueries({
-                predicate: (query) => {
-                    return !query.queryKey.includes(ACTOR_QUERY_KEY);
-                }
-            });
-        }
-    }, [actorQuery.data, queryClient]);
-
-    return {
-        actor: actorQuery.data || null,
-        isFetching: actorQuery.isFetching,
-        identity,
-        principal,
-        // Helper method to check if actor is ready for authenticated calls
-        isReady: !!actorQuery.data,
-        // Helper method for making authenticated calls
-        makeAuthenticatedCall: async <T>(callFn: (actor: _SERVICE) => Promise<T>): Promise<T> => {
-            if (!actorQuery.data) {
-                throw new Error('Actor not initialized');
-            }
-            return await callFn(actorQuery.data);
-        }
-    };
+    return actorQuery.data;
 }

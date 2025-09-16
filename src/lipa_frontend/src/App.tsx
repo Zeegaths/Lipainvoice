@@ -1,11 +1,8 @@
-import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TopNavigation from './components/TopNavigation';
 import Dashboard from './pages/Dashboard';
 import InvoiceCreation from './pages/InvoiceCreation';
-import AdminDashboard from './pages/AdminDashboard';
-import TaskLogger from './pages/TaskLogger';
 import TeamPayments from './pages/TeamPayments';
 import ClientPaymentPortal from './pages/ClientPaymentPortal';
 import FreelancerSettings from './pages/FreelancerSettings';
@@ -16,18 +13,19 @@ import NotificationCenter from './components/NotificationCenter';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
+import { useInternetIdentity } from 'ic-use-internet-identity';
 
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+export type Page = 'landing' | 'dashboard' | 'create-invoice' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { identity, status:loginStatus } = useInternetIdentity();
+  const { identity, login } = useInternetIdentity();
 
   const isAuthenticated = !!identity;
-  const isLoading = loginStatus === 'logging-in';
+  const isLoading = false;
 
   // Check if we should show client portal or public invoice view based on URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -93,7 +91,7 @@ function App() {
       return (
         <ErrorBoundary>
           <ToastProvider>
-            <LoginScreen />
+            <LoginScreen onNavigate={setCurrentPage} />
           </ToastProvider>
         </ErrorBoundary>
       );
@@ -128,10 +126,6 @@ function App() {
                   switch (currentPage) {
                     case 'create-invoice':
                       return <InvoiceCreation onNavigate={setCurrentPage} />;
-                    case 'admin':
-                      return <AdminDashboard />;
-                    case 'task-logger':
-                      return <TaskLogger onNavigate={setCurrentPage} />;
                     case 'team-payments':
                       return <TeamPayments onNavigate={setCurrentPage} />;
                     case 'settings':

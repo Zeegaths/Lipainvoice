@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip } from 'lucide-react';
+import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2 } from 'lucide-react';
 import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
-
-type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger';
+import { Page } from '../App';
 
 interface InvoiceCreationProps {
   onNavigate: (page: Page) => void;
@@ -51,7 +50,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [btcToUsd, setBtcToUsd] = useState(110_000); 
-  const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm'); // Mock Bitcoin address
+  const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm');
   const [createdInvoiceId, setCreatedInvoiceId] = useState<bigint | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
@@ -144,7 +143,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    // Validate required fields
     if (!formData.clientName.trim()) {
       showToast({
         title: 'Please enter a client name',
@@ -169,7 +167,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    // Create a structured details string that matches the backend format
     const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}`;
 
     try {
@@ -182,34 +179,22 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
       setCreatedInvoiceId(invoiceId);
       
-      // Show success message
       const successMessage = `Invoice #${invoiceId} created successfully!`;
       showToast({
         title: successMessage,
         type: 'success',
       });
-      
-      // Navigate back to dashboard
       onNavigate('dashboard');
     } catch (error) {
       console.error('Error creating invoice:', error);
-      
-      // Show more specific error message
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice. Please try again.';
-      showToast({
-        title: `Error: ${errorMessage}`,
-        type: 'error',
-      });
     }
   };
 
   const generateQRCode = () => {
-    // Mock QR code generation - in real app, use a QR code library
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${generatedAddress}?amount=${totalBtc}`;
   };
 
   const downloadPDF = () => {
-    // Mock PDF download - in real app, use a PDF generation library
     alert('PDF download functionality would be implemented here');
   };
 
@@ -236,7 +221,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          {/* Invoice Header */}
           <div className="border-b border-gray-200 pb-6 mb-6">
             <div className="flex justify-between items-start">
               <div>
@@ -250,7 +234,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
-          {/* Client & Project Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
@@ -266,7 +249,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
-          {/* Selected Tasks */}
           {formData.useTaskSelection && selectedTasksData.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Work Performed:</h3>
@@ -284,7 +266,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Work Details */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
@@ -303,7 +284,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
-          {/* Team Split */}
           {formData.useTeamSplit && teamMembers.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Payment Split:</h3>
@@ -318,7 +298,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Attached Files */}
           {uploadedFiles.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Attached Files:</h3>
@@ -331,7 +310,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Payment Info */}
           <div className="border-t border-gray-200 pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -387,7 +365,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Client Information */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -425,7 +402,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           </div>
         </div>
 
-        {/* Project Details */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -464,7 +440,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           </div>
         </div>
 
-        {/* Task Selection */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -496,7 +471,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                     <p>No tasks available</p>
                     <button
                       type="button"
-                      onClick={() => onNavigate('task-logger')}
+                      onClick={() => onNavigate('dashboard')}
                       className="text-blue-600 hover:text-blue-700 text-sm mt-2"
                     >
                       Go to Task Logger to create tasks
@@ -691,21 +666,21 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 md:justify-end justify-between">
           <button
             type="button"
             onClick={() => setShowPreview(true)}
             className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
           >
             <QrCode className="h-5 w-5 mr-2" />
-            Preview Invoice
+            Preview
           </button>
           <button
             type="submit"
             disabled={addInvoiceMutation.isPending || (formData.useTeamSplit && totalPercentage !== 100) || (formData.useTaskSelection && selectedTasks.length === 0)}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center md:w-1/4 w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {addInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
+            {addInvoiceMutation.isPending ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : 'Create'}
           </button>
         </div>
       </form>

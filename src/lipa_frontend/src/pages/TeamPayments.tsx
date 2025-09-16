@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Users, DollarSign, Clock, CheckCircle, AlertCircle, Eye, Filter, Search } from 'lucide-react';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 import { useInvoices } from '../hooks/useQueries';
-
-type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments';
+import { Page } from '../App';
 
 interface TeamPaymentsProps {
   onNavigate: (page: Page) => void;

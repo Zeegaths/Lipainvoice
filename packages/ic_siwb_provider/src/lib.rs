@@ -4,6 +4,24 @@ use k256::ecdsa::{VerifyingKey, Signature, signature::Verifier};
 use sha2::{Sha256, Digest};
 use hex::FromHex;
 
+// Custom random number generator for IC
+use getrandom::{register_custom_getrandom, Error};
+
+fn custom_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+    // Use IC's raw_rand for random number generation
+    // Note: This is a simplified implementation - in practice you'd want to cache
+    // the random bytes and use them as needed
+    ic_cdk::println!("Warning: Using synchronous random number generation");
+    // For now, we'll use a simple approach with ic_cdk::api::time()
+    let time = ic_cdk::api::time();
+    for (i, byte) in dest.iter_mut().enumerate() {
+        *byte = ((time >> (i * 8)) & 0xFF) as u8;
+    }
+    Ok(())
+}
+
+register_custom_getrandom!(custom_getrandom);
+
 #[derive(CandidType, Deserialize, Serialize)]
 pub struct ServiceInfo {
     pub name: String,

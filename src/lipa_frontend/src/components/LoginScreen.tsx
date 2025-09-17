@@ -42,7 +42,7 @@ const LoginScreen = ({ onNavigate }: LoginScreenProps) => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="max-w-md w-full animate-fade-in border border-gray-200 rounded-3xl py-4">
+      <div className="max-w-md w-full animate-fade-in border border-gray-300 rounded-3xl py-4">
         {/* Logo and Title */}
         <div className="text-center mb-2">
           <div className="mx-auto h-16 w-16 flex items-center justify-center mb-4">

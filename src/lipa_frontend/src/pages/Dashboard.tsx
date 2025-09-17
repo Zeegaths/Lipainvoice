@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Wallet, Clock, Calendar, BadgeDollarSign } from 'lucide-react';
 import { useInvoices } from '../hooks/useQueries';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
@@ -135,57 +135,41 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
       <div className="px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Overview</h1>
+        <div className='mb-4 mt-2'>
+        <h1 className="text-lg">Amount Earned: </h1>
+        <h1 className="text-4xl font-mono font-bold my-2">$0</h1>
+        <p className='text-sm text-gray-400'>Amount earned in BTC since May 2025</p>
+        </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
-            <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">{(totalInvoices).toLocaleString()}</p>
-                </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 text-lg lg:text-xl font-bold">
-                    📅
-                  </span>
-                </div>
+            <div className="bg-white rounded-3xl border border-gray-300 flex items-center gap-4 px-4 py-2"> 
+              <Wallet className="h-16 w-16 text-gray-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 font-body">Total Invoices</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalInvoices).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Paid</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalPaid).toLocaleString()}</p>
-                </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-purple-600 text-lg lg:text-xl font-bold">
-                    💰
-                  </span>
-                </div>
+            <div className="bg-white rounded-3xl border border-gray-300 flex items-center gap-4 px-4 py-2"> 
+              <Clock className="h-16 w-16 text-yellow-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 font-body">Total Pending</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalUnpaid).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Unpaid</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalUnpaid).toLocaleString()}</p>
-                </div>
+            <div className="bg-white rounded-3xl border border-gray-300 flex items-center gap-4 px-4 py-2"> 
+              <BadgeDollarSign className="h-16 w-16 text-green-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 font-body">Total Paid</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalPaid).toLocaleString()}</p>
               </div>
             </div>
 
-            <div className="bg-white rounded-xl p-4 lg:p-6 shadow-sm border border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-gray-600">Overdue</p>
-                  <p className="text-xl lg:text-2xl font-bold text-gray-900 truncate">${(totalOverdue * 100000).toLocaleString()}</p>
-                  <div className="flex items-center mt-2">
-                    <span className="text-green-500 text-sm">↗</span>
-                    <span className="text-green-600 text-sm font-medium ml-1">+17%/month</span>
-                  </div>
-                </div>
-                <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-green-600 text-lg lg:text-xl font-bold">$</span>
-                </div>
+            <div className="bg-white rounded-3xl border border-gray-300 flex items-center gap-4 px-4 py-2"> 
+              <Calendar className="h-16 w-16 text-red-600" />
+              <div>
+                <p className="text-sm font-medium text-gray-600 font-body">Total Overdue</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalOverdue).toLocaleString()}</p>
               </div>
             </div>
           </div>
@@ -243,14 +227,11 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
             </button>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-6 py-3 text-left">
-                      <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                    </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice ID</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>

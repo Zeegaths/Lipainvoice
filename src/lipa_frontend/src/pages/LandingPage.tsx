@@ -602,7 +602,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12 animate-energy-sweep" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-button-shimmer" />
                 <span className="relative flex items-center justify-center">
-                  Start Building Today
+                  Get PaidToday
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform duration-300 group-hover:animate-arrow-rocket" />
                 </span>
               </button>

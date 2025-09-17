@@ -24,7 +24,7 @@ function FeatureCard({
 }: FeatureCardProps) {
   return (
     <div
-      className={`border border-gray-200 rounded-2xl p-4 h-96`}
+      className={`border border-gray-300 rounded-2xl p-4 h-96`}
       style={{ backgroundColor: bg, color: text }}
     >
       <h1 className="text-2xl font-bold">{title}</h1>

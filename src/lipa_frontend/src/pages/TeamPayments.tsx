@@ -115,7 +115,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center">
             <div className="p-3 bg-purple-100 rounded-lg">
               <DollarSign className="h-6 w-6 text-purple-600" />
@@ -128,7 +128,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center">
             <div className="p-3 bg-yellow-100 rounded-lg">
               <Clock className="h-6 w-6 text-yellow-600" />
@@ -143,7 +143,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center">
             <div className="p-3 bg-green-100 rounded-lg">
               <CheckCircle className="h-6 w-6 text-green-600" />
@@ -160,7 +160,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -186,7 +186,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
       </div>
 
       {/* Payments List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300">
         <div className="p-6 border-b border-gray-200">
           <h3 className="text-lg font-semibold text-gray-900">
             Payment History ({filteredPayments.length})
@@ -213,7 +213,7 @@ const TeamPayments = ({ onNavigate }: TeamPaymentsProps) => {
               {filteredPayments.map((payment) => {
                 const StatusIcon = getStatusIcon(payment.paymentStatus);
                 return (
-                  <div key={payment.invoiceId.toString()} className="p-6 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow">
+                  <div key={payment.invoiceId.toString()} className="p-6 border border-gray-300 rounded-lg hover:shadow-sm transition-shadow">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">

@@ -89,7 +89,7 @@ const TasksSection = ({ tasks, addTask, completeTask, generateInvoice, invoices 
   const completedCount = tasks.filter(task => task.status === 'completed').length;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4 sm:mb-0">Tasks</h2>
         <button 
@@ -102,11 +102,11 @@ const TasksSection = ({ tasks, addTask, completeTask, generateInvoice, invoices 
 
       {/* Task statistics - simplified with just two boxes */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-300">
           <h3 className="text-sm font-medium text-gray-600">In Progress</h3>
           <p className="text-2xl font-bold text-gray-900">{inProgressCount}</p>
         </div>
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-300">
           <h3 className="text-sm font-medium text-gray-600">Completed</h3>
           <p className="text-2xl font-bold text-gray-900">{completedCount}</p>
         </div>
@@ -114,7 +114,7 @@ const TasksSection = ({ tasks, addTask, completeTask, generateInvoice, invoices 
 
       {/* Add task form */}
       {showAddForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-300">
           <div className="grid grid-cols-1 gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -196,7 +196,7 @@ const TasksSection = ({ tasks, addTask, completeTask, generateInvoice, invoices 
       <div className="space-y-3 max-h-[400px] overflow-y-auto">
         {tasks.length > 0 ? (
           tasks.map((task) => (
-            <div key={task.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div key={task.id} className="border border-gray-300 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1 mb-3 sm:mb-0">
                   <h3 className="font-semibold text-gray-900">{task.title}</h3>

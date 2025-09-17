@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2 } from 'lucide-react';
+import { Bitcoin, Users, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2, CopyPlus } from 'lucide-react';
 import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
 import { Page } from '../App';
+import qrCode from '../../public/qrcode.png';
+import { getEnvironment } from '../utils';
 
 interface InvoiceCreationProps {
   onNavigate: (page: Page) => void;
@@ -14,6 +16,8 @@ interface TeamMember {
   walletAddress: string;
   percentage: number;
 }
+
+const baseLink = getEnvironment() === 'development' ? ' http://localhost:3000/?invoice=' : 'https://mpigd-gqaaa-aaaaj-qnsoq-cai.icp0.io/?invoice=';
 
 interface Task {
   id: bigint;
@@ -41,6 +45,9 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
     ratePerHour: '',
     useTeamSplit: false,
     useTaskSelection: false,
+    billingType: 'service', // 'service', 'restaurant', 'fare', 'custom'
+    customAmount: '',
+    customDescription: '',
   });
 
   const [selectedTasks, setSelectedTasks] = useState<bigint[]>([]);
@@ -51,7 +58,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [btcToUsd, setBtcToUsd] = useState(110_000); 
   const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm');
-  const [createdInvoiceId, setCreatedInvoiceId] = useState<bigint | null>(null);
+  const [invoiceId, setInvoiceId] = useState<bigint>(BigInt(Date.now()));
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   // Parse task data from backend
@@ -90,7 +97,22 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   }, 0);
 
   const effectiveHours = formData.useTaskSelection ? totalHoursFromTasks : parseFloat(formData.hoursWorked || '0');
-  const totalBtc = effectiveHours * parseFloat(formData.ratePerHour || '0');
+  
+  // Calculate total based on billing type
+  const calculateTotal = () => {
+    switch (formData.billingType) {
+      case 'service':
+        return effectiveHours * parseFloat(formData.ratePerHour || '0');
+      case 'restaurant':
+      case 'fare':
+      case 'custom':
+        return parseFloat(formData.customAmount || '0');
+      default:
+        return 0;
+    }
+  };
+  
+  const totalBtc = calculateTotal();
   const totalUsd = totalBtc * btcToUsd;
 
   const addTeamMember = () => {
@@ -112,13 +134,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const totalPercentage = teamMembers.reduce((sum, member) => sum + member.percentage, 0);
 
-  const handleTaskSelection = (taskId: bigint) => {
-    setSelectedTasks(prev =>
-      prev.includes(taskId)
-        ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
 
   const handleFileUploadComplete = (filePath: string) => {
     setUploadedFiles(prev => [...prev, filePath]);
@@ -159,25 +174,34 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    if (!formData.ratePerHour || parseFloat(formData.ratePerHour) <= 0) {
-      showToast({
-        title: 'Please enter a valid rate per hour',
-        type: 'error',
-      });
-      return;
+    // Validate based on billing type
+    if (formData.billingType === 'service') {
+      if (!formData.ratePerHour || parseFloat(formData.ratePerHour) <= 0) {
+        showToast({
+          title: 'Please enter a valid rate per hour',
+          type: 'error',
+        });
+        return;
+      }
+    } else {
+      if (!formData.customAmount || parseFloat(formData.customAmount) <= 0) {
+        showToast({
+          title: 'Please enter a valid amount',
+          type: 'error',
+        });
+        return;
+      }
     }
 
-    const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}`;
+    const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Type: ${formData.billingType}${formData.billingType === 'service' ? `, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}` : `, Description: ${formData.customDescription}`}`;
 
     try {
-      const invoiceId = BigInt(Date.now());
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
         details: details,
         address: formData.clientWallet
       });
 
-      setCreatedInvoiceId(invoiceId);
       
       const successMessage = `Invoice #${invoiceId} created successfully!`;
       showToast({
@@ -191,11 +215,12 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   };
 
   const generateQRCode = () => {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${generatedAddress}?amount=${totalBtc}`;
+    return qrCode;
   };
 
-  const downloadPDF = () => {
-    alert('PDF download functionality would be implemented here');
+  const copyLink = () => {
+    alert('Link copied to clipboard');
+    navigator.clipboard.writeText(baseLink + invoiceId);
   };
 
   const formatTime = (timeSpent: { hours: number; minutes: number }) => {
@@ -249,6 +274,25 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
+          {/* Billing Type Info */}
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="flex items-center mb-2">
+              <span className="text-xl mr-2">
+                {formData.billingType === 'service' ? '💼' : 
+                 formData.billingType === 'restaurant' ? '🍽️' : 
+                 formData.billingType === 'fare' ? '🚗' : '📝'}
+              </span>
+              <h3 className="font-semibold text-blue-900">
+                {formData.billingType === 'service' ? 'Service Invoice' : 
+                 formData.billingType === 'restaurant' ? 'Restaurant Bill' : 
+                 formData.billingType === 'fare' ? 'Transport Fare' : 'Custom Payment'}
+              </h3>
+            </div>
+            {formData.billingType !== 'service' && formData.customDescription && (
+              <p className="text-sm text-blue-800">{formData.customDescription}</p>
+            )}
+          </div>
+
           {formData.useTaskSelection && selectedTasksData.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Work Performed:</h3>
@@ -267,21 +311,55 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           )}
 
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-sm text-gray-600">Hours Worked</p>
-                <p className="text-xl font-semibold">{effectiveHours.toFixed(2)}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Rate per Hour</p>
-                <p className="text-xl font-semibold">{formData.ratePerHour} BTC</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Amount</p>
-                <p className="text-xl font-semibold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
-                <p className="text-sm text-gray-600">${totalUsd.toLocaleString()}</p>
+            <div className="flex items-center justify-center mb-4">
+              <div className="flex items-center">
+                <span className="text-2xl mr-2">
+                  {formData.billingType === 'service' ? '💼' : 
+                   formData.billingType === 'restaurant' ? '🍽️' : 
+                   formData.billingType === 'fare' ? '🚗' : '📝'}
+                </span>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {formData.billingType === 'service' ? 'Service Billing' : 
+                   formData.billingType === 'restaurant' ? 'Restaurant Bill' : 
+                   formData.billingType === 'fare' ? 'Transport Fare' : 'Custom Payment'}
+                </h3>
               </div>
             </div>
+            
+            {formData.billingType === 'service' ? (
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-sm text-gray-600">Hours Worked</p>
+                  <p className="text-xl font-semibold">{effectiveHours.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Rate per Hour</p>
+                  <p className="text-xl font-semibold">{formData.ratePerHour} BTC</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Total Amount</p>
+                  <p className="text-xl font-semibold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
+                  <p className="text-sm text-gray-600">${totalUsd.toLocaleString()}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                  <p className="text-sm text-gray-600">
+                    {formData.billingType === 'restaurant' ? 'Bill Amount' : 
+                     formData.billingType === 'fare' ? 'Fare Amount' : 'Amount'}
+                  </p>
+                  <p className="text-xl font-semibold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
+                  <p className="text-sm text-gray-600">${totalUsd.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Description</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {formData.customDescription || 'No description provided'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {formData.useTeamSplit && teamMembers.length > 0 && (
@@ -302,9 +380,18 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Attached Files:</h3>
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center text-gray-600">
-                  <Paperclip className="h-4 w-4 mr-2" />
-                  <span>{uploadedFiles.length} file{uploadedFiles.length !== 1 ? 's' : ''} attached</span>
+                <div className="space-y-2">
+                  {uploadedFiles.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                      <div className="flex items-center">
+                        <Paperclip className="h-4 w-4 mr-2 text-gray-500" />
+                        <span className="text-sm text-gray-700">{file}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded">Uploaded</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -332,11 +419,11 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
         <div className="flex space-x-4">
           <button
-            onClick={downloadPDF}
+            onClick={copyLink}
             className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            <Download className="h-5 w-5 mr-2" />
-            Download PDF
+            <CopyPlus className="h-5 w-5 mr-2" />
+            Copy Link
           </button>
           <button
             onClick={handleSubmit}
@@ -365,7 +452,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl border border-gray-300 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-blue-100 rounded-lg">
               <Users className="h-5 w-5 text-blue-600" />
@@ -382,7 +469,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                 type="text"
                 value={formData.clientName}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                className="input-field"
+                className="input-field rounded-3xl"
                 placeholder="Enter client name"
                 required
               />
@@ -395,125 +482,93 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                 type="text"
                 value={formData.clientWallet}
                 onChange={(e) => setFormData({ ...formData, clientWallet: e.target.value })}
-                className="input-field"
+                className="input-field rounded-3xl"
                 placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-green-100 rounded-lg">
               <Bitcoin className="h-5 w-5 text-green-600" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 ml-3">Project Details</h2>
+            <h2 className="text-lg font-semibold text-gray-900 ml-3">Payment Details</h2>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Project Title
+                Payment Title
               </label>
               <input
                 type="text"
                 value={formData.projectTitle}
                 onChange={(e) => setFormData({ ...formData, projectTitle: e.target.value })}
-                className="input-field"
-                placeholder="Enter project title"
+                className="input-field rounded-3xl"
+                placeholder="Enter payment title"
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Project Description
+                Payment Description
               </label>
               <textarea
                 value={formData.projectDescription}
                 onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
-                className="input-field"
+                className="input-field rounded-3xl"
                 rows={3}
-                placeholder="Describe the project work"
+                placeholder="What work/service is being provided?"
                 required
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <div className="p-2 bg-purple-100 rounded-lg">
                 <CheckSquare className="h-5 w-5 text-purple-600" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900 ml-3">Work Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900 ml-3">Billing Details</h2>
             </div>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.useTaskSelection}
-                onChange={(e) => setFormData({ ...formData, useTaskSelection: e.target.checked })}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Select from logged tasks</span>
-            </label>
           </div>
 
-          {formData.useTaskSelection ? (
-            <div className="space-y-4">
-              <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-lg">
-                {tasksLoading ? (
-                  <div className="p-4 text-center text-gray-500">
-                    <p>Loading tasks...</p>
-                  </div>
-                ) : parsedTasks.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">
-                    <p>No tasks available</p>
-                    <button
-                      type="button"
-                      onClick={() => onNavigate('dashboard')}
-                      className="text-blue-600 hover:text-blue-700 text-sm mt-2"
-                    >
-                      Go to Task Logger to create tasks
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2 p-4">
-                    {parsedTasks.map((task) => (
-                      <label key={task.id.toString()} className="flex items-center p-3 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedTasks.includes(task.id)}
-                          onChange={() => handleTaskSelection(task.id)}
-                          className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-                        />
-                        <div className="ml-3 flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="font-medium text-gray-900">{task.title}</p>
-                            <span className="text-sm text-gray-600">{formatTime(task.timeSpent)}</span>
-                          </div>
-                          {task.description && (
-                            <p className="text-sm text-gray-600">{task.description}</p>
-                          )}
-                        </div>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {selectedTasksData.length > 0 && (
-                <div className="bg-purple-50 rounded-lg p-4">
-                  <p className="text-sm font-medium text-purple-900 mb-2">Selected Tasks Summary:</p>
-                  <p className="text-sm text-purple-700">
-                    {selectedTasksData.length} tasks selected • Total time: {totalHoursFromTasks.toFixed(2)} hours
-                  </p>
-                </div>
-              )}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Payment Type
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { value: 'service', label: 'Service/Work', icon: '💼' },
+                { value: 'restaurant', label: 'Restaurant', icon: '🍽️' },
+                { value: 'fare', label: 'Transport', icon: '🚗' },
+                { value: 'custom', label: 'Custom', icon: '📝' }
+              ].map((type) => (
+                <button
+                  key={type.value}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, billingType: type.value as any })}
+                  className={`p-3 rounded-xl border-2 transition-all ${
+                    formData.billingType === type.value
+                      ? 'border-purple-500 bg-purple-50 text-purple-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="text-2xl mb-1">{type.icon}</div>
+                  <div className="text-xs font-medium">{type.label}</div>
+                </button>
+              ))}
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+          </div>
+
+          {/* Dynamic Billing Fields */}
+          {formData.billingType === 'service' && (
+            <>
+              <div className="max-w-md mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Hours Worked
                 </label>
@@ -522,122 +577,82 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                   step="0.1"
                   value={formData.hoursWorked}
                   onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
-                  className="input-field"
+                  className="input-field rounded-3xl"
                   placeholder="0.0"
                   required={!formData.useTaskSelection}
                 />
               </div>
-            </div>
+              <div className="max-w-md">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rate per Hour (BTC)
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={formData.ratePerHour}
+                  onChange={(e) => setFormData({ ...formData, ratePerHour: e.target.value })}
+                  className="input-field rounded-3xl"
+                  placeholder="0.00000000"
+                  required
+                />
+              </div>
+            </>
           )}
 
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rate per Hour (BTC)
-            </label>
-            <input
-              type="number"
-              step="0.00000001"
-              value={formData.ratePerHour}
-              onChange={(e) => setFormData({ ...formData, ratePerHour: e.target.value })}
-              className="input-field"
-              placeholder="0.00000000"
-              required
-            />
-          </div>
+          {(formData.billingType === 'restaurant' || formData.billingType === 'fare' || formData.billingType === 'custom') && (
+            <>
+              <div className="max-w-md mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.billingType === 'restaurant' ? 'Bill Amount (BTC)' : 
+                   formData.billingType === 'fare' ? 'Fare Amount (BTC)' : 
+                   'Amount (BTC)'}
+                </label>
+                <input
+                  type="number"
+                  step="0.00000001"
+                  value={formData.customAmount}
+                  onChange={(e) => setFormData({ ...formData, customAmount: e.target.value })}
+                  className="input-field rounded-3xl"
+                  placeholder="0.00000000"
+                  required
+                />
+              </div>
+              <div className="max-w-md">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {formData.billingType === 'restaurant' ? 'Restaurant/Order Details' : 
+                   formData.billingType === 'fare' ? 'Trip Details' : 
+                   'Description'}
+                </label>
+                <input
+                  type="text"
+                  value={formData.customDescription}
+                  onChange={(e) => setFormData({ ...formData, customDescription: e.target.value })}
+                  className="input-field rounded-3xl"
+                  placeholder={formData.billingType === 'restaurant' ? 'e.g., Dinner for 4 people' : 
+                             formData.billingType === 'fare' ? 'e.g., Airport to Downtown' : 
+                             'Enter description'}
+                />
+              </div>
+            </>
+          )}
 
-          {/* Total Calculation */}
           {totalBtc > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4 mt-4">
+            <div className="bg-gray-50 rounded-lg p-4 mt-6">
               <div className="flex justify-between items-center">
                 <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
                 <div className="text-right">
                   <p className="text-xl font-bold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
                   <p className="text-sm text-gray-600">≈ ${totalUsd.toLocaleString()} USD</p>
-                  <p className="text-xs text-gray-500">{effectiveHours.toFixed(2)} hours</p>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Team Payment Split */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Users className="h-5 w-5 text-purple-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 ml-3">Team Payment Split</h2>
-            </div>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                checked={formData.useTeamSplit}
-                onChange={(e) => setFormData({ ...formData, useTeamSplit: e.target.checked })}
-                className="rounded border-gray-300 text-purple-600 focus:ring-purple-500"
-              />
-              <span className="ml-2 text-sm text-gray-700">Enable team split</span>
-            </label>
-          </div>
-
-          {formData.useTeamSplit && (
-            <div className="space-y-4">
-              {teamMembers.map((member, index) => (
-                <div key={member.id} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      value={member.walletAddress}
-                      onChange={(e) => updateTeamMember(member.id, 'walletAddress', e.target.value)}
-                      className="input-field"
-                      placeholder="Bitcoin wallet address"
-                      required={formData.useTeamSplit}
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={member.percentage}
-                      onChange={(e) => updateTeamMember(member.id, 'percentage', parseFloat(e.target.value) || 0)}
-                      className="input-field text-center"
-                      placeholder="0"
-                      required={formData.useTeamSplit}
-                    />
-                  </div>
-                  <span className="text-sm text-gray-600">%</span>
-                  {teamMembers.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeTeamMember(member.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                  {formData.billingType === 'service' && (
+                    <p className="text-xs text-gray-500">{effectiveHours.toFixed(2)} hours</p>
                   )}
                 </div>
-              ))}
-
-              <div className="flex justify-between items-center">
-                <button
-                  type="button"
-                  onClick={addTeamMember}
-                  className="flex items-center px-4 py-2 text-purple-600 border border-purple-300 rounded-lg hover:bg-purple-50"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Team Member
-                </button>
-                <div className={`text-sm font-medium ${totalPercentage === 100 ? 'text-green-600' : 'text-red-600'}`}>
-                  Total: {totalPercentage}%
-                </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* File Upload Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-orange-100 rounded-lg">
               <Paperclip className="h-5 w-5 text-orange-600" />
@@ -649,23 +664,12 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             Upload supporting documents for this invoice. Files will be attached after the invoice is created.
           </p>
 
-          {createdInvoiceId ? (
-            <FileUpload
-              invoiceId={createdInvoiceId}
-              onUploadComplete={handleFileUploadComplete}
-            />
-          ) : (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50">
-              <Paperclip className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">File upload will be available after creating the invoice</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Create the invoice first, then you can upload supporting documents
-              </p>
-            </div>
-          )}
+          <FileUpload
+            invoiceId={invoiceId}
+            onUploadComplete={handleFileUploadComplete}
+          />
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-4 md:justify-end justify-between">
           <button
             type="button"

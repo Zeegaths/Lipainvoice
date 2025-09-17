@@ -310,7 +310,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       )}
 
       {/* Profile Completion */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium text-gray-900">Profile Completion</h3>
           <span className="text-sm font-medium text-blue-600">{profileCompletion}%</span>
@@ -327,7 +327,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-6">
             {tabs.map((tab) => (
@@ -486,52 +486,6 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="https://yourwebsite.com"
                     />
-                  </div>
-                </div>
-              </div>
-
-              {/* Reputation Overview */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-900 mb-4">Reputation Overview</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                      <span className="ml-1 text-xl font-bold text-gray-900">{reputationData.averageRating}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{reputationData.totalReviews} reviews</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{badges.length}</p>
-                    <p className="text-sm text-gray-600">Badges earned</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{profileCompletion}%</p>
-                    <p className="text-sm text-gray-600">Profile complete</p>
-                  </div>
-                </div>
-                
-                {/* Recent Reviews */}
-                <div>
-                  <h5 className="font-medium text-gray-900 mb-3">Recent Client Reviews</h5>
-                  <div className="space-y-3">
-                    {reputationData.recentReviews.map((review, index) => (
-                      <div key={index} className="bg-white p-3 rounded border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">{review.client}</span>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600">{review.comment}</p>
-                        <p className="text-xs text-gray-500 mt-1">{new Date(review.date).toLocaleDateString()}</p>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>

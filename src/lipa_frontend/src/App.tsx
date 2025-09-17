@@ -128,6 +128,11 @@ function App() {
                       return <InvoiceCreation onNavigate={setCurrentPage} />;
                     case 'team-payments':
                       return <TeamPayments onNavigate={setCurrentPage} />;
+                    case 'client-portal':
+                      return <ClientPaymentPortal 
+                        invoiceId={clientPortalInvoiceId || 'test-invoice'} 
+                        onBack={() => setCurrentPage('dashboard')} 
+                      />;
                     case 'settings':
                       return <FreelancerSettings onNavigate={setCurrentPage} />;
                     default:

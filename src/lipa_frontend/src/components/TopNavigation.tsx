@@ -76,7 +76,7 @@ const TopNavigation = ({ onMenuClick, onSettingsClick, onNotificationsClick }: T
 
             {/* User Dropdown Menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200 animate-scale-in">
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-300 animate-scale-in">
                 <button
                   onClick={() => {
                     onSettingsClick();

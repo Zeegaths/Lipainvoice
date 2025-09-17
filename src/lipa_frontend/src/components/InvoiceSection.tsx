@@ -87,7 +87,7 @@ const InvoiceSection = ({ invoices: propInvoices = [], createDirectInvoice }: In
   };
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-800 mb-4 sm:mb-0">Invoice Overview</h2>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
@@ -113,7 +113,7 @@ const InvoiceSection = ({ invoices: propInvoices = [], createDirectInvoice }: In
       
       {/* Direct invoice creation form */}
       {showAddForm && (
-        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <form onSubmit={handleSubmit} className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-300">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Client</label>
@@ -175,7 +175,7 @@ const InvoiceSection = ({ invoices: propInvoices = [], createDirectInvoice }: In
       <div className="space-y-3 max-h-[400px] overflow-y-auto">
         {filteredInvoices.length > 0 ? (
           filteredInvoices.map((invoice) => (
-            <div key={invoice.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div key={invoice.id} className="border border-gray-300 rounded-lg p-4 hover:bg-gray-50 transition-colors">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex-1 mb-3 sm:mb-0">
                   <h3 className="font-semibold text-gray-900">Invoice #{invoice.id}</h3>

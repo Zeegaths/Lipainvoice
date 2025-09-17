@@ -489,52 +489,6 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
                   </div>
                 </div>
               </div>
-
-              {/* Reputation Overview */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-900 mb-4">Reputation Overview</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                      <span className="ml-1 text-xl font-bold text-gray-900">{reputationData.averageRating}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{reputationData.totalReviews} reviews</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{badges.length}</p>
-                    <p className="text-sm text-gray-600">Badges earned</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{profileCompletion}%</p>
-                    <p className="text-sm text-gray-600">Profile complete</p>
-                  </div>
-                </div>
-                
-                {/* Recent Reviews */}
-                <div>
-                  <h5 className="font-medium text-gray-900 mb-3">Recent Client Reviews</h5>
-                  <div className="space-y-3">
-                    {reputationData.recentReviews.map((review, index) => (
-                      <div key={index} className="bg-white p-3 rounded border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">{review.client}</span>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600">{review.comment}</p>
-                        <p className="text-xs text-gray-500 mt-1">{new Date(review.date).toLocaleDateString()}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 

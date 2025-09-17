@@ -86,7 +86,7 @@ const TeamPaymentsSection = () => {
 
   if (!identity) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6">
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
             <Users className="h-6 w-6 text-white" />
@@ -99,7 +99,7 @@ const TeamPaymentsSection = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center">
@@ -116,7 +116,7 @@ const TeamPaymentsSection = () => {
       <div className="p-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-300">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center mr-3">
                 <DollarSign className="h-4 w-4 text-white" />
@@ -169,7 +169,7 @@ const TeamPaymentsSection = () => {
             {teamPayments.map((payment) => {
               const StatusIcon = getStatusIcon(payment.paymentStatus);
               return (
-                <div key={payment.invoiceId.toString()} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-sm transition-all duration-200">
+                <div key={payment.invoiceId.toString()} className="bg-gray-50 rounded-lg p-4 border border-gray-300 hover:shadow-sm transition-all duration-200">
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-3 mb-2">
@@ -267,7 +267,7 @@ const TeamPaymentsSection = () => {
                   <h5 className="font-bold text-gray-900 mb-4">Team Split Breakdown</h5>
                   <div className="space-y-3">
                     {selectedPayment.teamMembers.map((member, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-300">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-3">
                             <span className="text-white text-xs font-bold">{index + 1}</span>

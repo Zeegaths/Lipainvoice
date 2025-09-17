@@ -310,7 +310,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       )}
 
       {/* Profile Completion */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium text-gray-900">Profile Completion</h3>
           <span className="text-sm font-medium text-blue-600">{profileCompletion}%</span>
@@ -327,7 +327,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-6">
             {tabs.map((tab) => (

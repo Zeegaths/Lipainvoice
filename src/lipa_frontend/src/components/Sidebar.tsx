@@ -34,7 +34,6 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
   const navigationItems: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, page: 'dashboard', current: currentPage === 'dashboard', hasPage: true },
     { name: 'Create Invoice', icon: Plus, page: 'create-invoice', current: currentPage === 'create-invoice', hasPage: true },
-    { name: "My Wallet", icon: Wallet, page: 'my-wallet', current: currentPage === 'my-wallet', hasPage: true },
     { name: 'Settings', icon: Settings, page: 'settings', current: currentPage === 'settings', hasPage: true },
   ];
 

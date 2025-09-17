@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2 } from 'lucide-react';
+import { Bitcoin, Users, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2, CopyPlus } from 'lucide-react';
 import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
 import { Page } from '../App';
+import qrCode from '../../public/qrcode.png';
+import { getEnvironment } from '../utils';
 
 interface InvoiceCreationProps {
   onNavigate: (page: Page) => void;
@@ -14,6 +16,8 @@ interface TeamMember {
   walletAddress: string;
   percentage: number;
 }
+
+const baseLink = getEnvironment() === 'development' ? ' http://localhost:3000/?invoice=' : 'https://mpigd-gqaaa-aaaaj-qnsoq-cai.icp0.io/?invoice=';
 
 interface Task {
   id: bigint;
@@ -54,7 +58,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [btcToUsd, setBtcToUsd] = useState(110_000); 
   const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm');
-  const [createdInvoiceId, setCreatedInvoiceId] = useState<bigint | null>(null);
+  const [invoiceId, setInvoiceId] = useState<bigint>(BigInt(Date.now()));
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   // Parse task data from backend
@@ -130,13 +134,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const totalPercentage = teamMembers.reduce((sum, member) => sum + member.percentage, 0);
 
-  const handleTaskSelection = (taskId: bigint) => {
-    setSelectedTasks(prev =>
-      prev.includes(taskId)
-        ? prev.filter(id => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
 
   const handleFileUploadComplete = (filePath: string) => {
     setUploadedFiles(prev => [...prev, filePath]);
@@ -199,14 +196,12 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
     const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Type: ${formData.billingType}${formData.billingType === 'service' ? `, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}` : `, Description: ${formData.customDescription}`}`;
 
     try {
-      const invoiceId = BigInt(Date.now());
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
         details: details,
         address: formData.clientWallet
       });
 
-      setCreatedInvoiceId(invoiceId);
       
       const successMessage = `Invoice #${invoiceId} created successfully!`;
       showToast({
@@ -220,11 +215,12 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   };
 
   const generateQRCode = () => {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${generatedAddress}?amount=${totalBtc}`;
+    return qrCode;
   };
 
-  const downloadPDF = () => {
-    alert('PDF download functionality would be implemented here');
+  const copyLink = () => {
+    alert('Link copied to clipboard');
+    navigator.clipboard.writeText(baseLink + invoiceId);
   };
 
   const formatTime = (timeSpent: { hours: number; minutes: number }) => {
@@ -423,11 +419,11 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
         <div className="flex space-x-4">
           <button
-            onClick={downloadPDF}
+            onClick={copyLink}
             className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            <Download className="h-5 w-5 mr-2" />
-            Download PDF
+            <CopyPlus className="h-5 w-5 mr-2" />
+            Copy Link
           </button>
           <button
             onClick={handleSubmit}
@@ -669,7 +665,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           </p>
 
           <FileUpload
-            invoiceId={createdInvoiceId || BigInt(Date.now())}
+            invoiceId={invoiceId}
             onUploadComplete={handleFileUploadComplete}
           />
         </div>

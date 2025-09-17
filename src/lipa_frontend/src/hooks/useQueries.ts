@@ -87,7 +87,7 @@ export function useAddInvoice() {
 
       return backendActor.addInvoice(id, details, [address]);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ['invoices', identity?.getPrincipal().toString()]
       });

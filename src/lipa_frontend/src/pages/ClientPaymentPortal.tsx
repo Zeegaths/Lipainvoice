@@ -57,7 +57,7 @@ const ClientPaymentPortal = ({ invoiceId, onBack }: ClientPaymentPortalProps) =>
   const [showRatingForm, setShowRatingForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
-  const [btcToUsd] = useState(45000); // Mock BTC to USD rate
+  const [btcToUsd] = useState(115000); 
 
   // Fetch invoice data
   const { data: invoice, isLoading, error } = useQuery({

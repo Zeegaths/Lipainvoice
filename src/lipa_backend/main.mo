@@ -1,5 +1,6 @@
 import OrderedMap "mo:base/OrderedMap";
 import Nat "mo:base/Nat";
+import Nat8 "mo:base/Nat8";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
@@ -18,9 +19,26 @@ import FileStorage "file-storage/file-storage";
 import Bitcoin "bitcoin";
 import HttpOutcalls "http-outcalls/outcall";
 
+// Bitcoin integration imports
+import BitcoinApi "bitcoin/bitcoinapi";
+import P2pkh "bitcoin/P2pkh";
+import P2tr "bitcoin/P2tr";
+import Types "bitcoin/Types";
+import Utils "bitcoin/Utils";
+import EcdsaApi "bitcoin/ecdsaapi";
+import SchnorrApi "bitcoin/SchnorrApi";
+
 persistent actor FreelancerDashboard {
     // Initialize the admin system state
     transient let adminState = AdminSystem.initState();
+
+    // Bitcoin canister actors
+    transient let ecdsa_canister_actor : Types.EcdsaCanisterActor = actor("aaaaa-aa");
+    transient let schnorr_canister_actor : Types.SchnorrCanisterActor = actor("aaaaa-aa");
+
+    // Bitcoin key names
+    stable var ecdsa_key_name : Text = "dfx_test_key";
+    stable var schnorr_key_name : Text = "dfx_test_key";
 
     transient let natMap = OrderedMap.Make<Nat>(Nat.compare);
     transient let textMap = OrderedMap.Make<Text>(Text.compare);
@@ -491,6 +509,51 @@ persistent actor FreelancerDashboard {
             Debug.trap("Only admin can access all Bitcoin mappings");
         };
         Bitcoin.getAllMappings(bitcoinAddressMap);
+    };
+
+    // Bitcoin integration functions
+
+    // Get Bitcoin balance for an address
+    public shared func getBitcoinBalance(address : Text, network : Types.Network) : async Types.Satoshi {
+        await BitcoinApi.get_balance(network, address);
+    };
+
+    // Get UTXOs for an address
+    public shared func getBitcoinUtxos(address : Text, network : Types.Network) : async Types.GetUtxosResponse {
+        await BitcoinApi.get_utxos(network, address);
+    };
+
+    // Get current fee percentiles
+    public shared func getBitcoinFeePercentiles(network : Types.Network) : async [Types.MillisatoshiPerVByte] {
+        await BitcoinApi.get_current_fee_percentiles(network);
+    };
+
+    // Send Bitcoin using P2PKH
+    public shared ({ caller }) func sendBitcoinP2pkh(destination : Text, amount : Types.Satoshi, network : Types.Network) : async [Nat8] {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot send Bitcoin");
+        };
+        await P2pkh.send(ecdsa_canister_actor, network, [[0]], ecdsa_key_name, destination, amount);
+    };
+
+    // Send Bitcoin using P2TR (Taproot)
+    public shared ({ caller }) func sendBitcoinP2tr(destination : Text, amount : Types.Satoshi, network : Types.Network) : async [Nat8] {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot send Bitcoin");
+        };
+        let derivation_paths = { key_path_derivation_path = [[0 : Nat8]]; script_path_derivation_path = [[0 : Nat8]] };
+        await P2tr.send_key_path(schnorr_canister_actor, network, derivation_paths, schnorr_key_name, destination, amount);
+    };
+
+    // Get P2PKH address for the canister
+    public shared func getP2pkhAddress(network : Types.Network) : async Text {
+        await P2pkh.get_address(ecdsa_canister_actor, network, ecdsa_key_name, [[0]]);
+    };
+
+    // Get P2TR address for the canister
+    public shared func getP2trAddress(network : Types.Network) : async Text {
+        let derivation_paths = { key_path_derivation_path = [[0 : Nat8]]; script_path_derivation_path = [[0 : Nat8]] };
+        await P2tr.get_address(schnorr_canister_actor, network, schnorr_key_name, derivation_paths);
     };
 };
 

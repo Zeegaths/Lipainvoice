@@ -2,6 +2,7 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
+export type BlockHash = Uint8Array | number[];
 export interface ConsentInfo {
   'metadata' : { 'utc_offset_minutes' : [] | [bigint], 'language' : string },
   'consent_message' : ConsentMessage,
@@ -27,6 +28,12 @@ export interface FileMetadata__1 {
   'path' : string,
   'size' : bigint,
   'mimeType' : string,
+}
+export interface GetUtxosResponse {
+  'next_page' : [] | [Page],
+  'tip_height' : number,
+  'tip_block_hash' : BlockHash,
+  'utxos' : Array<Utxo>,
 }
 export type HeaderField = [string, string];
 export interface HttpRequest {
@@ -56,6 +63,13 @@ export interface LightningInvoice {
   'amount' : bigint,
   'invoiceString' : string,
 }
+export type MillisatoshiPerVByte = bigint;
+export type Network = { 'mainnet' : null } |
+  { 'regtest' : null } |
+  { 'testnet' : null };
+export interface OutPoint { 'txid' : Uint8Array | number[], 'vout' : number }
+export type Page = Uint8Array | number[];
+export type Satoshi = bigint;
 export type StreamingCallback = ActorMethod<
   [StreamingToken],
   StreamingCallbackHttpResponse
@@ -68,6 +82,11 @@ export type StreamingStrategy = {
     'Callback' : { 'token' : StreamingToken, 'callback' : StreamingCallback }
   };
 export interface StreamingToken { 'resource' : string, 'index' : bigint }
+export interface Utxo {
+  'height' : number,
+  'value' : Satoshi,
+  'outpoint' : OutPoint,
+}
 export interface _SERVICE {
   'addBadge' : ActorMethod<[string, string], undefined>,
   'addInvoice' : ActorMethod<[bigint, string, [] | [string]], undefined>,
@@ -75,10 +94,18 @@ export interface _SERVICE {
   'createLightningInvoice' : ActorMethod<[bigint, bigint], LightningInvoice>,
   'getAllBitcoinMappings' : ActorMethod<[], Array<[bigint, string]>>,
   'getBadge' : ActorMethod<[string], [] | [string]>,
+  'getBitcoinBalance' : ActorMethod<[string, Network], Satoshi>,
+  'getBitcoinFeePercentiles' : ActorMethod<
+    [Network],
+    BigUint64Array | bigint[]
+  >,
+  'getBitcoinUtxos' : ActorMethod<[string, Network], GetUtxosResponse>,
   'getInvoice' : ActorMethod<[bigint], [] | [Invoice]>,
   'getInvoiceBitcoinAddress' : ActorMethod<[bigint], [] | [string]>,
   'getInvoiceFiles' : ActorMethod<[bigint], Array<FileMetadata>>,
   'getLightningInvoice' : ActorMethod<[bigint], [] | [LightningInvoice]>,
+  'getP2pkhAddress' : ActorMethod<[Network], string>,
+  'getP2trAddress' : ActorMethod<[Network], string>,
   'getTask' : ActorMethod<[bigint], [] | [string]>,
   'httpStreamingCallback' : ActorMethod<
     [StreamingToken],
@@ -95,6 +122,14 @@ export interface _SERVICE {
   'listFiles' : ActorMethod<[], Array<FileMetadata__1>>,
   'listInvoices' : ActorMethod<[], Array<[bigint, Invoice]>>,
   'listTasks' : ActorMethod<[], Array<[bigint, string]>>,
+  'sendBitcoinP2pkh' : ActorMethod<
+    [string, Satoshi, Network],
+    Uint8Array | number[]
+  >,
+  'sendBitcoinP2tr' : ActorMethod<
+    [string, Satoshi, Network],
+    Uint8Array | number[]
+  >,
   'uploadInvoiceFile' : ActorMethod<
     [bigint, string, string, Uint8Array | number[], boolean],
     [] | [string]

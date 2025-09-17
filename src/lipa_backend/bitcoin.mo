@@ -128,19 +128,5 @@ module {
         validateBitcoinAddress(address);
     };
 
-    // Generate a mock address for testing (in production, this should be done on frontend)
-    public func generateMockAddress(network : BitcoinNetwork) : BitcoinAddress {
-        let prefix = getExpectedPrefix(network);
-        // Generate a mock address body (not a real address, for testing only)
-        let mockBody = "qwertyuiopasdfghjklzxcvbnm1234567890";
-        let address = prefix # mockBody;
-        
-        // Ensure it passes basic validation
-        if (validateBitcoinAddress(address)) {
-            return address;
-        } else {
-            Debug.trap("Failed to generate mock address");
-        };
-    };
 
 };

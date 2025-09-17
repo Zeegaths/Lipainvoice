@@ -88,11 +88,55 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     }
   });
 
+  // Function to fetch user profile data from backend (simulated for now)
+  const fetchUserProfileData = async (): Promise<UserProfile> => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // TODO: Replace with actual backend call when user profile API is implemented
+    // For now, return default profile data
+    return {
+      displayName: 'John Doe',
+      professionalTitle: 'Full Stack Developer',
+      bio: 'Experienced developer with a passion for creating innovative solutions.',
+      profilePhoto: undefined,
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/johndoe',
+        twitter: 'https://twitter.com/johndoe',
+        github: 'https://github.com/johndoe',
+        website: 'https://johndoe.dev'
+      },
+      bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      withdrawalPreferences: {
+        autoWithdraw: false,
+        minimumAmount: 0.001,
+        notifyOnPayment: true
+      },
+      notificationPreferences: {
+        badgeMilestones: true,
+        clientReviews: true,
+        paymentUpdates: true,
+        progressUpdates: true,
+        emailNotifications: false
+      },
+      privacySettings: {
+        profileVisibility: 'public',
+        showEarnings: false,
+        showBadges: true,
+        showReviews: true
+      }
+    };
+  };
+
   // Load user profile data when available
   React.useEffect(() => {
     if (isAuthenticated) {
-      // TODO: Load user profile data from backend when authenticated
-      // For now, just use default profile data
+      fetchUserProfileData().then((profileData) => {
+        setProfileData(profileData);
+      }).catch((error) => {
+        console.error('Error loading user profile data:', error);
+        // Keep default profile data on error
+      });
     }
   }, [isAuthenticated]);
 

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip } from 'lucide-react';
+import { Bitcoin, DollarSign, Users, Download, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2, Zap } from 'lucide-react';
 import { useAddInvoice, useInvoices } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
-
-type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger';
+import { useLightningNetwork } from '../services/LightningService';
+import { Page } from '../App';
 
 interface InvoiceCreationProps {
   onNavigate: (page: Page) => void;
@@ -33,6 +33,16 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const { showToast } = useToast();
   const { data: tasks = [], isLoading: tasksLoading } = useInvoices();
 
+  // Lightning Network integration
+  const { 
+    isLoading: lightningLoading, 
+    isAuthenticated: lightningAuthenticated, 
+    wallet, 
+    generateWallet, 
+    createInvoice: createLightningInvoice,
+    error: lightningError 
+  } = useLightningNetwork();
+
   const [formData, setFormData] = useState({
     clientName: '',
     clientWallet: '',
@@ -42,6 +52,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
     ratePerHour: '',
     useTeamSplit: false,
     useTaskSelection: false,
+    paymentMethod: 'bitcoin' as 'bitcoin' | 'lightning', // NEW: Payment method selection
   });
 
   const [selectedTasks, setSelectedTasks] = useState<bigint[]>([]);
@@ -51,7 +62,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const [showPreview, setShowPreview] = useState(false);
   const [btcToUsd, setBtcToUsd] = useState(110_000); 
-  const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm'); // Mock Bitcoin address
+  const [generatedAddress] = useState('bc1p0gjmrhfy3gt3j8ykrw2vm7tqnzapq589kgjtg9sk6h48sjm6pv2skzgndm');
   const [createdInvoiceId, setCreatedInvoiceId] = useState<bigint | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
@@ -93,6 +104,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const effectiveHours = formData.useTaskSelection ? totalHoursFromTasks : parseFloat(formData.hoursWorked || '0');
   const totalBtc = effectiveHours * parseFloat(formData.ratePerHour || '0');
   const totalUsd = totalBtc * btcToUsd;
+  const totalSats = Math.round(totalBtc * 100000000); // Convert BTC to sats
 
   const addTeamMember = () => {
     const newId = (teamMembers.length + 1).toString();
@@ -128,6 +140,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation
     if (formData.useTeamSplit && totalPercentage !== 100) {
       showToast({
         title: 'Team member percentages must total 100%',
@@ -144,7 +157,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    // Validate required fields
     if (!formData.clientName.trim()) {
       showToast({
         title: 'Please enter a client name',
@@ -169,11 +181,151 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    // Create a structured details string that matches the backend format
+    // Handle Lightning Network payment
+    if (formData.paymentMethod === 'lightning') {
+      try {
+        console.log('Starting Lightning payment setup...');
+        
+        if (!lightningAuthenticated) {
+          showToast({ title: 'Please authenticate with Internet Identity first', type: 'error' });
+          return;
+        }
+
+        // Ensure user has Lightning wallet
+        if (!wallet) {
+          console.log('No wallet found, generating...');
+          showToast({ title: 'Creating Lightning wallet...', type: 'info' });
+
+          const walletResult = await generateWallet();
+          console.log('Wallet generation result:', walletResult);
+          
+          if (!walletResult.success) {
+            showToast({
+              title: `Failed to create Lightning wallet: ${walletResult.error}`,
+              type: 'error',
+            });
+            return;
+          }
+        }
+
+        // Create Lightning invoice
+        const description = `${formData.projectTitle} - ${formData.clientName} (${effectiveHours}h)`;
+        
+        console.log('Creating Lightning invoice with:', { amountSats: totalSats, description });
+        
+        const lightningResult = await createLightningInvoice(totalSats, description);
+        console.log('Lightning invoice result:', lightningResult);
+
+        if (lightningResult.success && lightningResult.invoice) {
+          // Store Lightning invoice data for the payment page
+          const invoiceData = {
+            invoiceNumber: `INV-${Date.now()}`,
+            freelancer: {
+              name: "Your Name", // You can customize this
+              title: "Developer",
+              email: "your-email@domain.com",
+              avatar: "YN",
+            },
+            amount: {
+              usd: totalUsd,
+              btc: totalBtc,
+              sats: totalSats,
+            },
+            items: formData.useTaskSelection 
+              ? selectedTasksData.map(task => ({
+                  description: `${task.title} (${task.timeSpent.hours}h ${task.timeSpent.minutes}m)`,
+                  amount: (task.timeSpent.hours + task.timeSpent.minutes / 60) * parseFloat(formData.ratePerHour) * btcToUsd
+                }))
+              : [{
+                  description: `${formData.projectTitle} (${effectiveHours} hours)`,
+                  amount: totalUsd
+                }],
+            clientName: formData.clientName,
+            projectTitle: formData.projectTitle,
+            projectDescription: formData.projectDescription,
+            paymentMethod: 'lightning',
+            lightningInvoice: {
+              id: lightningResult.invoice.id,
+              payment_request: lightningResult.invoice.payment_request,
+              payment_hash: lightningResult.invoice.payment_hash,
+              amount_msat: Number(lightningResult.invoice.amount_msat),
+              description: lightningResult.invoice.description,
+              expires_at: Number(lightningResult.invoice.expires_at),
+              status: lightningResult.invoice.status,
+              created_at: Number(lightningResult.invoice.created_at),
+            },
+            teamMembers: formData.useTeamSplit ? teamMembers : [],
+            selectedTasks: formData.useTaskSelection ? selectedTasksData : [],
+            uploadedFiles,
+          };
+
+          // Store in session storage for the Lightning payment page
+          sessionStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+          sessionStorage.setItem('lightningInvoice', JSON.stringify(invoiceData.lightningInvoice));
+          
+          showToast({
+            title: 'Lightning invoice created successfully!',
+            type: 'success',
+          });
+          
+          // Navigate to Lightning payment page
+          onNavigate('lightning-payment');
+          return;
+        } else {
+          showToast({
+            title: `Lightning invoice creation failed: ${lightningResult.error}`,
+            type: 'error',
+          });
+          return;
+        }
+      } catch (error) {
+        console.error('Lightning payment error:', error);
+        showToast({ title: `Lightning payment setup failed: ${error.message}`, type: 'error' });
+        return;
+      }
+    }
+
+    // Handle traditional Bitcoin payment (EXACTLY as before)
     const details = `Client: ${formData.clientName}, Amount: ${Math.round(totalBtc * 100000)}, Status: pending, Project: ${formData.projectTitle}, Hours: ${effectiveHours}, Rate: ${formData.ratePerHour}`;
 
     try {
       const invoiceId = BigInt(Date.now());
+      
+      // Store Bitcoin invoice data for payment page
+      const invoiceData = {
+        invoiceNumber: `INV-${invoiceId}`,
+        freelancer: {
+          name: "Your Name",
+          title: "Developer", 
+          email: "your-email@domain.com",
+          avatar: "YN",
+        },
+        amount: {
+          usd: totalUsd,
+          btc: totalBtc,
+          sats: totalSats,
+        },
+        items: formData.useTaskSelection 
+          ? selectedTasksData.map(task => ({
+              description: `${task.title} (${task.timeSpent.hours}h ${task.timeSpent.minutes}m)`,
+              amount: (task.timeSpent.hours + task.timeSpent.minutes / 60) * parseFloat(formData.ratePerHour) * btcToUsd
+            }))
+          : [{
+              description: `${formData.projectTitle} (${effectiveHours} hours)`,
+              amount: totalUsd
+            }],
+        clientName: formData.clientName,
+        projectTitle: formData.projectTitle,
+        projectDescription: formData.projectDescription,
+        paymentMethod: 'bitcoin',
+        btcAddress: generatedAddress,
+        teamMembers: formData.useTeamSplit ? teamMembers : [],
+        selectedTasks: formData.useTaskSelection ? selectedTasksData : [],
+        uploadedFiles,
+      };
+
+      sessionStorage.setItem('invoiceData', JSON.stringify(invoiceData));
+
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
         details: details,
@@ -182,34 +334,24 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
       setCreatedInvoiceId(invoiceId);
       
-      // Show success message
       const successMessage = `Invoice #${invoiceId} created successfully!`;
       showToast({
         title: successMessage,
         type: 'success',
       });
       
-      // Navigate back to dashboard
-      onNavigate('dashboard');
+      // Navigate to Bitcoin payment page
+      onNavigate('bitcoin-payment');
     } catch (error) {
       console.error('Error creating invoice:', error);
-      
-      // Show more specific error message
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create invoice. Please try again.';
-      showToast({
-        title: `Error: ${errorMessage}`,
-        type: 'error',
-      });
     }
   };
 
   const generateQRCode = () => {
-    // Mock QR code generation - in real app, use a QR code library
     return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=bitcoin:${generatedAddress}?amount=${totalBtc}`;
   };
 
   const downloadPDF = () => {
-    // Mock PDF download - in real app, use a PDF generation library
     alert('PDF download functionality would be implemented here');
   };
 
@@ -236,12 +378,23 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
-          {/* Invoice Header */}
           <div className="border-b border-gray-200 pb-6 mb-6">
             <div className="flex justify-between items-start">
               <div>
                 <h2 className="text-3xl font-bold text-gray-900">INVOICE</h2>
-                <p className="text-gray-600 mt-2">Bitcoin Payment Invoice</p>
+                <p className="text-gray-600 mt-2 flex items-center">
+                  {formData.paymentMethod === 'lightning' ? (
+                    <>
+                      <Zap className="h-4 w-4 mr-1 text-yellow-500" />
+                      Lightning Network Payment
+                    </>
+                  ) : (
+                    <>
+                      <Bitcoin className="h-4 w-4 mr-1 text-orange-500" />
+                      Bitcoin Payment Invoice
+                    </>
+                  )}
+                </p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-gray-600">Invoice Date</p>
@@ -250,7 +403,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
-          {/* Client & Project Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Bill To:</h3>
@@ -266,7 +418,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
 
-          {/* Selected Tasks */}
           {formData.useTaskSelection && selectedTasksData.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Work Performed:</h3>
@@ -284,7 +435,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Work Details */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
@@ -298,12 +448,14 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
               <div>
                 <p className="text-sm text-gray-600">Total Amount</p>
                 <p className="text-xl font-semibold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
-                <p className="text-sm text-gray-600">${totalUsd.toLocaleString()}</p>
+                <p className="text-sm text-gray-600">≈ ${totalUsd.toLocaleString()} USD</p>
+                {formData.paymentMethod === 'lightning' && (
+                  <p className="text-xs text-yellow-600">{totalSats.toLocaleString()} sats</p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Team Split */}
           {formData.useTeamSplit && teamMembers.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Payment Split:</h3>
@@ -318,7 +470,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Attached Files */}
           {uploadedFiles.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold text-gray-900 mb-3">Attached Files:</h3>
@@ -331,22 +482,35 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           )}
 
-          {/* Payment Info */}
           <div className="border-t border-gray-200 pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Payment Address:</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  {formData.paymentMethod === 'lightning' ? 'Lightning Invoice' : 'Payment Address'}:
+                </h3>
                 <div className="bg-gray-100 p-3 rounded break-all text-sm font-mono">
-                  {generatedAddress}
+                  {formData.paymentMethod === 'lightning' 
+                    ? 'Lightning invoice will be generated after creation'
+                    : generatedAddress
+                  }
                 </div>
               </div>
               <div className="text-center">
                 <h3 className="font-semibold text-gray-900 mb-3">QR Code:</h3>
-                <img
-                  src={generateQRCode()}
-                  alt="Bitcoin Payment QR Code"
-                  className="mx-auto border rounded"
-                />
+                {formData.paymentMethod === 'lightning' ? (
+                  <div className="w-48 h-48 bg-gray-200 rounded flex items-center justify-center mx-auto">
+                    <div className="text-center text-gray-500">
+                      <Zap className="h-8 w-8 mx-auto mb-2" />
+                      <p className="text-sm">Lightning QR will be generated</p>
+                    </div>
+                  </div>
+                ) : (
+                  <img
+                    src={generateQRCode()}
+                    alt="Bitcoin Payment QR Code"
+                    className="mx-auto border rounded"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -362,10 +526,20 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={addInvoiceMutation.isPending}
+            disabled={addInvoiceMutation.isPending || lightningLoading}
             className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
-            {addInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
+            {addInvoiceMutation.isPending || lightningLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                {formData.paymentMethod === 'lightning' ? <Zap className="h-5 w-5 mr-2" /> : <Bitcoin className="h-5 w-5 mr-2" />}
+                Create {formData.paymentMethod === 'lightning' ? 'Lightning' : 'Bitcoin'} Invoice
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -382,11 +556,97 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Create Bitcoin Invoice</h1>
-        <p className="text-gray-600">Generate a professional invoice for Bitcoin payments</p>
+        <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
+        <p className="text-gray-600">Generate a professional invoice for Bitcoin or Lightning payments</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Payment Method Selection - NEW SECTION */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center mb-4">
+            <div className="p-2 bg-yellow-100 rounded-lg">
+              <Zap className="h-5 w-5 text-yellow-600" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 ml-3">Payment Method</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+              formData.paymentMethod === 'bitcoin' ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:bg-gray-50'
+            }`}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="bitcoin"
+                checked={formData.paymentMethod === 'bitcoin'}
+                onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as 'bitcoin' | 'lightning' })}
+                className="sr-only"
+              />
+              <div className="flex items-center">
+                <Bitcoin className="h-6 w-6 text-orange-500 mr-3" />
+                <div>
+                  <div className="font-medium text-gray-900">Bitcoin (On-chain)</div>
+                  <div className="text-sm text-gray-500">Traditional Bitcoin payment</div>
+                </div>
+              </div>
+            </label>
+            
+            <label className={`flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors ${
+              formData.paymentMethod === 'lightning' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:bg-gray-50'
+            }`}>
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="lightning"
+                checked={formData.paymentMethod === 'lightning'}
+                onChange={(e) => setFormData({ ...formData, paymentMethod: e.target.value as 'bitcoin' | 'lightning' })}
+                className="sr-only"
+              />
+              <div className="flex items-center">
+                <Zap className="h-6 w-6 text-yellow-500 mr-3" />
+                <div>
+                  <div className="font-medium text-gray-900">Lightning Network</div>
+                  <div className="text-sm text-gray-500">Instant, low-fee payments</div>
+                </div>
+              </div>
+            </label>
+          </div>
+
+          {/* Lightning Status Indicator */}
+          {formData.paymentMethod === 'lightning' && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              {lightningLoading ? (
+                <div className="flex items-center text-yellow-700">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Initializing Lightning Network...
+                </div>
+              ) : !lightningAuthenticated ? (
+                <div className="text-yellow-700">
+                  <p className="font-medium">Internet Identity Required</p>
+                  <p className="text-sm">You need to be authenticated to use Lightning Network payments.</p>
+                </div>
+              ) : !wallet ? (
+                <div className="text-yellow-700">
+                  <p className="font-medium">Lightning Wallet Setup</p>
+                  <p className="text-sm">A Lightning wallet will be created automatically when you create the invoice.</p>
+                </div>
+              ) : (
+                <div className="text-green-700">
+                  <p className="font-medium">Lightning Ready</p>
+                  <p className="text-sm">Your Lightning wallet is ready. Balance: {Number(wallet.balance_sats)} sats</p>
+                </div>
+              )}
+              
+              {lightningError && (
+                <div className="text-red-700 mt-2">
+                  <p className="font-medium">Error:</p>
+                  <p className="text-sm">{lightningError}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Client Information */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
@@ -412,14 +672,15 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client Bitcoin Wallet (Optional)
+                Client {formData.paymentMethod === 'lightning' ? 'Lightning/Bitcoin Wallet (Optional)' : 'Bitcoin Wallet'}
               </label>
               <input
                 type="text"
                 value={formData.clientWallet}
                 onChange={(e) => setFormData({ ...formData, clientWallet: e.target.value })}
                 className="input-field"
-                placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                placeholder={formData.paymentMethod === 'lightning' ? 'Lightning address or Bitcoin wallet' : 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'}
+                required={formData.paymentMethod === 'bitcoin'}
               />
             </div>
           </div>
@@ -429,7 +690,11 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
             <div className="p-2 bg-green-100 rounded-lg">
-              <Bitcoin className="h-5 w-5 text-green-600" />
+              {formData.paymentMethod === 'lightning' ? (
+                <Zap className="h-5 w-5 text-green-600" />
+              ) : (
+                <Bitcoin className="h-5 w-5 text-green-600" />
+              )}
             </div>
             <h2 className="text-lg font-semibold text-gray-900 ml-3">Project Details</h2>
           </div>
@@ -464,7 +729,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           </div>
         </div>
 
-        {/* Task Selection */}
+        {/* Work Details */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
@@ -496,7 +761,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                     <p>No tasks available</p>
                     <button
                       type="button"
-                      onClick={() => onNavigate('task-logger')}
+                      onClick={() => onNavigate('dashboard')}
                       className="text-blue-600 hover:text-blue-700 text-sm mt-2"
                     >
                       Go to Task Logger to create tasks
@@ -578,6 +843,9 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                 <div className="text-right">
                   <p className="text-xl font-bold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
                   <p className="text-sm text-gray-600">≈ ${totalUsd.toLocaleString()} USD</p>
+                  {formData.paymentMethod === 'lightning' && (
+                    <p className="text-xs text-yellow-600">{totalSats.toLocaleString()} sats</p>
+                  )}
                   <p className="text-xs text-gray-500">{effectiveHours.toFixed(2)} hours</p>
                 </div>
               </div>
@@ -615,7 +883,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                       value={member.walletAddress}
                       onChange={(e) => updateTeamMember(member.id, 'walletAddress', e.target.value)}
                       className="input-field"
-                      placeholder="Bitcoin wallet address"
+                      placeholder={formData.paymentMethod === 'lightning' ? 'Lightning/Bitcoin wallet address' : 'Bitcoin wallet address'}
                       required={formData.useTeamSplit}
                     />
                   </div>
@@ -691,21 +959,36 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 md:justify-end justify-between">
           <button
             type="button"
             onClick={() => setShowPreview(true)}
             className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
           >
             <QrCode className="h-5 w-5 mr-2" />
-            Preview Invoice
+            Preview
           </button>
           <button
             type="submit"
-            disabled={addInvoiceMutation.isPending || (formData.useTeamSplit && totalPercentage !== 100) || (formData.useTaskSelection && selectedTasks.length === 0)}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            disabled={
+              addInvoiceMutation.isPending || 
+              (formData.useTeamSplit && totalPercentage !== 100) || 
+              (formData.useTaskSelection && selectedTasks.length === 0) ||
+              (formData.paymentMethod === 'lightning' && lightningLoading)
+            }
+            className="flex items-center md:w-1/4 w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {addInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
+            {addInvoiceMutation.isPending || lightningLoading ? (
+              <>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                {formData.paymentMethod === 'lightning' ? <Zap className="h-5 w-5 mr-2" /> : <Bitcoin className="h-5 w-5 mr-2" />}
+                Create {formData.paymentMethod === 'lightning' ? 'Lightning' : 'Bitcoin'} Invoice
+              </>
+            )}
           </button>
         </div>
       </form>

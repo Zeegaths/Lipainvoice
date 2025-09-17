@@ -17,15 +17,16 @@ import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
 import BitcoinPaymentPage from './pages/BitcoinPaymentPage'
+import LightningPaymentPage from './pages/LightningPaymentSystem';
 
-type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+type Page = 'landing' | 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet' | 'lightning-payment';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [clientPortalInvoiceId, setClientPortalInvoiceId] = useState<string | null>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const { identity, status:loginStatus } = useInternetIdentity();
+  const { identity, status: loginStatus } = useInternetIdentity();
 
   const isAuthenticated = !!identity;
   const isLoading = loginStatus === 'logging-in';
@@ -35,7 +36,7 @@ function App() {
   const invoiceIdFromUrl = urlParams.get('invoice');
   const pathSegments = window.location.pathname.split('/');
   const isPublicInvoiceView = pathSegments[1] === 'invoice' && pathSegments[2];
-  
+
   // If there's an invoice ID in URL path and we're not authenticated, show public invoice view
   if (isPublicInvoiceView && !isAuthenticated) {
     const publicInvoiceId = pathSegments[2];
@@ -47,7 +48,7 @@ function App() {
       </ErrorBoundary>
     );
   }
-  
+
   // If there's an invoice ID in URL params and we're not authenticated, show client portal
   if (invoiceIdFromUrl && !isAuthenticated && currentPage !== 'client-portal') {
     setCurrentPage('client-portal');
@@ -71,9 +72,9 @@ function App() {
     return (
       <ErrorBoundary>
         <ToastProvider>
-          <ClientPaymentPortal 
-            invoiceId={invoiceIdFromUrl} 
-            onBack={() => setCurrentPage('landing')} 
+          <ClientPaymentPortal
+            invoiceId={invoiceIdFromUrl}
+            onBack={() => setCurrentPage('landing')}
           />
         </ToastProvider>
       </ErrorBoundary>
@@ -106,22 +107,22 @@ function App() {
       <ToastProvider>
         <div className="flex h-screen bg-gray-50">
           {/* Sidebar */}
-          <Sidebar 
-            isOpen={sidebarOpen} 
+          <Sidebar
+            isOpen={sidebarOpen}
             onClose={() => setSidebarOpen(false)}
             currentPage={currentPage}
             onNavigate={(page: Page) => setCurrentPage(page)}
           />
-          
+
           {/* Main content */}
           <div className="flex-1 flex flex-col overflow-hidden">
             {/* Top Navigation */}
-            <TopNavigation 
+            <TopNavigation
               onMenuClick={() => setSidebarOpen(true)}
               onSettingsClick={() => setCurrentPage('settings')}
               onNotificationsClick={() => setShowNotifications(true)}
             />
-            
+
             {/* Main content area */}
             <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
               <div className="animate-fade-in">
@@ -135,25 +136,27 @@ function App() {
                       return <TaskLogger onNavigate={setCurrentPage} />;
                     case 'team-payments':
                       return <TeamPayments onNavigate={setCurrentPage} />;
+                    case 'lightning-payment':
+                      return <LightningPaymentPage onNavigate={setCurrentPage} />;
                     case 'settings':
-                      return <FreelancerSettings onNavigate={setCurrentPage} />;
+                      return <BitcoinPaymentPage onNavigate={setCurrentPage} />;
                     default:
                       return <Dashboard onNavigate={setCurrentPage} />;
                   }
                 })()}
               </div>
             </main>
-            
+
             {/* Footer */}
             <footer className="footer no-print">
               Lipa Invoice © 2025 <span className="text-red-500">♥</span>
-              <a 
-                href="https://icphubkenya.io/" 
-                target="_blank" 
+              <a
+                href="https://icphubkenya.io/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:underline focus:underline focus:outline-none"
               >
-                
+
               </a>
             </footer>
           </div>

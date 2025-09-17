@@ -1,16 +1,12 @@
 {
-  "canisters": {
-    "internet_identity": {
-      "type": "pull",
-      "id": "rdmx6-jaaaa-aaaah-qdrva-cai"
-    },
+  "canisters": {   
     "lightning_backend": {
       "main": "src/lipa_backend/lightning.mo", 
-      "type": "motoko"
+      "type": "motoko"      
     },
     "lipa_backend": {
       "main": "src/lipa_backend/main.mo",
-      "type": "motoko"
+      "type": "motoko"      
     },
     "ic_siwb_provider": {
       "candid": "packages/ic_siwb_provider/ic_siwb_provider.did",

@@ -27,5 +27,8 @@
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11",
     "vite": "^7.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.0"
   }
 }

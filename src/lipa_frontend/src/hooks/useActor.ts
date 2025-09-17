@@ -4,6 +4,7 @@ import { canisterId } from '../../../declarations/lipa_backend';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { _SERVICE } from '../../../declarations/lipa_backend/lipa_backend.did';
 import { useEffect, useState } from 'react';
+import { HttpAgent } from '@dfinity/agent';
 
 const ACTOR_QUERY_KEY = 'actor';
 
@@ -20,34 +21,50 @@ export function useActor() {
         }
     }, [identity]);
 
+    const createLocalAgent = (identity?: any) => {
+        const isLocal = process.env.DFX_NETWORK === 'local' || process.env.NODE_ENV === 'development';
+
+        const host = isLocal
+            ? 'http://127.0.0.1:4943'
+            : 'https://ic0.app';
+
+        const agent = new HttpAgent({
+            host,
+            verifyQuerySignatures: !isLocal,
+            ...(identity && { identity })
+        });
+
+        // Fetch root key for local development
+        if (isLocal) {
+            agent.fetchRootKey().catch(console.warn);
+        }
+
+        return agent;
+    };
+
+
     const actorQuery = useQuery<_SERVICE>({
         queryKey: [ACTOR_QUERY_KEY, principal],
         queryFn: async () => {
             if (!identity) {
-                // Return anonymous actor if not authenticated
-                return await createActor(canisterId);
+                // Create anonymous actor with local agent
+                const agent = createLocalAgent();
+                return await createActor(canisterId, { agent });
             }
 
-            const actorOptions = {
-                agentOptions: {
-                    identity
-                }
-            };
+            // Create authenticated actor with local agent
+            const agent = createLocalAgent(identity);
+            const actor = createActor(canisterId, { agent });
 
-            const actor =  createActor(canisterId, actorOptions);
-            
-            // Initialize auth if the method exists
             try {
                 await actor.initializeAuth();
             } catch (error) {
                 console.warn('initializeAuth method not available or failed:', error);
             }
-            
+
             return actor;
         },
-        // Only refetch when identity changes
         staleTime: Infinity,
-        // This will cause the actor to be recreated when the identity changes
         enabled: true
     });
 

@@ -1,9 +1,11 @@
-const ENVIRONMENT = "development";
+const ENVIRONMENT = "production";
+
 
 export const getEnvironment = () => {
     return ENVIRONMENT;
 }
 
 export const getHost = () => {
-    return ENVIRONMENT === "development" ? "http://localhost:8080" : "https://lipa.ic0.app";
+    const environment = getEnvironment();
+    return environment === "production" ? "https://lipa.ic0.app" : "http://localhost:8080";
 }

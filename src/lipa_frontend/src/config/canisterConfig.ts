@@ -1,3 +1,5 @@
+import { getEnvironment } from "../utils";
+
 interface CanisterConfig {
   [canisterName: string]: {
     [network: string]: string;
@@ -5,19 +7,23 @@ interface CanisterConfig {
 }
 
 const canisterIds: CanisterConfig = {
-  lipa_backend: {
-    local: 'u6s2n-gx777-77774-qaaba-cai'
+ ic_siwb_provider: {
+    "ic": "vuhp5-qiaaa-aaaan-qz6vq-cai",
+    "local": "uxrrr-q7777-77774-qaaaq-cai"
   },
-  ic_siwb_provider: {
-    local: 'uxrrr-q7777-77774-qaaaq-cai'
+  lipa_backend: {
+    "ic": "vba6q-raaaa-aaaan-qz6wa-cai",
+    "local": "u6s2n-gx777-77774-qaaba-cai"
   },
   lipa_frontend: {
-    local: 'uzt4z-lp777-77774-qaabq-cai'
+    "ic": "vgbye-4yaaa-aaaan-qz6wq-cai",
+    "local": "uzt4z-lp777-77774-qaabq-cai"
   }
 };
 
 export const getCanisterId = (canisterName: string): string => {
-  const network = import.meta.env.DFX_NETWORK || 'local';
+  const environment = getEnvironment();
+  const network = environment === "development" ? "local" : "ic";
   const canisterConfig = canisterIds[canisterName];
 
   if (!canisterConfig) {

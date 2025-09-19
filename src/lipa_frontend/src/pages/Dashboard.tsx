@@ -153,7 +153,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               <Clock className="h-16 w-16 text-yellow-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600 font-body">Total Pending</p>
-                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalUnpaid).toLocaleString()}</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">${(totalUnpaid).toLocaleString()}</p>
               </div>
             </div>
 
@@ -244,11 +244,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredInvoices && filteredInvoices.slice(0, 7).map((invoice, index) => (
                     <tr key={invoice.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        INV-{String(invoice.id).padStart(4, '0')}
+                        INV-{String(invoice.id).slice(-4)}...
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@{invoice.client.toLowerCase().replace(/\s+/g, '')}@gmail.com</td>

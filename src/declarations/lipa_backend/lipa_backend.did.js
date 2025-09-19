@@ -139,6 +139,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getP2pkhAddress' : IDL.Func([Network], [IDL.Text], []),
     'getP2trAddress' : IDL.Func([Network], [IDL.Text], []),
+    'getPublicInvoice' : IDL.Func([IDL.Nat], [IDL.Opt(Invoice)], ['query']),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
         [StreamingToken],

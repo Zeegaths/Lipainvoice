@@ -136,6 +136,7 @@ service : {
   getLightningInvoice: (invoiceId: nat) -> (opt LightningInvoice) query;
   getP2pkhAddress: (network: Network) -> (text);
   getP2trAddress: (network: Network) -> (text);
+  getPublicInvoice: (id: nat) -> (opt Invoice) query;
   getTask: (id: nat) -> (opt text) query;
   httpStreamingCallback: (token: StreamingToken) ->
    (StreamingCallbackHttpResponse) query;

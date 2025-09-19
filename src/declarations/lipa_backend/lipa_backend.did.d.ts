@@ -106,6 +106,7 @@ export interface _SERVICE {
   'getLightningInvoice' : ActorMethod<[bigint], [] | [LightningInvoice]>,
   'getP2pkhAddress' : ActorMethod<[Network], string>,
   'getP2trAddress' : ActorMethod<[Network], string>,
+  'getPublicInvoice' : ActorMethod<[bigint], [] | [Invoice]>,
   'getTask' : ActorMethod<[bigint], [] | [string]>,
   'httpStreamingCallback' : ActorMethod<
     [StreamingToken],

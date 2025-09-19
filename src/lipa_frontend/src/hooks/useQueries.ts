@@ -229,7 +229,7 @@ export function useInvoiceById(id: bigint) {
       });
 
       try {
-        const invoice = await backendActor.getInvoice(id);
+        const invoice = await backendActor.getPublicInvoice(id);
         const nullInvoice = {
           id: BigInt(0),
           details: {

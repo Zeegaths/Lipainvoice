@@ -392,6 +392,18 @@ persistent actor FreelancerDashboard {
         };
     };
 
+    // Get public invoice
+    public query func getPublicInvoice(id : Nat) : async ?Invoice {
+    // Search through all users' invoices
+    for ((principal, userInvoices) in principalMap.entries(invoices)) {
+        switch (natMap.get(userInvoices, id)) {
+            case (?invoice) return ?invoice;
+            case null {};
+        };
+    };
+    null;
+};
+
     // Get invoice files
     public query ({ caller }) func getInvoiceFiles(invoiceId : Nat) : async [FileMetadata] {
         if (Principal.isAnonymous(caller)) {

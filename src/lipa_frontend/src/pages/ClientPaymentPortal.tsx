@@ -3,6 +3,7 @@ import { CheckCircle, AlertCircle, FileText, ArrowLeft } from 'lucide-react';
 import FileList from '../components/FileList';
 import { useInvoiceById } from '../hooks/useQueries';
 import { useToast } from '../components/ToastContainer';
+import { useTransferCkBtcWithAgent } from '../hooks/useTransfer';
 
 interface ClientPaymentPortalProps {
   invoiceId: string;
@@ -15,14 +16,36 @@ const ClientPaymentPortal = ({ invoiceId, onBack }: ClientPaymentPortalProps) =>
   const [paymentStatus, setPaymentStatus] = useState<'pending' | 'verifying' | 'confirmed' | 'failed'>('pending');
   const [btcToUsd] = useState(115000);
   const { showToast } = useToast();
+  const { mutate, isPending, error: transferError } = useTransferCkBtcWithAgent();
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     console.log('handlePayment');
-    showToast({
-      title: 'Payment initiated',
-      message: 'Payment initiated',
-      type: 'success',
-    });
+    if (!invoice) {
+      showToast({
+        title: 'Error',
+        message: 'Invoice not found',
+        type: 'error',
+      });
+      return;
+    }
+    try {
+      const parsedAmount = parseFloat(invoice.details.Amount) / btcToUsd;
+      console.log('parsedAmount', parsedAmount);
+      mutate(parsedAmount);
+      showToast({
+        title: 'Payment initiated',
+        message: 'Payment initiated',
+        type: 'success',
+      });
+    } catch (error) {
+      showToast({
+        title: 'Error',
+        message: 'Error initiating payment',
+        type: 'error',
+      });
+      console.log('error', error);
+    }
+   
   };
 
   const generateQRCode = (address: string, amount: number) => {
@@ -55,7 +78,7 @@ const ClientPaymentPortal = ({ invoiceId, onBack }: ClientPaymentPortalProps) =>
 
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-2">
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-2">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Invoice Not Found</h1>
@@ -68,12 +91,13 @@ const ClientPaymentPortal = ({ invoiceId, onBack }: ClientPaymentPortalProps) =>
             Go Back
           </button>
         </div>
+        <p className='text-sm text-gray-500'>Remember, you need to be logged in to view this invoice.</p>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-gray-50 max-w-4xl mx-auto px-6 py-4" >
+    <div className="h-screen bg-gray-50 max-w-4xl mx-auto px-6 py-4 flex flex-col items-center justify-center" >
       <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
               <button

@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Search, Plus, Wallet, Clock, Calendar, BadgeDollarSign } from 'lucide-react';
+import { Search, Plus, Wallet, Clock, Calendar, BadgeDollarSign, Share2 } from 'lucide-react';
 import { useInvoices } from '../hooks/useQueries';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Page } from '../App';
+import { getEnvironment } from '../utils';
+import { useToast } from '../components/ToastContainer';
+const baseLink = getEnvironment() === 'development' ? ' http://localhost:3000/?invoice=' : 'https://mpigd-gqaaa-aaaaj-qnsoq-cai.icp0.io/?invoice=';
+
 
 interface DashboardProps {
   onNavigate: (page: Page) => void;
@@ -34,6 +38,7 @@ interface Invoice {
 type Tab = "all" | "pending" | "paid"
 
 const Dashboard = ({ onNavigate }: DashboardProps) => {
+  const { showToast } = useToast();
   const { data: backendInvoices, isLoading, error } = useInvoices();
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("all");
@@ -129,6 +134,14 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
   const totalPaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'paid').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
   const totalUnpaid = transformedInvoices.filter((inv: Invoice) => inv.status === 'unpaid' || inv.status === 'pending').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
   const totalOverdue = transformedInvoices.filter((inv: Invoice) => inv.status === 'overdue').reduce((sum: number, inv: Invoice) => sum + inv.amount, 0);
+
+  const copyLink = (invoiceId: number) => {
+    showToast({
+      title: `Link to invoice #${invoiceId} copied to clipboard`,
+      type: 'success',
+    });
+    navigator.clipboard.writeText(baseLink + invoiceId);
+  };
   return (
     <div className="min-h-screen bg-gray-50">
 
@@ -153,7 +166,7 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
               <Clock className="h-16 w-16 text-yellow-600" />
               <div>
                 <p className="text-sm font-medium text-gray-600 font-body">Total Pending</p>
-                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">{(totalUnpaid).toLocaleString()}</p>
+                <p className="text-4xl font-mono lg:text-2xl font-bold text-gray-900">${(totalUnpaid).toLocaleString()}</p>
               </div>
             </div>
 
@@ -244,11 +257,8 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredInvoices && filteredInvoices.slice(0, 7).map((invoice, index) => (
                     <tr key={invoice.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <input type="checkbox" className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        INV-{String(invoice.id).padStart(4, '0')}
+                        INV-{String(invoice.id).slice(-4)}...
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">@{invoice.client.toLowerCase().replace(/\s+/g, '')}@gmail.com</td>
@@ -264,7 +274,9 @@ const Dashboard = ({ onNavigate }: DashboardProps) => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <button className="text-gray-400 hover:text-gray-600">•••</button>
+                        <button className="text-gray-400 hover:text-gray-600" onClick={() => copyLink(invoice.id)}>
+                          <Share2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}

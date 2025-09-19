@@ -219,7 +219,10 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   };
 
   const copyLink = () => {
-    alert('Link copied to clipboard');
+    showToast({
+      title: 'Link copied to clipboard',
+      type: 'success',
+    });
     navigator.clipboard.writeText(baseLink + invoiceId);
   };
 

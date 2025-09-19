@@ -4,11 +4,7 @@ type LightningInvoice__609048747 =
 actor {
   stable var bitcoinAddressMap : [(Nat, Text)];
   stable var bitcoinMappingsStable : [(Nat, Text)];
-<<<<<<< HEAD
-  stable var lightningInvoicesStable : [(Nat, LightningInvoice__609048747)]
-=======
   stable var ecdsa_key_name : Text;
-  stable var lightningInvoicesStable : [(Nat, LightningInvoice__1014944640)];
+  stable var lightningInvoicesStable : [(Nat, LightningInvoice__609048747)];
   stable var schnorr_key_name : Text
->>>>>>> 74cab03bdf36d069604e8c0b89498c23838094cd
 };

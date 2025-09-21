@@ -134,9 +134,24 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const totalPercentage = teamMembers.reduce((sum, member) => sum + member.percentage, 0);
 
-  // Simple validation - just check if address is not empty
+  // Comprehensive Bitcoin address and Lightning invoice validation
   const isValidBitcoinAddress = (address: string): boolean => {
-    return Boolean(address && address.trim() !== '');
+    if (!address || address.trim() === '') return false;
+
+    const trimmedAddress = address.trim();
+
+    // Lightning Network invoice validation (lnbc, lntb, lnbcrt prefixes)
+    const lightningRegex = /^lnbc[0-9a-z]*|^lntb[0-9a-z]*|^lnbcrt[0-9a-z]*/i;
+    if (lightningRegex.test(trimmedAddress)) {
+      // Basic Lightning invoice structure validation
+      // Lightning invoices should have minimum length and contain expected characters
+      return trimmedAddress.length >= 100 && /^[lnbcrtlntb0-9a-z]+$/i.test(trimmedAddress);
+    }
+
+    // Bitcoin address validation: Legacy (P2PKH), P2SH, Bech32, Bech32m
+    // Updated to support all Bitcoin address formats including Bech32m (bc1p) and testnet (tb1)
+    const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$|^bc1p[a-z0-9]{58,62}$|^tb1[a-z0-9]{39,59}$|^tb1p[a-z0-9]{58,62}$|^bcrt1[a-z0-9]{39,59}$/;
+    return btcRegex.test(trimmedAddress);
   };
 
   const handleFileUploadComplete = (filePath: string) => {
@@ -178,15 +193,22 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
-    // Validate Bitcoin address or Lightning invoice if provided
+    // Validate Bitcoin address (Lightning invoices will be handled separately)
     const addressToUse = formData.clientWallet.trim() !== '' ? formData.clientWallet : generatedAddress;
-    if (!isValidBitcoinAddress(addressToUse)) {
+    
+    // Check if it's a Lightning invoice
+    const isLightningInvoice = addressToUse.startsWith('lnbc') || addressToUse.startsWith('lntb') || addressToUse.startsWith('lnbcrt');
+    
+    if (!isLightningInvoice && !isValidBitcoinAddress(addressToUse)) {
       showToast({
-        title: 'Please enter a Bitcoin address or Lightning invoice',
+        title: 'Please enter a proper Bitcoin address',
         type: 'error',
       });
       return;
     }
+    
+    // For Lightning invoices, don't pass to backend Bitcoin address field
+    const bitcoinAddressForBackend = isLightningInvoice ? undefined : addressToUse;
 
     // Validate based on billing type
     if (formData.billingType === 'service') {
@@ -213,7 +235,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
         details: details,
-        address: addressToUse
+        address: bitcoinAddressForBackend
       });
 
       
@@ -476,7 +498,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                 placeholder="Enter any Bitcoin address or Lightning invoice"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Accepts any Bitcoin address format (Legacy, P2SH, Bech32, Bech32m) or Lightning Network invoice<br/>
+                Accepts Bitcoin addresses (Legacy, P2SH, Bech32, Bech32m) or Lightning invoices (lnbc, lntb, lnbcrt)<br/>
                 Leave empty to use the default generated address: {generatedAddress.substring(0, 20)}...
               </p>
             </div>

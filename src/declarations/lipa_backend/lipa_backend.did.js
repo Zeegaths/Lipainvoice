@@ -103,6 +103,10 @@ export const idlFactory = ({ IDL }) => {
     'size' : IDL.Nat,
     'mimeType' : IDL.Text,
   });
+  const BitcoinNetwork = IDL.Variant({
+    'mainnet' : IDL.Null,
+    'testnet' : IDL.Null,
+  });
   return IDL.Service({
     'addBadge' : IDL.Func([IDL.Text, IDL.Text], [], []),
     'addInvoice' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
@@ -186,6 +190,11 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'validateBitcoinAddress' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
+    'validateBitcoinAddressForNetwork' : IDL.Func(
+        [IDL.Text, BitcoinNetwork],
+        [IDL.Bool],
+        ['query'],
+      ),
   });
 };
 export const init = ({ IDL }) => { return []; };

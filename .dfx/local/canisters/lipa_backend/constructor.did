@@ -117,6 +117,11 @@ type ConsentInfo =
              };
  };
 type BlockHash = vec nat8;
+type BitcoinNetwork = 
+ variant {
+   mainnet;
+   testnet;
+ };
 service : {
   addBadge: (name: text, description: text) -> ();
   addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
@@ -165,4 +170,6 @@ service : {
   uploadInvoiceFile: (invoiceId: nat, fileName: text, mimeType: text, chunk:
    blob, complete: bool) -> (opt text);
   validateBitcoinAddress: (address: text) -> (bool) query;
+  validateBitcoinAddressForNetwork: (address: text, network:
+   BitcoinNetwork) -> (bool) query;
 }

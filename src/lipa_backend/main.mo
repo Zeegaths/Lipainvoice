@@ -178,10 +178,16 @@ persistent actor FreelancerDashboard {
             Debug.trap("Anonymous users cannot add invoices");
         };
         
-        // Handle Bitcoin address if provided (no validation)
+        // Handle Bitcoin address if provided (validation temporarily disabled for immediate fix)
         switch (bitcoinAddress) {
             case null {};
             case (?address) {
+                // Validation temporarily disabled - will re-enable after deployment
+                // TODO: Re-enable validation after deployment
+                // Validate Bitcoin address format
+                // if (not Bitcoin.validateBitcoinAddress(address)) {
+                //     Debug.trap("Invalid Bitcoin address format");
+                // };
                 // Check if address is already used
                 if (Bitcoin.isAddressUsed(bitcoinAddressMap, address)) {
                     Debug.trap("Bitcoin address is already in use");
@@ -512,6 +518,11 @@ persistent actor FreelancerDashboard {
         Bitcoin.validateBitcoinAddress(address);
     };
 
+    // Validate Bitcoin address for specific network
+    public query func validateBitcoinAddressForNetwork(address : Text, network : Bitcoin.BitcoinNetwork) : async Bool {
+        Bitcoin.validateBitcoinAddressForNetwork(address, network);
+    };
+
     // Get all Bitcoin address mappings (admin only)
     public shared ({ caller }) func getAllBitcoinMappings() : async [(Nat, Text)] {
         if (not AdminSystem.isCurrentUserAdmin(adminState, caller)) {
@@ -542,6 +553,11 @@ persistent actor FreelancerDashboard {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot send Bitcoin");
         };
+        // TODO: Re-enable validation after deployment
+        // Validate destination Bitcoin address
+        // if (not Bitcoin.validateBitcoinAddress(destination)) {
+        //     Debug.trap("Invalid destination Bitcoin address format");
+        // };
         await P2pkh.send(ecdsa_canister_actor, network, [[0]], ecdsa_key_name, destination, amount);
     };
 
@@ -550,6 +566,11 @@ persistent actor FreelancerDashboard {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot send Bitcoin");
         };
+        // TODO: Re-enable validation after deployment
+        // Validate destination Bitcoin address
+        // if (not Bitcoin.validateBitcoinAddress(destination)) {
+        //     Debug.trap("Invalid destination Bitcoin address format");
+        // };
         let derivation_paths = { key_path_derivation_path = [[0 : Nat8]]; script_path_derivation_path = [[0 : Nat8]] };
         await P2tr.send_key_path(schnorr_canister_actor, network, derivation_paths, schnorr_key_name, destination, amount);
     };

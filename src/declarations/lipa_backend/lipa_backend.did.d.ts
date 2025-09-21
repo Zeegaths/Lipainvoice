@@ -2,6 +2,8 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
+export type BitcoinNetwork = { 'mainnet' : null } |
+  { 'testnet' : null };
 export type BlockHash = Uint8Array | number[];
 export interface ConsentInfo {
   'metadata' : { 'utc_offset_minutes' : [] | [bigint], 'language' : string },
@@ -136,6 +138,10 @@ export interface _SERVICE {
     [] | [string]
   >,
   'validateBitcoinAddress' : ActorMethod<[string], boolean>,
+  'validateBitcoinAddressForNetwork' : ActorMethod<
+    [string, BitcoinNetwork],
+    boolean
+  >,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

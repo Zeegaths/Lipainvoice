@@ -142,7 +142,7 @@ export function useAddInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, details, address }: { id: bigint; details: string, address: string }) => {
+    mutationFn: async ({ id, details, address }: { id: bigint; details: string, address: string | undefined }) => {
       if (!identity) {
         console.log("Identity not available");
         console.log(identity);
@@ -165,7 +165,7 @@ export function useAddInvoice() {
         canisterId
       });
 
-      return backendActor.addInvoice(id, details, [address]);
+      return backendActor.addInvoice(id, details, address ? [address] : []);
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({

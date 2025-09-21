@@ -200,8 +200,8 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
   };
 
   const validateBitcoinAddress = (address: string) => {
-    // Basic Bitcoin address validation
-    const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/;
+    // Comprehensive Bitcoin address validation supporting all formats
+    const btcRegex = /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$|^bc1p[a-z0-9]{58,62}$|^tb1[a-z0-9]{39,59}$|^tb1p[a-z0-9]{58,62}$|^bcrt1[a-z0-9]{39,59}$/;
     return btcRegex.test(address);
   };
 

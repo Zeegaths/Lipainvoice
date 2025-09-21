@@ -134,6 +134,10 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
 
   const totalPercentage = teamMembers.reduce((sum, member) => sum + member.percentage, 0);
 
+  // Simple validation - just check if address is not empty
+  const isValidBitcoinAddress = (address: string): boolean => {
+    return Boolean(address && address.trim() !== '');
+  };
 
   const handleFileUploadComplete = (filePath: string) => {
     setUploadedFiles(prev => [...prev, filePath]);
@@ -174,6 +178,16 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       return;
     }
 
+    // Validate Bitcoin address or Lightning invoice if provided
+    const addressToUse = formData.clientWallet.trim() !== '' ? formData.clientWallet : generatedAddress;
+    if (!isValidBitcoinAddress(addressToUse)) {
+      showToast({
+        title: 'Please enter a Bitcoin address or Lightning invoice',
+        type: 'error',
+      });
+      return;
+    }
+
     // Validate based on billing type
     if (formData.billingType === 'service') {
       if (!formData.ratePerHour || parseFloat(formData.ratePerHour) <= 0) {
@@ -199,7 +213,7 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
       await addInvoiceMutation.mutateAsync({
         id: invoiceId,
         details: details,
-        address: formData.clientWallet
+        address: addressToUse
       });
 
       
@@ -419,23 +433,6 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
             </div>
           </div>
         </div>
-
-        <div className="flex space-x-4">
-          <button
-            onClick={copyLink}
-            className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            <CopyPlus className="h-5 w-5 mr-2" />
-            Copy Link
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={addInvoiceMutation.isPending}
-            className="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-          >
-            {addInvoiceMutation.isPending ? 'Creating...' : 'Create Invoice'}
-          </button>
-        </div>
       </div>
     );
   }
@@ -450,242 +447,172 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Dashboard
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">Create Bitcoin Invoice</h1>
-        <p className="text-gray-600">Generate a professional invoice for Bitcoin payments</p>
+        <h1 className="text-2xl font-bold text-gray-900">Create Invoice</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white rounded-3xl border border-gray-300 p-6">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 ml-3">Client Information</h2>
-          </div>
-
+        {/* Client Information */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Client Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client Name
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Client Name *</label>
               <input
                 type="text"
                 value={formData.clientName}
                 onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                className="input-field rounded-3xl"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter client name"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Client Bitcoin Wallet (Optional)
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Client Wallet Address / Lightning Invoice</label>
               <input
                 type="text"
                 value={formData.clientWallet}
                 onChange={(e) => setFormData({ ...formData, clientWallet: e.target.value })}
-                className="input-field rounded-3xl"
-                placeholder="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter any Bitcoin address or Lightning invoice"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Accepts any Bitcoin address format (Legacy, P2SH, Bech32, Bech32m) or Lightning Network invoice<br/>
+                Leave empty to use the default generated address: {generatedAddress.substring(0, 20)}...
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Bitcoin className="h-5 w-5 text-green-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 ml-3">Payment Details</h2>
-          </div>
-
+        {/* Project Information */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h2>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Title
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Project Title *</label>
               <input
                 type="text"
                 value={formData.projectTitle}
                 onChange={(e) => setFormData({ ...formData, projectTitle: e.target.value })}
-                className="input-field rounded-3xl"
-                placeholder="Enter payment title"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter project title"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Payment Description
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Project Description</label>
               <textarea
                 value={formData.projectDescription}
                 onChange={(e) => setFormData({ ...formData, projectDescription: e.target.value })}
-                className="input-field rounded-3xl"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows={3}
-                placeholder="What work/service is being provided?"
-                required
+                placeholder="Enter project description"
               />
             </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <CheckSquare className="h-5 w-5 text-purple-600" />
-              </div>
-              <h2 className="text-lg font-semibold text-gray-900 ml-3">Billing Details</h2>
-            </div>
+        {/* Billing Type */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Billing Type</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: 'service', label: 'Service', icon: '💼' },
+              { value: 'restaurant', label: 'Restaurant', icon: '🍽️' },
+              { value: 'fare', label: 'Transport', icon: '🚗' },
+              { value: 'custom', label: 'Custom', icon: '📝' }
+            ].map((type) => (
+              <label key={type.value} className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="billingType"
+                  value={type.value}
+                  checked={formData.billingType === type.value}
+                  onChange={(e) => setFormData({ ...formData, billingType: e.target.value as any })}
+                  className="text-blue-600"
+                />
+                <span className="text-xl">{type.icon}</span>
+                <span className="text-sm">{type.label}</span>
+              </label>
+            ))}
           </div>
+        </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Payment Type
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {[
-                { value: 'service', label: 'Service/Work', icon: '💼' },
-                { value: 'restaurant', label: 'Restaurant', icon: '🍽️' },
-                { value: 'fare', label: 'Transport', icon: '🚗' },
-                { value: 'custom', label: 'Custom', icon: '📝' }
-              ].map((type) => (
-                <button
-                  key={type.value}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, billingType: type.value as any })}
-                  className={`p-3 rounded-xl border-2 transition-all ${
-                    formData.billingType === type.value
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{type.icon}</div>
-                  <div className="text-xs font-medium">{type.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Dynamic Billing Fields */}
-          {formData.billingType === 'service' && (
-            <>
-              <div className="max-w-md mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Hours Worked
-                </label>
+        {/* Service Billing */}
+        {formData.billingType === 'service' && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Service Billing</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Hours Worked</label>
                 <input
                   type="number"
                   step="0.1"
                   value={formData.hoursWorked}
                   onChange={(e) => setFormData({ ...formData, hoursWorked: e.target.value })}
-                  className="input-field rounded-3xl"
-                  placeholder="0.0"
-                  required={!formData.useTaskSelection}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter hours worked"
                 />
               </div>
-              <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Rate per Hour (BTC)
-                </label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rate per Hour (BTC)</label>
                 <input
                   type="number"
                   step="0.00000001"
                   value={formData.ratePerHour}
                   onChange={(e) => setFormData({ ...formData, ratePerHour: e.target.value })}
-                  className="input-field rounded-3xl"
-                  placeholder="0.00000000"
-                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter rate per hour"
                 />
               </div>
-            </>
-          )}
+            </div>
+          </div>
+        )}
 
-          {(formData.billingType === 'restaurant' || formData.billingType === 'fare' || formData.billingType === 'custom') && (
-            <>
-              <div className="max-w-md mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {formData.billingType === 'restaurant' ? 'Bill Amount (BTC)' : 
-                   formData.billingType === 'fare' ? 'Fare Amount (BTC)' : 
-                   'Amount (BTC)'}
-                </label>
+        {/* Custom Billing */}
+        {formData.billingType !== 'service' && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Amount (BTC)</label>
                 <input
                   type="number"
                   step="0.00000001"
                   value={formData.customAmount}
                   onChange={(e) => setFormData({ ...formData, customAmount: e.target.value })}
-                  className="input-field rounded-3xl"
-                  placeholder="0.00000000"
-                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter amount in BTC"
                 />
               </div>
-              <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {formData.billingType === 'restaurant' ? 'Restaurant/Order Details' : 
-                   formData.billingType === 'fare' ? 'Trip Details' : 
-                   'Description'}
-                </label>
-                <input
-                  type="text"
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
                   value={formData.customDescription}
                   onChange={(e) => setFormData({ ...formData, customDescription: e.target.value })}
-                  className="input-field rounded-3xl"
-                  placeholder={formData.billingType === 'restaurant' ? 'e.g., Dinner for 4 people' : 
-                             formData.billingType === 'fare' ? 'e.g., Airport to Downtown' : 
-                             'Enter description'}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={3}
+                  placeholder="Enter payment description"
                 />
               </div>
-            </>
-          )}
-
-          {totalBtc > 0 && (
-            <div className="bg-gray-50 rounded-lg p-4 mt-6">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-900">Total Amount:</span>
-                <div className="text-right">
-                  <p className="text-xl font-bold text-orange-600">{totalBtc.toFixed(8)} BTC</p>
-                  <p className="text-sm text-gray-600">≈ ${totalUsd.toLocaleString()} USD</p>
-                  {formData.billingType === 'service' && (
-                    <p className="text-xs text-gray-500">{effectiveHours.toFixed(2)} hours</p>
-                  )}
-                </div>
-              </div>
             </div>
-          )}
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6">
-          <div className="flex items-center mb-4">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Paperclip className="h-5 w-5 text-orange-600" />
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 ml-3">Supporting Documents</h2>
           </div>
+        )}
 
-          <p className="text-sm text-gray-600 mb-4">
-            Upload supporting documents for this invoice. Files will be attached after the invoice is created.
-          </p>
-
-          <FileUpload
-            invoiceId={invoiceId}
-            onUploadComplete={handleFileUploadComplete}
-          />
-        </div>
-
-        <div className="flex space-x-4 md:justify-end justify-between">
+        {/* Action Buttons */}
+        <div className="flex space-x-4">
           <button
             type="button"
             onClick={() => setShowPreview(true)}
             className="flex items-center px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
           >
             <QrCode className="h-5 w-5 mr-2" />
-            Preview
+            Preview Invoice
           </button>
+
           <button
             type="submit"
             disabled={addInvoiceMutation.isPending || (formData.useTeamSplit && totalPercentage !== 100) || (formData.useTaskSelection && selectedTasks.length === 0)}
-            className="flex items-center md:w-1/4 w-1/2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center md:w-1/4 w-1/2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
           >
             {addInvoiceMutation.isPending ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : 'Create'}
           </button>

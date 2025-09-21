@@ -15,52 +15,20 @@ module {
 
     // Simple Bitcoin address validation (basic format check)
     public func validateBitcoinAddress(address : Text) : Bool {
-        // Basic validation for bech32 addresses (Native SegWit)
-        if (Text.size(address) < 14 or Text.size(address) > 90) {
-            return false;
-        };
-
-        // Convert to char array for easier manipulation
-        let chars = Iter.toArray(Text.toIter(address));
-        
-        // Check if it starts with "bc1" for mainnet or "tb1" for testnet
-        if (chars.size() < 3) return false;
-        
-        let firstThree = Text.fromIter(Iter.fromArray(Array.tabulate<Char>(3, func(i) = chars[i])));
-        if (firstThree != "bc1" and firstThree != "tb1") {
-            return false;
-        };
-
-        // Check for valid characters in bech32 address (basic check)
-        let validChars = "qpzry9x8gf2tvdw0s3jn54khce6mua7l";
-        
-        // Skip the first 3 characters (prefix)
-        for (i in Iter.range(3, chars.size() - 1)) {
-            let char = chars[i];
-            if (not Text.contains(validChars, #char char)) {
-                return false;
-            };
-        };
-
-        // Additional validation could be added here for checksum verification
-        // For now, we'll rely on the frontend's more comprehensive validation
-        return true;
+        // Accept any non-empty address - no format validation
+        Text.size(address) > 0;
     };
 
     // Simple functions for Bitcoin address management
     public func addInvoiceAddress(invoiceAddressMap : InvoiceAddressMap, invoiceId : Nat, address : BitcoinAddress) : InvoiceAddressMap {
-        if (validateBitcoinAddress(address)) {
-            // Check if invoice ID already exists
-            for ((id, _) in invoiceAddressMap.vals()) {
-                if (id == invoiceId) {
-                    Debug.trap("Invoice ID already exists in Bitcoin address map");
-                };
+        // Check if invoice ID already exists
+        for ((id, _) in invoiceAddressMap.vals()) {
+            if (id == invoiceId) {
+                Debug.trap("Invoice ID already exists in Bitcoin address map");
             };
-            // Add new mapping
-            Array.append<(Nat, BitcoinAddress)>(invoiceAddressMap, [(invoiceId, address)]);
-        } else {
-            Debug.trap("Invalid Bitcoin address format");
         };
+        // Add new mapping (no validation - accept any address)
+        Array.append<(Nat, BitcoinAddress)>(invoiceAddressMap, [(invoiceId, address)]);
     };
 
     public func getInvoiceAddress(invoiceAddressMap : InvoiceAddressMap, invoiceId : Nat) : ?BitcoinAddress {

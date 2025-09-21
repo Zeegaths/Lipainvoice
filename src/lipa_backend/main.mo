@@ -178,13 +178,10 @@ persistent actor FreelancerDashboard {
             Debug.trap("Anonymous users cannot add invoices");
         };
         
-        // Validate Bitcoin address if provided
+        // Handle Bitcoin address if provided (no validation)
         switch (bitcoinAddress) {
             case null {};
             case (?address) {
-                if (not Bitcoin.validateBitcoinAddress(address)) {
-                    Debug.trap("Invalid Bitcoin address format");
-                };
                 // Check if address is already used
                 if (Bitcoin.isAddressUsed(bitcoinAddressMap, address)) {
                     Debug.trap("Bitcoin address is already in use");

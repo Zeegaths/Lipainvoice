@@ -1,5 +1,6 @@
 import OrderedMap "mo:base/OrderedMap";
 import Nat "mo:base/Nat";
+import Nat8 "mo:base/Nat8";
 import Text "mo:base/Text";
 import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
@@ -8,23 +9,43 @@ import Time "mo:base/Time";
 import Int "mo:base/Int";
 import Blob "mo:base/Blob";
 import Array "mo:base/Array";
+import HashMap "mo:base/HashMap";
+import Hash "mo:base/Hash";
 
 
 import AdminSystem "auth-single-user/management";
 import Http "file-storage/http";
 import FileStorage "file-storage/file-storage";
+import Bitcoin "bitcoin";
+import HttpOutcalls "http-outcalls/outcall";
 
+// Bitcoin integration imports
+import BitcoinApi "bitcoin/bitcoinapi";
+import P2pkh "bitcoin/P2pkh";
+import P2tr "bitcoin/P2tr";
+import Types "bitcoin/Types";
+import Utils "bitcoin/Utils";
+import EcdsaApi "bitcoin/ecdsaapi";
+import SchnorrApi "bitcoin/SchnorrApi";
 
 persistent actor FreelancerDashboard {
     // Initialize the admin system state
-    let adminState = AdminSystem.initState();
+    transient let adminState = AdminSystem.initState();
+
+    // Bitcoin canister actors
+    transient let ecdsa_canister_actor : Types.EcdsaCanisterActor = actor("aaaaa-aa");
+    transient let schnorr_canister_actor : Types.SchnorrCanisterActor = actor("aaaaa-aa");
+
+    // Bitcoin key names
+    stable var ecdsa_key_name : Text = "dfx_test_key";
+    stable var schnorr_key_name : Text = "dfx_test_key";
 
     transient let natMap = OrderedMap.Make<Nat>(Nat.compare);
     transient let textMap = OrderedMap.Make<Text>(Text.compare);
     transient let principalMap = OrderedMap.Make<Principal>(Principal.compare);
 
     // File storage
-    var storage = FileStorage.new();
+    transient var storage = FileStorage.new();
 
     // File metadata type
     public type FileMetadata = {
@@ -35,24 +56,111 @@ persistent actor FreelancerDashboard {
         path : Text;
     };
 
-    // Invoice type with file attachments
+    // Lightning invoice type
+    public type LightningInvoice = {
+        invoiceString : Text;
+        amount : Nat;
+        expiry : Nat;
+        status : Text; // e.g. "pending", "paid"
+    };
+
+    // Invoice type with file attachments and Bitcoin address
     public type Invoice = {
         id : Nat;
         details : Text;
         files : [FileMetadata];
+        bitcoinAddress : ?Text; // Optional Bitcoin address for payment
+        lightningInvoice : ?LightningInvoice; // Optional lightning invoice
     };
 
     // Invoices - now stores Invoice records instead of just Text
-    var invoices : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Invoice>> = principalMap.empty();
+    transient var invoices : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Invoice>> = principalMap.empty();
+
+    // Bitcoin address mappings (stable storage)
+    stable var bitcoinMappingsStable : [(Nat, Text)] = [];
+
+    // Bitcoin address map (stable representation for persistent storage)
+    stable var bitcoinAddressMap : [(Nat, Text)] = [];
+
+    // Lightning invoices stable storage mapped by invoice ID
+    stable var lightningInvoicesStable : [(Nat, LightningInvoice)] = [];
+
+    // Lightning invoices HashMap for runtime operations
+    transient var lightningInvoices : HashMap.HashMap<Nat, LightningInvoice> = HashMap.HashMap<Nat, LightningInvoice>(10, Nat.equal, Hash.hash);
 
     // Tasks
-    var tasks : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Text>> = principalMap.empty();
+    transient var tasks : OrderedMap.Map<Principal, OrderedMap.Map<Nat, Text>> = principalMap.empty();
 
     // Reputation Badges
-    var badges : OrderedMap.Map<Principal, OrderedMap.Map<Text, Text>> = principalMap.empty();
+    transient var badges : OrderedMap.Map<Principal, OrderedMap.Map<Text, Text>> = principalMap.empty();
 
     // File counter for unique file paths
-    var fileCounter : Nat = 0;
+    transient var fileCounter : Nat = 0;
+
+
+
+    public type ConsentMessageRequest = {
+        method : Text;
+        arg : Blob;
+        consent_preferences : ?{
+            language : Text;
+        };
+    };
+
+    public type ConsentMessage = {
+        #GenericDisplayMessage : Text;
+        #LineDisplayMessage : { pages : [{ lines : [Text] }] };
+    };
+
+    public type ConsentInfo = {
+        metadata : {
+            language : Text;
+            utc_offset_minutes : ?Int;
+        };
+        consent_message : ConsentMessage;
+    };
+
+    public type ErrorInfo = {
+        description : Text;
+    };
+
+    public type ICRC21ConsentMessageResponse = {
+        #Ok : ConsentInfo;
+        #Err : ErrorInfo;
+    };
+
+    public shared func icrc21_canister_call_consent_message(request : ConsentMessageRequest) : async ICRC21ConsentMessageResponse {
+        let consent_message = switch (request.method) {
+            case "addInvoice" {
+                #GenericDisplayMessage("Approve Lipa Invoice to add a new invoice");
+            };
+            case "addTask" {
+                #GenericDisplayMessage("Approve Lipa Invoice to add a new task");
+            };
+            case "addBadge" {
+                #GenericDisplayMessage("Approve Lipa Invoice to add a new badge");
+            };
+            case "uploadInvoiceFile" {
+                #GenericDisplayMessage("Approve Lipa Invoice to upload a file");
+            };
+            case _ {
+                #GenericDisplayMessage("Approve Lipa Invoice to execute " # request.method);
+            };
+        };
+        
+        let metadata = {
+            language = switch (request.consent_preferences) {
+                case null { "en" };
+                case (?prefs) { prefs.language };
+            };
+            utc_offset_minutes = null;
+        };
+        
+        return #Ok({
+            metadata = metadata;
+            consent_message = consent_message;
+        });
+    };
 
     // Initialize admin (first caller becomes admin)
     public shared ({ caller }) func initializeAuth() : async () {
@@ -64,11 +172,28 @@ persistent actor FreelancerDashboard {
         AdminSystem.isCurrentUserAdmin(adminState, caller);
     };
 
-    // Add Invoice
-    public shared ({ caller }) func addInvoice(id : Nat, details : Text) : async () {
+    // Add Invoice with optional Bitcoin address
+    public shared ({ caller }) func addInvoice(id : Nat, details : Text, bitcoinAddress : ?Text) : async () {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot add invoices");
         };
+        
+        // Validate Bitcoin address if provided
+        switch (bitcoinAddress) {
+            case null {};
+            case (?address) {
+                if (not Bitcoin.validateBitcoinAddress(address)) {
+                    Debug.trap("Invalid Bitcoin address format");
+                };
+                // Check if address is already used
+                if (Bitcoin.isAddressUsed(bitcoinAddressMap, address)) {
+                    Debug.trap("Bitcoin address is already in use");
+                };
+                // Store the address mapping
+                bitcoinAddressMap := Bitcoin.addInvoiceAddress(bitcoinAddressMap, id, address);
+            };
+        };
+        
         let userInvoices = switch (principalMap.get(invoices, caller)) {
             case null natMap.empty();
             case (?existing) existing;
@@ -77,9 +202,100 @@ persistent actor FreelancerDashboard {
             id = id;
             details = details;
             files = [];
+            bitcoinAddress = bitcoinAddress;
+            lightningInvoice = null;
         };
         let updatedInvoices = natMap.put(userInvoices, id, newInvoice);
         invoices := principalMap.put(invoices, caller, updatedInvoices);
+    };
+
+    // Helper function to get lightning invoice from stable array
+    func getLightningInvoiceFromStable(id : Nat) : ?LightningInvoice {
+        for ((invoiceId, invoice) in lightningInvoicesStable.vals()) {
+            if (invoiceId == id) {
+                return ?invoice;
+            };
+        };
+        null;
+    };
+
+    // Helper function to put lightning invoice in stable array
+    func putLightningInvoiceInStable(id : Nat, invoice : LightningInvoice) {
+        var found = false;
+        var newArray : [(Nat, LightningInvoice)] = [];
+        for ((invoiceId, inv) in lightningInvoicesStable.vals()) {
+            if (invoiceId == id) {
+                newArray := Array.append(newArray, [(id, invoice)]);
+                found := true;
+            } else {
+                newArray := Array.append(newArray, [(invoiceId, inv)]);
+            };
+        };
+        if (not found) {
+            newArray := Array.append(newArray, [(id, invoice)]);
+        };
+        lightningInvoicesStable := newArray;
+    };
+
+    // Create Lightning Invoice via Universal Bitcoin Bridge API
+    public shared ({ caller }) func createLightningInvoice(invoiceId : Nat, amount : Nat) : async LightningInvoice {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot create lightning invoices");
+        };
+
+        // Construct request payload
+        let payload = "{\"amount\": " # Nat.toText(amount) # "}";
+
+        // Call Universal Bitcoin Bridge API to create lightning invoice
+        let url = "https://lightning.infernal.finance/api/v1/invoices";
+
+        // Mock response for now (replace with real HTTP call)
+        let response = "{\"invoice\":\"lnbc1mockinvoice" # Nat.toText(amount) # "\",\"expiry\":3600}";
+
+        // Parse response JSON (simplified)
+        // Assume response is JSON with invoice string and expiry
+        let invoiceString = response; // placeholder, in real code parse JSON
+        let expiry : Nat = 3600; // 1 hour expiry
+        let status : Text = "pending";
+
+        let lightningInvoice : LightningInvoice = {
+            invoiceString = invoiceString;
+            amount = amount;
+            expiry = expiry;
+            status = status;
+        };
+
+        // Store lightning invoice in stable storage
+        putLightningInvoiceInStable(invoiceId, lightningInvoice);
+
+        // Update invoice record to include lightning invoice
+        let userInvoices = switch (principalMap.get(invoices, caller)) {
+            case null natMap.empty();
+            case (?existing) existing;
+        };
+        let invoiceOpt = natMap.get(userInvoices, invoiceId);
+        switch (invoiceOpt) {
+            case null {
+                Debug.trap("Invoice not found");
+            };
+            case (?invoice) {
+                let updatedInvoice : Invoice = {
+                    invoice with lightningInvoice = ?lightningInvoice;
+                };
+                let updatedUserInvoices = natMap.put(userInvoices, invoiceId, updatedInvoice);
+                invoices := principalMap.put(invoices, caller, updatedUserInvoices);
+            };
+        };
+
+        lightningInvoice;
+    };
+
+    // Query lightning invoice details
+    public query ({ caller }) func getLightningInvoice(invoiceId : Nat) : async ?LightningInvoice {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot query lightning invoices");
+        };
+        getLightningInvoiceFromStable(invoiceId);
     };
 
     // Upload file for invoice
@@ -154,7 +370,7 @@ persistent actor FreelancerDashboard {
         };
     };
 
-    // Get Invoice with files
+    // Get Invoice with files and Bitcoin address
     public query ({ caller }) func getInvoice(id : Nat) : async ?Invoice {
         if (Principal.isAnonymous(caller)) {
             Debug.trap("Anonymous users cannot get invoices");
@@ -175,6 +391,18 @@ persistent actor FreelancerDashboard {
             case (?userInvoices) Iter.toArray(natMap.entries(userInvoices));
         };
     };
+
+    // Get public invoice
+    public query func getPublicInvoice(id : Nat) : async ?Invoice {
+    // Search through all users' invoices
+    for ((principal, userInvoices) in principalMap.entries(invoices)) {
+        switch (natMap.get(userInvoices, id)) {
+            case (?invoice) return ?invoice;
+            case null {};
+        };
+    };
+    null;
+};
 
     // Get invoice files
     public query ({ caller }) func getInvoiceFiles(invoiceId : Nat) : async [FileMetadata] {
@@ -275,6 +503,69 @@ persistent actor FreelancerDashboard {
             case null [];
             case (?userBadges) Iter.toArray(textMap.entries(userBadges));
         };
+    };
+
+    // Get Bitcoin address for invoice
+    public query func getInvoiceBitcoinAddress(invoiceId : Nat) : async ?Text {
+        Bitcoin.getInvoiceAddress(bitcoinAddressMap, invoiceId);
+    };
+
+    // Validate Bitcoin address
+    public query func validateBitcoinAddress(address : Text) : async Bool {
+        Bitcoin.validateBitcoinAddress(address);
+    };
+
+    // Get all Bitcoin address mappings (admin only)
+    public shared ({ caller }) func getAllBitcoinMappings() : async [(Nat, Text)] {
+        if (not AdminSystem.isCurrentUserAdmin(adminState, caller)) {
+            Debug.trap("Only admin can access all Bitcoin mappings");
+        };
+        Bitcoin.getAllMappings(bitcoinAddressMap);
+    };
+
+    // Bitcoin integration functions
+
+    // Get Bitcoin balance for an address
+    public shared func getBitcoinBalance(address : Text, network : Types.Network) : async Types.Satoshi {
+        await BitcoinApi.get_balance(network, address);
+    };
+
+    // Get UTXOs for an address
+    public shared func getBitcoinUtxos(address : Text, network : Types.Network) : async Types.GetUtxosResponse {
+        await BitcoinApi.get_utxos(network, address);
+    };
+
+    // Get current fee percentiles
+    public shared func getBitcoinFeePercentiles(network : Types.Network) : async [Types.MillisatoshiPerVByte] {
+        await BitcoinApi.get_current_fee_percentiles(network);
+    };
+
+    // Send Bitcoin using P2PKH
+    public shared ({ caller }) func sendBitcoinP2pkh(destination : Text, amount : Types.Satoshi, network : Types.Network) : async [Nat8] {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot send Bitcoin");
+        };
+        await P2pkh.send(ecdsa_canister_actor, network, [[0]], ecdsa_key_name, destination, amount);
+    };
+
+    // Send Bitcoin using P2TR (Taproot)
+    public shared ({ caller }) func sendBitcoinP2tr(destination : Text, amount : Types.Satoshi, network : Types.Network) : async [Nat8] {
+        if (Principal.isAnonymous(caller)) {
+            Debug.trap("Anonymous users cannot send Bitcoin");
+        };
+        let derivation_paths = { key_path_derivation_path = [[0 : Nat8]]; script_path_derivation_path = [[0 : Nat8]] };
+        await P2tr.send_key_path(schnorr_canister_actor, network, derivation_paths, schnorr_key_name, destination, amount);
+    };
+
+    // Get P2PKH address for the canister
+    public shared func getP2pkhAddress(network : Types.Network) : async Text {
+        await P2pkh.get_address(ecdsa_canister_actor, network, ecdsa_key_name, [[0]]);
+    };
+
+    // Get P2TR address for the canister
+    public shared func getP2trAddress(network : Types.Network) : async Text {
+        let derivation_paths = { key_path_derivation_path = [[0 : Nat8]]; script_path_derivation_path = [[0 : Nat8]] };
+        await P2tr.get_address(schnorr_canister_actor, network, schnorr_key_name, derivation_paths);
     };
 };
 

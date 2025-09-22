@@ -86,7 +86,7 @@ const TeamPaymentsSection = () => {
 
   if (!identity) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-300 p-6">
         <div className="text-center py-8">
           <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center mx-auto mb-4">
             <Users className="h-6 w-6 text-white" />
@@ -99,7 +99,7 @@ const TeamPaymentsSection = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-300 overflow-hidden">
       {/* Header Section */}
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
         <div className="flex items-center">
@@ -116,14 +116,14 @@ const TeamPaymentsSection = () => {
       <div className="p-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <div className="bg-gray-50 rounded-lg p-4 border border-gray-300">
             <div className="flex items-center">
               <div className="w-8 h-8 bg-gray-500 rounded-lg flex items-center justify-center mr-3">
                 <DollarSign className="h-4 w-4 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                <p className="text-lg font-bold text-gray-900">{totalEarnings.toFixed(8)} BTC</p>
+                <p className="text-lg font-bold text-gray-900">{totalEarnings.toFixed(2)} BTC</p>
               </div>
             </div>
           </div>
@@ -134,7 +134,7 @@ const TeamPaymentsSection = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-orange-700">Pending</p>
-                <p className="text-lg font-bold text-orange-800">{pendingEarnings.toFixed(8)} BTC</p>
+                <p className="text-lg font-bold text-orange-800">{pendingEarnings.toFixed(2)} BTC</p>
               </div>
             </div>
           </div>
@@ -145,19 +145,19 @@ const TeamPaymentsSection = () => {
               </div>
               <div>
                 <p className="text-sm font-medium text-green-700">Received</p>
-                <p className="text-lg font-bold text-green-800">{receivedEarnings.toFixed(8)} BTC</p>
+                <p className="text-lg font-bold text-green-800">{receivedEarnings.toFixed(2)} BTC</p>
               </div>
             </div>
           </div>
         </div>
 
         {isLoading ? (
-          <div className="text-center py-10">
+          <div className="text-center py-8">
             <div className="w-8 h-8 border-2 border-gray-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3"></div>
             <p className="text-gray-600 text-sm">Loading team payments...</p>
           </div>
         ) : teamPayments.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-10">
             <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
               <Users className="h-8 w-8 text-purple-600" />
             </div>
@@ -169,9 +169,9 @@ const TeamPaymentsSection = () => {
             {teamPayments.map((payment) => {
               const StatusIcon = getStatusIcon(payment.paymentStatus);
               return (
-                <div key={payment.invoiceId.toString()} className="bg-gray-50 rounded-lg p-5 border border-gray-200 hover:shadow-sm transition-all duration-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                <div key={payment.invoiceId.toString()} className="bg-gray-50 rounded-lg p-4 border border-gray-300 hover:shadow-sm transition-all duration-200">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex-1 mb-3 sm:mb-0">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-7 h-7 bg-gradient-to-r from-purple-500 to-blue-500 rounded-md flex items-center justify-center">
                           <Users className="h-4 w-4 text-white" />
@@ -182,17 +182,17 @@ const TeamPaymentsSection = () => {
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-3">Client: {payment.clientName}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm mb-3 sm:mb-0">
                           <span className="text-gray-600">Your share: <span className="font-semibold text-gray-900">{payment.userPercentage}%</span></span>
                           <span className="font-bold text-purple-600">
-                            {payment.userShare.toFixed(8)} BTC
+                            {payment.userShare.toFixed(2)} BTC
                           </span>
-                          <span className="text-gray-500">of {payment.totalAmount.toFixed(8)} BTC total</span>
+                          <span className="text-gray-500">of {payment.totalAmount.toFixed(2)} BTC total</span>
                         </div>
                         <button
                           onClick={() => setSelectedPayment(payment)}
-                          className="flex items-center text-purple-600 hover:text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium"
+                          className="flex items-center text-purple-600 hover:text-purple-700 hover:bg-purple-50 px-3 py-1.5 rounded-md transition-all duration-200 text-sm font-medium w-fit"
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           Details
@@ -227,7 +227,7 @@ const TeamPaymentsSection = () => {
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="text-md font-bold text-gray-900 mb-2">{selectedPayment.projectTitle}</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Invoice ID</p>
                       <p className="font-semibold text-gray-900">#{selectedPayment.invoiceId.toString()}</p>
@@ -251,14 +251,14 @@ const TeamPaymentsSection = () => {
 
                 <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border border-purple-200">
                   <h5 className="font-bold text-purple-900 mb-3">Your Payment Share</h5>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-white rounded-lg p-3">
                       <p className="text-sm text-purple-700 mb-1">Percentage</p>
                       <p className="text-xl font-bold text-purple-900">{selectedPayment.userPercentage}%</p>
                     </div>
                     <div className="bg-white rounded-lg p-3">
                       <p className="text-sm text-purple-700 mb-1">Amount</p>
-                      <p className="text-xl font-bold text-purple-900">{selectedPayment.userShare.toFixed(8)} BTC</p>
+                      <p className="text-xl font-bold text-purple-900">{selectedPayment.userShare.toFixed(2)} BTC</p>
                     </div>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ const TeamPaymentsSection = () => {
                   <h5 className="font-bold text-gray-900 mb-4">Team Split Breakdown</h5>
                   <div className="space-y-3">
                     {selectedPayment.teamMembers.map((member, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-300">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-gradient-to-r from-gray-400 to-gray-500 rounded-full flex items-center justify-center mr-3">
                             <span className="text-white text-xs font-bold">{index + 1}</span>

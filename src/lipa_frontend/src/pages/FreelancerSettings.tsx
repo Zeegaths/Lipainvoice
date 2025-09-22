@@ -1,9 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, User, Camera, Save, Check, AlertCircle, Bitcoin, Bell, Shield, Link as LinkIcon, Star, Award, Eye, EyeOff } from 'lucide-react';
-import { useInternetIdentity } from 'ic-use-internet-identity';
-import { useUserProfile, useSaveUserProfile, useBadges } from '../hooks/useQueries';
-
-type Page = 'dashboard' | 'create-invoice' | 'admin' | 'task-logger' | 'team-payments' | 'client-portal' | 'settings';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { Page } from '../App';
 
 interface FreelancerSettingsProps {
   onNavigate: (page: Page) => void;
@@ -42,11 +41,17 @@ interface UserProfile {
 }
 
 const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
-  const { identity } = useInternetIdentity();
-  const { data: userProfile, isLoading } = useUserProfile();
-  const { data: badges = [] } = useBadges();
-  const saveProfileMutation = useSaveUserProfile();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isAuthenticated } = useInternetIdentity();
+  
+  // Placeholder for saveProfileMutation
+  const saveProfileMutation = {
+    mutateAsync: async (data: string) => {
+      console.log('Saving profile data:', data);
+      return Promise.resolve();
+    },
+    isPending: false
+  };
   
   const [activeTab, setActiveTab] = useState<'profile' | 'wallet' | 'notifications' | 'privacy'>('profile');
   const [hasChanges, setHasChanges] = useState(false);
@@ -83,17 +88,57 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     }
   });
 
+  // Function to fetch user profile data from backend (simulated for now)
+  const fetchUserProfileData = async (): Promise<UserProfile> => {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // TODO: Replace with actual backend call when user profile API is implemented
+    // For now, return default profile data
+    return {
+      displayName: 'John Doe',
+      professionalTitle: 'Full Stack Developer',
+      bio: 'Experienced developer with a passion for creating innovative solutions.',
+      profilePhoto: undefined,
+      socialLinks: {
+        linkedin: 'https://linkedin.com/in/johndoe',
+        twitter: 'https://twitter.com/johndoe',
+        github: 'https://github.com/johndoe',
+        website: 'https://johndoe.dev'
+      },
+      bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      withdrawalPreferences: {
+        autoWithdraw: false,
+        minimumAmount: 0.001,
+        notifyOnPayment: true
+      },
+      notificationPreferences: {
+        badgeMilestones: true,
+        clientReviews: true,
+        paymentUpdates: true,
+        progressUpdates: true,
+        emailNotifications: false
+      },
+      privacySettings: {
+        profileVisibility: 'public',
+        showEarnings: false,
+        showBadges: true,
+        showReviews: true
+      }
+    };
+  };
+
   // Load user profile data when available
   React.useEffect(() => {
-    if (userProfile) {
-      try {
-        const parsed = typeof userProfile === 'string' ? JSON.parse(userProfile) : userProfile;
-        setProfileData(prev => ({ ...prev, ...parsed }));
-      } catch (error) {
-        console.error('Error parsing user profile:', error);
-      }
+    if (isAuthenticated) {
+      fetchUserProfileData().then((profileData) => {
+        setProfileData(profileData);
+      }).catch((error) => {
+        console.error('Error loading user profile data:', error);
+        // Keep default profile data on error
+      });
     }
-  }, [userProfile]);
+  }, [isAuthenticated]);
 
   const handleInputChange = (field: string, value: any) => {
     setProfileData(prev => {
@@ -197,6 +242,13 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     ]
   };
 
+  // Placeholder badges data
+  const badges = [
+    { name: 'Gold Tier', description: 'Top performer' },
+    { name: 'Silver Tier', description: 'Consistent quality' },
+    { name: 'Bronze Tier', description: 'Getting started' }
+  ];
+
   const tabs = [
     { id: 'profile', name: 'Profile', icon: User },
     { id: 'wallet', name: 'Wallet & Payments', icon: Bitcoin },
@@ -204,7 +256,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
     { id: 'privacy', name: 'Privacy & Security', icon: Shield }
   ];
 
-  if (!identity) {
+  if (!isAuthenticated) {
     return (
       <div className="p-6">
         <div className="text-center py-8">
@@ -258,7 +310,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       )}
 
       {/* Profile Completion */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-medium text-gray-900">Profile Completion</h3>
           <span className="text-sm font-medium text-blue-600">{profileCompletion}%</span>
@@ -275,7 +327,7 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-6">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8 px-6">
             {tabs.map((tab) => (
@@ -434,52 +486,6 @@ const FreelancerSettings = ({ onNavigate }: FreelancerSettingsProps) => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="https://yourwebsite.com"
                     />
-                  </div>
-                </div>
-              </div>
-
-              {/* Reputation Overview */}
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h4 className="font-medium text-gray-900 mb-4">Reputation Overview</h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-2">
-                      <Star className="h-5 w-5 text-yellow-500 fill-current" />
-                      <span className="ml-1 text-xl font-bold text-gray-900">{reputationData.averageRating}</span>
-                    </div>
-                    <p className="text-sm text-gray-600">{reputationData.totalReviews} reviews</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{badges.length}</p>
-                    <p className="text-sm text-gray-600">Badges earned</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xl font-bold text-gray-900">{profileCompletion}%</p>
-                    <p className="text-sm text-gray-600">Profile complete</p>
-                  </div>
-                </div>
-                
-                {/* Recent Reviews */}
-                <div>
-                  <h5 className="font-medium text-gray-900 mb-3">Recent Client Reviews</h5>
-                  <div className="space-y-3">
-                    {reputationData.recentReviews.map((review, index) => (
-                      <div key={index} className="bg-white p-3 rounded border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="font-medium text-gray-900">{review.client}</span>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <Star
-                                key={star}
-                                className={`h-3 w-3 ${star <= review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'}`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-600">{review.comment}</p>
-                        <p className="text-xs text-gray-500 mt-1">{new Date(review.date).toLocaleDateString()}</p>
-                      </div>
-                    ))}
                   </div>
                 </div>
               </div>

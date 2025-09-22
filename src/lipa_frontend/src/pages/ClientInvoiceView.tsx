@@ -73,19 +73,25 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
     queryFn: async () => {
       if (!invoiceId) throw new Error('Invoice ID is required');
       
-      const actor = await createActor();
+      const actor = await createActor(import.meta.env.VITE_LIPA_BACKEND_CANISTER_ID || 'ryjl3-tyaaa-aaaaa-aaaba-cai');
       const invoiceData = await actor.getInvoice(BigInt(invoiceId));
       
-      if (!invoiceData) {
+      if (!invoiceData || (Array.isArray(invoiceData) && invoiceData.length === 0)) {
         throw new Error('Invoice not found');
       }
 
       try {
-        const parsedDetails = JSON.parse(invoiceData.details);
+        // Handle the case where invoiceData is [Invoice] or []
+        const invoiceItem = Array.isArray(invoiceData) ? invoiceData[0] : invoiceData;
+        if (!invoiceItem) {
+          throw new Error('Invoice not found');
+        }
+        
+        const parsedDetails = JSON.parse(invoiceItem.details);
         return {
-          id: invoiceData.id,
+          id: invoiceItem.id,
           ...parsedDetails,
-          files: invoiceData.files
+          files: invoiceItem.files
         } as InvoiceData;
       } catch {
         throw new Error('Invalid invoice data');
@@ -258,7 +264,7 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Freelancer Profile Section */}
         {freelancerProfile && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-8">
             <div className="p-6 sm:p-8">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-yellow-100 rounded-lg">
@@ -432,7 +438,7 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
         )}
 
         {/* Invoice Details */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-8">
           <div className="p-6 sm:p-8">
             {/* Invoice Header */}
             <div className="border-b border-gray-200 pb-6 mb-6">
@@ -543,7 +549,7 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
 
         {/* Payment Section */}
         {paymentStatus !== 'confirmed' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-8">
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-8">
             <div className="p-6 sm:p-8">
               <div className="flex items-center mb-6">
                 <div className="p-3 bg-orange-100 rounded-lg">

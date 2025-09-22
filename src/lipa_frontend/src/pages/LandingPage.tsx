@@ -31,17 +31,37 @@ import {
   Target,
   Layers,
   Eye,
+  Loader2,
 } from "lucide-react";
+import { useInternetIdentity } from "ic-use-internet-identity";
+import { Page } from '../App';
+import Hero from '../components/landing/Hero';
 
-export type Page =
-  | "landing"
-  | "dashboard"
-  | "create-invoice"
-  | "admin"
-  | "task-logger"
-  | "team-payments"
-  | "client-portal"
-  | "settings";
+export function CustomConnectWallet({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 group"
+    >
+      <span className="relative flex items-center">
+        Get Started
+        <Sparkles className="ml-2 h-4 w-4" />
+      </span>
+    </button>
+  );
+}
+
+export function CustomConnectedWallet({ principal, loading }: { principal?: string; loading?: boolean }) {
+  return (
+    <button
+      className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 group"
+    >
+     {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+     {principal && <span className="text-xs mr-2">{principal.slice(0, 6)}...{principal.slice(-4)}</span>}
+    </button>
+  );
+}
+
 
 interface LandingPageProps {
   onNavigate: (page: Page) => void;
@@ -59,6 +79,15 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const { identity: user, login: connect } = useInternetIdentity();
+
+  const handleConnect = async () => {
+    try {
+      await connect();
+    } catch (error) {
+      console.error("Connection error:", error);
+    }
+  };
 
   useEffect(() => {
     setIsVisible(true);
@@ -242,10 +271,6 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     },
   ];
 
-  const handleGetStarted = () => {
-    onNavigate("dashboard");
-  };
-
   const AdvancedBackground = () => (
     <div className="fixed inset-0 -z-10">
       {/* Animated mesh gradient */}
@@ -294,6 +319,12 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
     </div>
   );
 
+  // Loading state removed - Internet Identity handles this internally
+
+  if(user) {
+    onNavigate("dashboard");
+  }
+
   return (
     <div className="relative min-h-screen bg-slate-950">
       <AdvancedBackground />
@@ -338,16 +369,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 Pricing
                 <div className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-orange-500 to-yellow-500 group-hover:w-full transition-all duration-300" />
               </button>
-              <button
-                onClick={handleGetStarted}
-                className="relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-8 py-3 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <span className="relative flex items-center">
-                  Get Started
-                  <Sparkles className="ml-2 h-4 w-4" />
-                </span>
-              </button>
+              {user ? (
+                <CustomConnectedWallet principal={user.getPrincipal().toString()} />
+              ) : (
+                <CustomConnectWallet onClick={connect} />
+              )}
             </div>
 
             <div className="md:hidden">
@@ -394,15 +420,11 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                 >
                   Pricing
                 </button>
-                <button
-                  onClick={() => {
-                    handleGetStarted();
-                    setMobileMenuOpen(false);
-                  }}
-                  className="block w-full text-left bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-6 py-3 rounded-2xl font-semibold mt-4"
-                >
-                  Get Started
-                </button>
+              {user ? (
+                <CustomConnectedWallet principal={user.getPrincipal().toString()} />
+              ) : (
+                <CustomConnectWallet onClick={connect} />
+              )}
               </div>
             </div>
           )}
@@ -554,7 +576,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               <span className="inline-block animate-title-emerge">
                 The Future of
               </span>
-              <span className="block bg-gradient-to-r from-purple-400 via-violet-400 via-fuchsia-500 to-purple-600 bg-clip-text text-transparent animate-title-rainbow bg-[length:300%_300%]">
+              <span className="block bg-gradient-to-r from-purple-400 via-violet-400 to-fuchsia-500 to-purple-600 bg-clip-text text-transparent animate-title-rainbow bg-[length:300%_300%]">
                 Freelance Invoicing
               </span>
             </h1>
@@ -573,20 +595,20 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
               style={{ animationDelay: "0.4s" }}
             >
               <button
-                onClick={handleGetStarted}
+                onClick={() => handleConnect()}
                 className="group relative overflow-hidden bg-gradient-to-r from-purple-500 to-violet-500 text-white px-12 py-5 rounded-2xl font-bold text-xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-purple-500/25 hover:shadow-purple-500/50 animate-button-power-up hover:animate-none"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-violet-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 skew-x-12 animate-energy-sweep" />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-button-shimmer" />
                 <span className="relative flex items-center justify-center">
-                  Start Building Today
+                  Get PaidToday
                   <ArrowRight className="ml-3 h-6 w-6 group-hover:translate-x-1 transition-transform duration-300 group-hover:animate-arrow-rocket" />
                 </span>
               </button>
 
               <button
-                onClick={() => scrollToSection("demo")}
+                onClick={() => handleConnect()}
                 className="group relative border-2 border-purple-500/30 text-white px-12 py-5 rounded-2xl font-bold text-xl hover:bg-purple-500/10 backdrop-blur-sm transition-all duration-500 hover:border-purple-400/50 overflow-hidden hover:shadow-lg hover:shadow-purple-500/20 animate-button-materialize"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -636,7 +658,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
           </div>
         </div>
 
-        <style jsx>{`
+        <style>{`
           /* ORBITAL ANIMATIONS */
           @keyframes orbit-1 {
             0% {
@@ -1752,14 +1774,14 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={handleGetStarted}
-                    className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${
-                      plan.popular
-                        ? "bg-white text-orange-500 hover:bg-gray-100 shadow-2xl"
-                        : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600"
-                    }`}
-                  >
+              <button
+                onClick={() => connect()}
+                className={`w-full py-5 px-8 rounded-2xl font-bold text-lg transition-all duration-500 transform hover:scale-105 shadow-xl relative overflow-hidden group ${
+                  plan.popular
+                    ? "bg-white text-orange-500 hover:bg-gray-100 shadow-2xl"
+                    : "bg-gradient-to-r from-orange-500 to-yellow-500 text-white hover:from-orange-600 hover:to-yellow-600"
+                }`}
+              >
                     <div
                       className={`absolute inset-0 ${
                         plan.popular
@@ -1806,7 +1828,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
 
           <div className="flex flex-col sm:flex-row gap-8 justify-center">
             <button
-              onClick={handleGetStarted}
+              onClick={() => connect()}
               className="group relative overflow-hidden bg-gradient-to-r from-orange-500 to-yellow-500 text-white px-16 py-6 rounded-2xl font-black text-2xl transition-all duration-500 transform hover:scale-105 shadow-2xl shadow-orange-500/50 hover:shadow-orange-500/70"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1818,7 +1840,7 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
             </button>
 
             <button
-              onClick={() => scrollToSection("demo")}
+              onClick={() => connect()}
               className="group relative border-2 border-white/30 text-white px-16 py-6 rounded-2xl font-black text-2xl hover:bg-white/10 backdrop-blur-sm transition-all duration-500 hover:border-white/50 overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-yellow-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -1911,10 +1933,10 @@ const LandingPage = ({ onNavigate }: LandingPageProps) => {
                   </button>
                 </li>
                 <li>
-                  <button
-                    onClick={handleGetStarted}
-                    className="text-gray-400 hover:text-white transition-colors duration-300 font-medium"
-                  >
+                    <button
+                      onClick={() => handleConnect()}
+                      className="text-gray-400 hover:text-white transition-colors duration-300 font-medium"
+                    >
                     Dashboard
                   </button>
                 </li>

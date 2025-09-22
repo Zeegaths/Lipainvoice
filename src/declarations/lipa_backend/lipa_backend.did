@@ -1,3 +1,9 @@
+type Utxo = 
+ record {
+   height: nat32;
+   outpoint: OutPoint;
+   value: Satoshi;
+ };
 type StreamingToken = 
  record {
    index: nat;
@@ -16,11 +22,39 @@ type StreamingCallbackHttpResponse =
  };
 type StreamingCallback = func (StreamingToken) ->
                           (StreamingCallbackHttpResponse) query;
+type Satoshi = nat64;
+type Page = vec nat8;
+type OutPoint = 
+ record {
+   txid: blob;
+   vout: nat32;
+ };
+type Network = 
+ variant {
+   mainnet;
+   regtest;
+   testnet;
+ };
+type MillisatoshiPerVByte = nat64;
+type LightningInvoice = 
+ record {
+   amount: nat;
+   expiry: nat;
+   invoiceString: text;
+   status: text;
+ };
 type Invoice = 
  record {
+   bitcoinAddress: opt text;
    details: text;
    files: vec FileMetadata;
    id: nat;
+   lightningInvoice: opt LightningInvoice;
+ };
+type ICRC21ConsentMessageResponse = 
+ variant {
+   Err: ErrorInfo;
+   Ok: ConsentInfo;
  };
 type HttpResponse = 
  record {
@@ -41,6 +75,13 @@ type HeaderField =
    text;
    text;
  };
+type GetUtxosResponse = 
+ record {
+   next_page: opt Page;
+   tip_block_hash: BlockHash;
+   tip_height: nat32;
+   utxos: vec Utxo;
+ };
 type FileMetadata__1 = 
  record {
    mimeType: text;
@@ -55,17 +96,53 @@ type FileMetadata =
    size: nat;
    uploadedAt: int;
  };
+type ErrorInfo = record {description: text;};
+type ConsentMessageRequest = 
+ record {
+   arg: blob;
+   consent_preferences: opt record {language: text;};
+   method: text;
+ };
+type ConsentMessage = 
+ variant {
+   GenericDisplayMessage: text;
+   LineDisplayMessage: record {pages: vec record {lines: vec text;};};
+ };
+type ConsentInfo = 
+ record {
+   consent_message: ConsentMessage;
+   metadata: record {
+               language: text;
+               utc_offset_minutes: opt int;
+             };
+ };
+type BlockHash = vec nat8;
 service : {
   addBadge: (name: text, description: text) -> ();
-  addInvoice: (id: nat, details: text) -> ();
+  addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
   addTask: (id: nat, description: text) -> ();
+  createLightningInvoice: (invoiceId: nat, amount: nat) -> (LightningInvoice);
+  getAllBitcoinMappings: () -> (vec record {
+                                      nat;
+                                      text;
+                                    });
   getBadge: (name: text) -> (opt text) query;
+  getBitcoinBalance: (address: text, network: Network) -> (Satoshi);
+  getBitcoinFeePercentiles: (network: Network) -> (vec MillisatoshiPerVByte);
+  getBitcoinUtxos: (address: text, network: Network) -> (GetUtxosResponse);
   getInvoice: (id: nat) -> (opt Invoice) query;
+  getInvoiceBitcoinAddress: (invoiceId: nat) -> (opt text) query;
   getInvoiceFiles: (invoiceId: nat) -> (vec FileMetadata) query;
+  getLightningInvoice: (invoiceId: nat) -> (opt LightningInvoice) query;
+  getP2pkhAddress: (network: Network) -> (text);
+  getP2trAddress: (network: Network) -> (text);
+  getPublicInvoice: (id: nat) -> (opt Invoice) query;
   getTask: (id: nat) -> (opt text) query;
   httpStreamingCallback: (token: StreamingToken) ->
    (StreamingCallbackHttpResponse) query;
   http_request: (request: HttpRequest) -> (HttpResponse) query;
+  icrc21_canister_call_consent_message: (request: ConsentMessageRequest) ->
+   (ICRC21ConsentMessageResponse);
   initializeAuth: () -> ();
   isCurrentUserAdmin: () -> (bool) query;
   listBadges: () -> (vec record {
@@ -81,6 +158,11 @@ service : {
                           nat;
                           text;
                         }) query;
+  sendBitcoinP2pkh: (destination: text, amount: Satoshi, network: Network) ->
+   (vec nat8);
+  sendBitcoinP2tr: (destination: text, amount: Satoshi, network: Network) ->
+   (vec nat8);
   uploadInvoiceFile: (invoiceId: nat, fileName: text, mimeType: text, chunk:
    blob, complete: bool) -> (opt text);
+  validateBitcoinAddress: (address: text) -> (bool) query;
 }

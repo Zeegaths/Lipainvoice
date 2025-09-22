@@ -4,21 +4,22 @@
       "main": "src/lipa_backend/main.mo",
       "type": "motoko"
     },
+    "ic_siwb_provider": {
+      "type": "custom",
+      "candid": "packages/ic_siwb_provider/ic_siwb_provider.did",
+      "wasm": "target/wasm32-unknown-unknown/release/ic_siwb_provider.wasm",
+      "build": [
+        "cargo build --target wasm32-unknown-unknown --release -p ic_siwb_provider"
+      ]
+    },
     "lipa_frontend": {
-      "dependencies": [
-        "lipa_backend"
-      ],
-      "source": [
-        "src/lipa_frontend/dist"
-      ],
-      "type": "assets",
-      "workspace": "lipa_frontend"
+      "source": ["src/lipa_frontend/dist"],
+      "type": "assets"
     }
   },
   "defaults": {
     "build": {
-      "args": "",
-      "packtool": ""
+      "packtool": "mops sources"
     }
   },
   "output_env_file": ".env",

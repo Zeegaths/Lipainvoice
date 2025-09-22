@@ -44,7 +44,7 @@
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md;
+    @apply bg-white rounded-3xl shadow-sm border border-gray-300 transition-all duration-200 hover:shadow-md;
   }
 
   .input-field {
@@ -93,7 +93,7 @@
   }
 
   .testimonial-card {
-    @apply bg-white rounded-xl shadow-lg border border-gray-200 p-8 hover:shadow-xl transition-shadow duration-300;
+    @apply bg-white rounded-xl shadow-lg border border-gray-300 p-8 hover:shadow-xl transition-shadow duration-300;
   }
 
   .pricing-card {
@@ -105,7 +105,7 @@
   }
 
   .pricing-card.standard {
-    @apply bg-white border border-gray-200;
+    @apply bg-white border border-gray-300;
   }
 
   .nav-link {
@@ -469,7 +469,7 @@
 }
 
 .task-card {
-  @apply p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-all duration-200 hover:border-gray-300;
+  @apply p-4 border border-gray-300 rounded-lg hover:shadow-sm transition-all duration-200 hover:border-gray-300;
 }
 
 .task-card-active {
@@ -494,7 +494,7 @@
 
 /* Task selection styles */
 .task-selection-container {
-  @apply max-h-64 overflow-y-auto border border-gray-200 rounded-lg;
+  @apply max-h-64 overflow-y-auto border border-gray-300 rounded-lg;
 }
 
 .task-selection-item {
@@ -585,7 +585,7 @@
 
 /* Toast notifications */
 .toast {
-  @apply fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border border-gray-200 p-4;
+  @apply fixed top-4 right-4 z-50 max-w-sm w-full bg-white rounded-lg shadow-lg border border-gray-300 p-4;
   animation: slideInRight 0.3s ease-out;
 }
 

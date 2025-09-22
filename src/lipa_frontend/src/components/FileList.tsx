@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { File, Image, FileText, Archive, Download, Eye, Trash2, Calendar, HardDrive } from 'lucide-react';
-import { FileMetadata } from '../backend';
+import { FileMetadata } from '../types/backend';
 
 interface FileListProps {
   files: FileMetadata[];

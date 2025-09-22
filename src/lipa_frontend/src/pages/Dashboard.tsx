@@ -17,7 +17,7 @@ import { useToast } from "../components/ToastContainer";
 const baseLink =
   getEnvironment() === "development"
     ? " http://localhost:3000/?invoice="
-    : "https://mpigd-gqaaa-aaaaj-qnsoq-cai.icp0.io/?invoice=";
+    : "https://vgbye-4yaaa-aaaan-qz6wq-cai.icp0.io/?invoice=";
 
 interface DashboardProps {
   onNavigate: (page: Page) => void;

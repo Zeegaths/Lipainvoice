@@ -24,6 +24,11 @@ type StreamingCallback = func (StreamingToken) ->
                           (StreamingCallbackHttpResponse) query;
 type Satoshi = nat64;
 type Page = vec nat8;
+type P2trDerivationPaths = 
+ record {
+   key_path_derivation_path: vec vec nat8;
+   script_path_derivation_path: vec vec nat8;
+ };
 type OutPoint = 
  record {
    txid: blob;
@@ -126,7 +131,12 @@ service : {
   addBadge: (name: text, description: text) -> ();
   addInvoice: (id: nat, details: text, bitcoinAddress: opt text) -> ();
   addTask: (id: nat, description: text) -> ();
-  createLightningInvoice: (invoiceId: nat, amount: nat) -> (LightningInvoice);
+  createLightningInvoice: (invoiceId: nat, amountMsats: nat, _memo: text) ->
+   (LightningInvoice);
+  generateBitcoinAddress: (network: Network, derivationPath: vec vec nat8) ->
+   (text);
+  generateP2TRAddress: (network: Network, derivationPaths:
+   P2trDerivationPaths) -> (text);
   getAllBitcoinMappings: () -> (vec record {
                                       nat;
                                       text;
@@ -139,8 +149,16 @@ service : {
   getInvoiceBitcoinAddress: (invoiceId: nat) -> (opt text) query;
   getInvoiceFiles: (invoiceId: nat) -> (vec FileMetadata) query;
   getLightningInvoice: (invoiceId: nat) -> (opt LightningInvoice) query;
+  getLightningInvoiceStatus: (invoiceId: nat) -> (opt LightningInvoice);
   getP2pkhAddress: (network: Network) -> (text);
   getP2trAddress: (network: Network) -> (text);
+  getPaymentInfo: (invoiceId: nat, network: Network) ->
+   (record {
+      address: opt text;
+      balance: Satoshi;
+      hasPayment: bool;
+      utxos: vec Utxo;
+    });
   getPublicInvoice: (id: nat) -> (opt Invoice) query;
   getTask: (id: nat) -> (opt text) query;
   httpStreamingCallback: (token: StreamingToken) ->
@@ -167,9 +185,18 @@ service : {
    (vec nat8);
   sendBitcoinP2tr: (destination: text, amount: Satoshi, network: Network) ->
    (vec nat8);
+  sendFreelancerPaymentEmail: (invoiceId: nat, amount: text, clientName:
+   text) -> (bool);
+  sendInvoiceEmail: (clientEmail: text, clientName: text, invoiceId: 
+   nat, amount: text, bitcoinAddress: text) -> (bool);
+  sendPaymentConfirmationEmailPublic: (clientEmail: text, clientName: 
+   text, invoiceId: nat, amount: text, freelancerName: text) -> (bool);
+  updateInvoicePaymentStatus: (invoiceId: nat, network: Network) -> (bool);
   uploadInvoiceFile: (invoiceId: nat, fileName: text, mimeType: text, chunk:
    blob, complete: bool) -> (opt text);
   validateBitcoinAddress: (address: text) -> (bool) query;
   validateBitcoinAddressForNetwork: (address: text, network:
    BitcoinNetwork) -> (bool) query;
+  verifyBitcoinPayment: (invoiceId: nat, network: Network) -> (bool);
+  verifyLightningPayment: (invoiceId: nat) -> (bool);
 }

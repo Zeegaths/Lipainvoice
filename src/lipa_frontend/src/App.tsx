@@ -7,6 +7,7 @@ import TeamPayments from './pages/TeamPayments';
 import ClientPaymentPortal from './pages/ClientPaymentPortal';
 import FreelancerSettings from './pages/FreelancerSettings';
 import ClientInvoiceView from './pages/ClientInvoiceView';
+import BitcoinPaymentDemo from './pages/BitcoinPaymentDemo';
 import LandingPage from './pages/LandingPage';
 import LoginScreen from './components/LoginScreen';
 import NotificationCenter from './components/NotificationCenter';
@@ -15,7 +16,7 @@ import { ToastProvider } from './components/ToastContainer';
 import LoadingSpinner from './components/LoadingSpinner';
 import { useInternetIdentity } from 'ic-use-internet-identity';
 
-export type Page = 'landing' | 'dashboard' | 'create-invoice' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet';
+export type Page = 'landing' | 'dashboard' | 'create-invoice' | 'team-payments' | 'client-portal' | 'settings' | 'my-wallet' | 'bitcoin-demo';
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -32,6 +33,7 @@ function App() {
   const invoiceIdFromUrl = urlParams.get('invoice');
   const pathSegments = window.location.pathname.split('/');
   const isPublicInvoiceView = pathSegments[1] === 'invoice' && pathSegments[2];
+  const isBitcoinDemo = pathSegments[1] === 'bitcoin-demo';
   
   // If there's an invoice ID in URL path and we're not authenticated, show public invoice view
   if (isPublicInvoiceView && !isAuthenticated) {
@@ -40,6 +42,17 @@ function App() {
       <ErrorBoundary>
         <ToastProvider>
           <ClientInvoiceView invoiceId={publicInvoiceId} />
+        </ToastProvider>
+      </ErrorBoundary>
+    );
+  }
+
+  // Show Bitcoin demo page
+  if (isBitcoinDemo) {
+    return (
+      <ErrorBoundary>
+        <ToastProvider>
+          <BitcoinPaymentDemo />
         </ToastProvider>
       </ErrorBoundary>
     );
@@ -135,6 +148,8 @@ function App() {
                       />;
                     case 'settings':
                       return <FreelancerSettings onNavigate={setCurrentPage} />;
+                    case 'bitcoin-demo':
+                      return <BitcoinPaymentDemo />;
                     default:
                       return <Dashboard onNavigate={setCurrentPage} />;
                   }

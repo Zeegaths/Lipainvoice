@@ -2,15 +2,29 @@ import { useState, useEffect } from 'react';
 import { Bitcoin, Download, Star, CheckCircle, Clock, AlertCircle, FileText, Paperclip, Award, Trophy, Shield, User, ExternalLink, QrCode, Copy, Eye, EyeOff } from 'lucide-react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { createActor } from '../../../declarations/lipa_backend';
+import { useVerifyBitcoinPayment, usePaymentInfo, useSendPaymentConfirmationEmail } from '../hooks/useQueries';
 import FileList from '../components/FileList';
+import ProductionBitcoinPayment from '../components/ProductionBitcoinPayment';
 
 interface ClientInvoiceViewProps {
   invoiceId: string;
 }
 
+interface PaymentInfo {
+  address: string | null;
+  balance: bigint;
+  utxos: Array<{
+    outpoint: { txid: Array<number>; vout: number };
+    value: bigint;
+    height: number;
+  }>;
+  hasPayment: boolean;
+}
+
 interface InvoiceData {
   id: bigint;
   clientName: string;
+  clientEmail?: string;
   projectTitle: string;
   projectDescription: string;
   totalBtc: number;
@@ -136,34 +150,55 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
     enabled: !!invoice?.freelancerPrincipal,
   });
 
-  // Mock Bitcoin payment verification
-  const verifyPaymentMutation = useMutation({
-    mutationFn: async () => {
-      // Simulate payment verification delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Mock verification result (in real implementation, this would use ICP Chain Fusion)
-      const isPaymentValid = Math.random() > 0.2; // 80% success rate for demo
-      
-      if (!isPaymentValid) {
-        throw new Error('Payment verification failed');
-      }
-      
-      return { verified: true, transactionId: 'mock_tx_' + Date.now() };
-    },
-    onMutate: () => {
-      setPaymentStatus('verifying');
-    },
-    onSuccess: () => {
+  // Real Bitcoin payment verification using ICP Chain Fusion
+  const verifyPaymentMutation = useVerifyBitcoinPayment();
+  const sendPaymentConfirmationEmailMutation = useSendPaymentConfirmationEmail();
+  
+  // Real-time payment monitoring
+  const paymentInfoQuery = usePaymentInfo(
+    invoice?.id || BigInt(0), 
+    'testnet' // Use testnet for development, change to 'mainnet' for production
+  );
+  const paymentInfo = paymentInfoQuery.data as PaymentInfo | undefined;
+  const paymentInfoLoading = paymentInfoQuery.isLoading;
+  
+  // Auto-update payment status when payment is detected
+  useEffect(() => {
+    if (paymentInfo?.hasPayment && paymentStatus === 'pending') {
       setPaymentStatus('confirmed');
+    }
+  }, [paymentInfo?.hasPayment, paymentStatus]);
+
+  const handleMarkAsPaid = () => {
+    if (!invoice?.id) return;
+    
+    setPaymentStatus('verifying');
+    verifyPaymentMutation.mutate({
+      invoiceId: invoice.id,
+      network: 'testnet' // Use testnet for development, change to 'mainnet' for production
+    }, {
+      onSuccess: (paymentReceived) => {
+        if (paymentReceived) {
+          setPaymentStatus('confirmed');
+          
+          // Send payment confirmation email
+          if (invoice?.clientEmail) {
+            sendPaymentConfirmationEmailMutation.mutate({
+              clientEmail: invoice.clientEmail,
+              clientName: invoice.clientName,
+              invoiceId: invoice.id,
+              amount: `$${(invoice.totalBtc * btcToUsd).toLocaleString()}`,
+              freelancerName: freelancerProfile?.displayName || 'Freelancer'
+            });
+          }
+        } else {
+          setPaymentStatus('failed');
+        }
     },
     onError: () => {
       setPaymentStatus('failed');
-    },
+      }
   });
-
-  const handleMarkAsPaid = () => {
-    verifyPaymentMutation.mutate();
   };
 
   const formatTime = (timeSpent: { hours: number; minutes: number }) => {
@@ -547,103 +582,28 @@ const ClientInvoiceView = ({ invoiceId }: ClientInvoiceViewProps) => {
           </div>
         </div>
 
-        {/* Payment Section */}
+        {/* Production Bitcoin Payment Section */}
         {paymentStatus !== 'confirmed' && (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-300 mb-8">
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center mb-6">
-                <div className="p-3 bg-orange-100 rounded-lg">
-                  <Bitcoin className="h-6 w-6 text-orange-600" />
-                </div>
-                <div className="ml-4">
-                  <h3 className="text-xl font-semibold text-gray-900">Bitcoin Payment</h3>
-                  <p className="text-gray-600">Send payment to complete this invoice</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-3">Payment Address:</h4>
-                  <div className="bg-gray-100 p-4 rounded-lg break-all text-sm font-mono mb-4 relative">
-                    {invoice.bitcoinAddress}
-                    <button
-                      onClick={() => copyToClipboard(invoice.bitcoinAddress)}
-                      className="absolute top-2 right-2 p-2 text-gray-500 hover:text-gray-700 transition-colors"
-                      title="Copy address"
-                    >
-                      {copiedAddress ? (
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    <p><strong>Amount:</strong> {invoice.totalBtc.toFixed(8)} BTC</p>
-                    <p><strong>USD Equivalent:</strong> ~${(invoice.totalBtc * btcToUsd).toLocaleString()}</p>
-                  </div>
-                  
-                  <button
-                    onClick={() => setShowQRCode(!showQRCode)}
-                    className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors sm:hidden"
-                  >
-                    {showQRCode ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
-                    {showQRCode ? 'Hide' : 'Show'} QR Code
-                  </button>
-                </div>
-                
-                <div className={`text-center ${showQRCode ? 'block' : 'hidden sm:block'}`}>
-                  <h4 className="font-medium text-gray-900 mb-3">QR Code:</h4>
-                  <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
-                    <img 
-                      src={generateQRCode(invoice.bitcoinAddress, invoice.totalBtc)} 
-                      alt="Bitcoin Payment QR Code" 
-                      className="w-48 h-48 sm:w-64 sm:h-64"
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Scan with your Bitcoin wallet
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-200">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <button
-                    onClick={handleMarkAsPaid}
-                    disabled={verifyPaymentMutation.isPending || paymentStatus === 'verifying'}
-                    className="flex-1 flex items-center justify-center px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {paymentStatus === 'verifying' ? (
-                      <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        Verifying Payment...
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle className="h-5 w-5 mr-2" />
-                        Mark as Paid
-                      </>
-                    )}
-                  </button>
-                </div>
-                
-                {paymentStatus === 'failed' && (
-                  <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                    <div className="flex items-center">
-                      <AlertCircle className="h-5 w-5 text-red-600 mr-2" />
-                      <p className="text-red-700">
-                        Payment verification failed. Please ensure you've sent the correct amount to the specified address and try again.
-                      </p>
-                    </div>
-                  </div>
-                )}
-                
-                <p className="text-xs text-gray-500 mt-4 text-center">
-                  Click "Mark as Paid" after sending Bitcoin to verify your transaction on the blockchain.
-                </p>
-              </div>
-            </div>
+          <div className="mb-8">
+            <ProductionBitcoinPayment
+              invoiceId={invoice.id}
+              amount={invoice.totalBtc}
+              clientName={invoice.clientName}
+              freelancerName={freelancerProfile?.displayName || 'Freelancer'}
+              onPaymentConfirmed={() => {
+                setPaymentStatus('confirmed');
+                // Send payment confirmation email
+                if (invoice?.clientEmail) {
+                  sendPaymentConfirmationEmailMutation.mutate({
+                    clientEmail: invoice.clientEmail,
+                    clientName: invoice.clientName,
+                    invoiceId: invoice.id,
+                    amount: `$${(invoice.totalBtc * btcToUsd).toLocaleString()}`,
+                    freelancerName: freelancerProfile?.displayName || 'Freelancer'
+                  });
+                }
+              }}
+            />
           </div>
         )}
 

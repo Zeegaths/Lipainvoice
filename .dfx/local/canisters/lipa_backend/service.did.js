@@ -10,6 +10,10 @@ export const idlFactory = ({ IDL }) => {
     'regtest' : IDL.Null,
     'testnet' : IDL.Null,
   });
+  const P2trDerivationPaths = IDL.Record({
+    'key_path_derivation_path' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+    'script_path_derivation_path' : IDL.Vec(IDL.Vec(IDL.Nat8)),
+  });
   const Satoshi = IDL.Nat64;
   const MillisatoshiPerVByte = IDL.Nat64;
   const Page = IDL.Vec(IDL.Nat8);
@@ -112,8 +116,18 @@ export const idlFactory = ({ IDL }) => {
     'addInvoice' : IDL.Func([IDL.Nat, IDL.Text, IDL.Opt(IDL.Text)], [], []),
     'addTask' : IDL.Func([IDL.Nat, IDL.Text], [], []),
     'createLightningInvoice' : IDL.Func(
-        [IDL.Nat, IDL.Nat],
+        [IDL.Nat, IDL.Nat, IDL.Text],
         [LightningInvoice],
+        [],
+      ),
+    'generateBitcoinAddress' : IDL.Func(
+        [Network, IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [IDL.Text],
+        [],
+      ),
+    'generateP2TRAddress' : IDL.Func(
+        [Network, P2trDerivationPaths],
+        [IDL.Text],
         [],
       ),
     'getAllBitcoinMappings' : IDL.Func(
@@ -141,8 +155,25 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(LightningInvoice)],
         ['query'],
       ),
+    'getLightningInvoiceStatus' : IDL.Func(
+        [IDL.Nat],
+        [IDL.Opt(LightningInvoice)],
+        [],
+      ),
     'getP2pkhAddress' : IDL.Func([Network], [IDL.Text], []),
     'getP2trAddress' : IDL.Func([Network], [IDL.Text], []),
+    'getPaymentInfo' : IDL.Func(
+        [IDL.Nat, Network],
+        [
+          IDL.Record({
+            'balance' : Satoshi,
+            'hasPayment' : IDL.Bool,
+            'address' : IDL.Opt(IDL.Text),
+            'utxos' : IDL.Vec(Utxo),
+          }),
+        ],
+        [],
+      ),
     'getPublicInvoice' : IDL.Func([IDL.Nat], [IDL.Opt(Invoice)], ['query']),
     'getTask' : IDL.Func([IDL.Nat], [IDL.Opt(IDL.Text)], ['query']),
     'httpStreamingCallback' : IDL.Func(
@@ -184,6 +215,22 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Nat8)],
         [],
       ),
+    'sendFreelancerPaymentEmail' : IDL.Func(
+        [IDL.Nat, IDL.Text, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
+    'sendInvoiceEmail' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat, IDL.Text, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
+    'sendPaymentConfirmationEmailPublic' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat, IDL.Text, IDL.Text],
+        [IDL.Bool],
+        [],
+      ),
+    'updateInvoicePaymentStatus' : IDL.Func([IDL.Nat, Network], [IDL.Bool], []),
     'uploadInvoiceFile' : IDL.Func(
         [IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(IDL.Nat8), IDL.Bool],
         [IDL.Opt(IDL.Text)],
@@ -195,6 +242,8 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Bool],
         ['query'],
       ),
+    'verifyBitcoinPayment' : IDL.Func([IDL.Nat, Network], [IDL.Bool], []),
+    'verifyLightningPayment' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

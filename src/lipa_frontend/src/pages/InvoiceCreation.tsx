@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Bitcoin, Users, QrCode, ArrowLeft, Plus, Trash2, CheckSquare, Paperclip, Loader2, CopyPlus } from 'lucide-react';
-import { useAddInvoice, useInvoices } from '../hooks/useQueries';
+import { useAddInvoice, useInvoices, useSendInvoiceEmail } from '../hooks/useQueries';
 import FileUpload from '../components/FileUpload';
 import { useToast } from '../components/ToastContainer';
 import { Page } from '../App';
@@ -33,11 +33,13 @@ interface Task {
 
 const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
   const addInvoiceMutation = useAddInvoice();
+  const sendInvoiceEmailMutation = useSendInvoiceEmail();
   const { showToast } = useToast();
   const { data: tasks = [], isLoading: tasksLoading } = useInvoices();
 
   const [formData, setFormData] = useState({
     clientName: '',
+    clientEmail: '',
     clientWallet: '',
     projectTitle: '',
     projectDescription: '',
@@ -238,7 +240,27 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
         address: bitcoinAddressForBackend
       });
 
-      
+      // Send email notification if client email is provided
+      if (formData.clientEmail.trim()) {
+        try {
+          await sendInvoiceEmailMutation.mutateAsync({
+            clientEmail: formData.clientEmail,
+            clientName: formData.clientName,
+            invoiceId: invoiceId,
+            amount: `$${(totalBtc * btcToUsd).toLocaleString()}`,
+            bitcoinAddress: addressToUse
+          });
+        } catch (emailError) {
+          console.error('Error sending email:', emailError);
+          // Don't fail the invoice creation if email fails
+          showToast({
+            title: 'Invoice created, but email notification failed',
+            message: 'The invoice was created successfully, but the email notification could not be sent.',
+            type: 'warning',
+          });
+        }
+      }
+
       const successMessage = `Invoice #${invoiceId} created successfully!`;
       showToast({
         title: successMessage,
@@ -487,6 +509,17 @@ const InvoiceCreation = ({ onNavigate }: InvoiceCreationProps) => {
                 placeholder="Enter client name"
                 required
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Client Email</label>
+              <input
+                type="email"
+                value={formData.clientEmail}
+                onChange={(e) => setFormData({ ...formData, clientEmail: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="client@example.com"
+              />
+              <p className="text-xs text-gray-500 mt-1">Optional: Send invoice notification via email</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Client Wallet Address / Lightning Invoice</label>

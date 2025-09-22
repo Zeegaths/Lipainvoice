@@ -280,3 +280,257 @@ export function useInvoiceById(id: bigint) {
   enabled: !!identity,
 });
 }
+
+// Real Bitcoin payment verification hook
+export function useVerifyBitcoinPayment() {
+  const { identity } = useInternetIdentity();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ invoiceId, network }: { invoiceId: bigint; network: 'mainnet' | 'testnet' }) => {
+      if (!identity) {
+        throw new Error('Identity not available');
+      }
+
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ identity, host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
+      }
+
+      const canisterId = CANISTER_IDS.lipa_backend;
+      if (!canisterId) {
+        throw new Error('Canister ID for lipa_backend is not set');
+      }
+
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      });
+
+      // Convert network string to the expected format
+      const networkParam = network === 'mainnet' ? { mainnet: null } : { testnet: null };
+      
+      return backendActor.updateInvoicePaymentStatus(invoiceId, networkParam);
+    },
+    onSuccess: (paymentReceived) => {
+      if (paymentReceived) {
+        showToast({
+          title: "Payment Verified!",
+          message: "Bitcoin payment has been confirmed on the blockchain.",
+          type: "success",
+        });
+      } else {
+        showToast({
+          title: "No Payment Found",
+          message: "No Bitcoin payment detected for this invoice address.",
+          type: "warning",
+        });
+      }
+    },
+    onError: (error) => {
+      showToast({
+        title: "Payment Verification Failed",
+        message: error instanceof Error ? error.message : "Unknown error occurred",
+        type: "error",
+      });
+    },
+  });
+}
+
+// Get payment information hook
+export function usePaymentInfo(invoiceId: bigint, network: 'mainnet' | 'testnet') {
+  return useQuery({
+    queryKey: ['payment-info', invoiceId, network],
+    queryFn: async () => {
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
+      }
+
+      const canisterId = CANISTER_IDS.lipa_backend;
+      if (!canisterId) {
+        throw new Error('Canister ID for lipa_backend is not set');
+      }
+
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      });
+
+      const networkParam = network === 'mainnet' ? { mainnet: null } : { testnet: null };
+      
+      return backendActor.getPaymentInfo(invoiceId, networkParam);
+    },
+    enabled: !!invoiceId,
+    refetchInterval: 30000, // Refetch every 30 seconds to check for new payments
+  });
+}
+
+// Email notification hooks
+
+// Send invoice creation email
+export function useSendInvoiceEmail() {
+  const { identity } = useInternetIdentity();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      clientEmail, 
+      clientName, 
+      invoiceId, 
+      amount, 
+      bitcoinAddress 
+    }: { 
+      clientEmail: string; 
+      clientName: string; 
+      invoiceId: bigint; 
+      amount: string; 
+      bitcoinAddress: string; 
+    }) => {
+      if (!identity) {
+        throw new Error('Identity not available');
+      }
+
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ identity, host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
+      }
+
+      const canisterId = CANISTER_IDS.lipa_backend;
+      if (!canisterId) {
+        throw new Error('Canister ID for lipa_backend is not set');
+      }
+
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      });
+
+      return backendActor.sendInvoiceEmail(clientEmail, clientName, invoiceId, amount, bitcoinAddress);
+    },
+    onSuccess: () => {
+      showToast({
+        title: "Email Sent!",
+        message: "Invoice notification email has been sent to the client.",
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: "Email Failed",
+        message: error instanceof Error ? error.message : "Failed to send email notification",
+        type: "error",
+      });
+    },
+  });
+}
+
+// Send payment confirmation email
+export function useSendPaymentConfirmationEmail() {
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      clientEmail, 
+      clientName, 
+      invoiceId, 
+      amount, 
+      freelancerName 
+    }: { 
+      clientEmail: string; 
+      clientName: string; 
+      invoiceId: bigint; 
+      amount: string; 
+      freelancerName: string; 
+    }) => {
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
+      }
+
+      const canisterId = CANISTER_IDS.lipa_backend;
+      if (!canisterId) {
+        throw new Error('Canister ID for lipa_backend is not set');
+      }
+
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      });
+
+      return backendActor.sendPaymentConfirmationEmailPublic(clientEmail, clientName, invoiceId, amount, freelancerName);
+    },
+    onSuccess: () => {
+      showToast({
+        title: "Confirmation Sent!",
+        message: "Payment confirmation email has been sent to the client.",
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: "Email Failed",
+        message: error instanceof Error ? error.message : "Failed to send confirmation email",
+        type: "error",
+      });
+    },
+  });
+}
+
+// Send freelancer payment notification
+export function useSendFreelancerPaymentEmail() {
+  const { identity } = useInternetIdentity();
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      invoiceId, 
+      amount, 
+      clientName 
+    }: { 
+      invoiceId: bigint; 
+      amount: string; 
+      clientName: string; 
+    }) => {
+      if (!identity) {
+        throw new Error('Identity not available');
+      }
+
+      const host = import.meta.env.DFX_NETWORK === 'local' ? 'http://127.0.0.1:4943' : undefined;
+      const agent = new HttpAgent({ identity, host });
+      if (import.meta.env.DFX_NETWORK === 'local') {
+        await agent.fetchRootKey();
+      }
+
+      const canisterId = CANISTER_IDS.lipa_backend;
+      if (!canisterId) {
+        throw new Error('Canister ID for lipa_backend is not set');
+      }
+
+      const backendActor = Actor.createActor(idlFactory, {
+        agent,
+        canisterId
+      });
+
+      return backendActor.sendFreelancerPaymentEmail(invoiceId, amount, clientName);
+    },
+    onSuccess: () => {
+      showToast({
+        title: "Notification Sent!",
+        message: "Payment notification has been sent to the freelancer.",
+        type: "success",
+      });
+    },
+    onError: (error) => {
+      showToast({
+        title: "Notification Failed",
+        message: error instanceof Error ? error.message : "Failed to send payment notification",
+        type: "error",
+      });
+    },
+  });
+}

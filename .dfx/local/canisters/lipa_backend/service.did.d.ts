@@ -70,6 +70,10 @@ export type Network = { 'mainnet' : null } |
   { 'regtest' : null } |
   { 'testnet' : null };
 export interface OutPoint { 'txid' : Uint8Array | number[], 'vout' : number }
+export interface P2trDerivationPaths {
+  'key_path_derivation_path' : Array<Uint8Array | number[]>,
+  'script_path_derivation_path' : Array<Uint8Array | number[]>,
+}
 export type Page = Uint8Array | number[];
 export type Satoshi = bigint;
 export type StreamingCallback = ActorMethod<
@@ -81,7 +85,7 @@ export interface StreamingCallbackHttpResponse {
   'body' : Uint8Array | number[],
 }
 export type StreamingStrategy = {
-    'Callback' : { 'token' : StreamingToken, 'callback' : StreamingCallback }
+    'Callback' : { 'token' : StreamingToken, 'callback' : [Principal, string] }
   };
 export interface StreamingToken { 'resource' : string, 'index' : bigint }
 export interface Utxo {
@@ -93,7 +97,15 @@ export interface _SERVICE {
   'addBadge' : ActorMethod<[string, string], undefined>,
   'addInvoice' : ActorMethod<[bigint, string, [] | [string]], undefined>,
   'addTask' : ActorMethod<[bigint, string], undefined>,
-  'createLightningInvoice' : ActorMethod<[bigint, bigint], LightningInvoice>,
+  'createLightningInvoice' : ActorMethod<
+    [bigint, bigint, string],
+    LightningInvoice
+  >,
+  'generateBitcoinAddress' : ActorMethod<
+    [Network, Array<Uint8Array | number[]>],
+    string
+  >,
+  'generateP2TRAddress' : ActorMethod<[Network, P2trDerivationPaths], string>,
   'getAllBitcoinMappings' : ActorMethod<[], Array<[bigint, string]>>,
   'getBadge' : ActorMethod<[string], [] | [string]>,
   'getBitcoinBalance' : ActorMethod<[string, Network], Satoshi>,
@@ -106,8 +118,18 @@ export interface _SERVICE {
   'getInvoiceBitcoinAddress' : ActorMethod<[bigint], [] | [string]>,
   'getInvoiceFiles' : ActorMethod<[bigint], Array<FileMetadata>>,
   'getLightningInvoice' : ActorMethod<[bigint], [] | [LightningInvoice]>,
+  'getLightningInvoiceStatus' : ActorMethod<[bigint], [] | [LightningInvoice]>,
   'getP2pkhAddress' : ActorMethod<[Network], string>,
   'getP2trAddress' : ActorMethod<[Network], string>,
+  'getPaymentInfo' : ActorMethod<
+    [bigint, Network],
+    {
+      'balance' : Satoshi,
+      'hasPayment' : boolean,
+      'address' : [] | [string],
+      'utxos' : Array<Utxo>,
+    }
+  >,
   'getPublicInvoice' : ActorMethod<[bigint], [] | [Invoice]>,
   'getTask' : ActorMethod<[bigint], [] | [string]>,
   'httpStreamingCallback' : ActorMethod<
@@ -133,6 +155,16 @@ export interface _SERVICE {
     [string, Satoshi, Network],
     Uint8Array | number[]
   >,
+  'sendFreelancerPaymentEmail' : ActorMethod<[bigint, string, string], boolean>,
+  'sendInvoiceEmail' : ActorMethod<
+    [string, string, bigint, string, string],
+    boolean
+  >,
+  'sendPaymentConfirmationEmailPublic' : ActorMethod<
+    [string, string, bigint, string, string],
+    boolean
+  >,
+  'updateInvoicePaymentStatus' : ActorMethod<[bigint, Network], boolean>,
   'uploadInvoiceFile' : ActorMethod<
     [bigint, string, string, Uint8Array | number[], boolean],
     [] | [string]
@@ -142,6 +174,8 @@ export interface _SERVICE {
     [string, BitcoinNetwork],
     boolean
   >,
+  'verifyBitcoinPayment' : ActorMethod<[bigint, Network], boolean>,
+  'verifyLightningPayment' : ActorMethod<[bigint], boolean>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];

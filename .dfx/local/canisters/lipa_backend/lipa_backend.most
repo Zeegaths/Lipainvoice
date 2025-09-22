@@ -2,9 +2,9 @@
 type LightningInvoice__1014944640 =
   {amount : Nat; expiry : Nat; invoiceString : Text; status : Text};
 actor {
+  stable var _bitcoinMappingsStable : [(Nat, Text)];
+  stable var _lightningInvoicesStable : [(Nat, LightningInvoice__1014944640)];
   stable var bitcoinAddressMap : [(Nat, Text)];
-  stable var bitcoinMappingsStable : [(Nat, Text)];
   stable var ecdsa_key_name : Text;
-  stable var lightningInvoicesStable : [(Nat, LightningInvoice__1014944640)];
   stable var schnorr_key_name : Text
 };

@@ -1,4 +1,4 @@
-import { X, Home, Settings, LogOut, Shield, Plus, Wallet } from 'lucide-react';
+import { X, Home, Settings, LogOut, Shield, Plus, Wallet, Bitcoin } from 'lucide-react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { Page } from '../App';
 
@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen, onClose, currentPage, onNavigate }: SidebarProps) => 
   const navigationItems: NavigationItem[] = [
     { name: 'Dashboard', icon: Home, page: 'dashboard', current: currentPage === 'dashboard', hasPage: true },
     { name: 'Create Invoice', icon: Plus, page: 'create-invoice', current: currentPage === 'create-invoice', hasPage: true },
+    { name: 'Bitcoin Demo', icon: Bitcoin, page: 'bitcoin-demo', current: currentPage === 'bitcoin-demo', hasPage: true },
     { name: 'Settings', icon: Settings, page: 'settings', current: currentPage === 'settings', hasPage: true },
   ];
 
